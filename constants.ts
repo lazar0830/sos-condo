@@ -1,0 +1,654 @@
+
+
+import { Recurrence, ServiceRequestStatus, TaskStatus, ComponentType } from './types';
+
+export const RECURRENCE_OPTIONS = [
+    Recurrence.OneTime,
+    Recurrence.Weekly,
+    Recurrence.BiWeekly,
+    Recurrence.Monthly,
+    Recurrence.Quarterly,
+    Recurrence.SemiAnnually,
+    Recurrence.Annually,
+];
+
+export const TASK_STATUSES = [
+    TaskStatus.New,
+    TaskStatus.Sent,
+    TaskStatus.OnHold,
+    TaskStatus.Completed,
+];
+
+export const SERVICE_REQUEST_STATUSES = [
+    ServiceRequestStatus.Sent,
+    ServiceRequestStatus.Accepted,
+    ServiceRequestStatus.Refused,
+    ServiceRequestStatus.InProgress,
+    ServiceRequestStatus.Completed,
+];
+
+export const SERVICE_PROVIDER_SPECIALTIES = [
+    'Plumbing',
+    'Electrical',
+    'HVAC',
+    'Landscaping',
+    'Cleaning',
+    'General Maintenance',
+    'Painting',
+    'Roofing',
+    'Building Inspector',
+];
+
+export const COMPONENT_TYPES = [
+  ComponentType.Building,
+  ComponentType.Site,
+  ComponentType.Unit,
+];
+
+export const COMPONENT_CATEGORIES: {
+  [key in ComponentType]: {
+    [parent: string]: {
+      [child: string]: string[];
+    };
+  };
+} = {
+  [ComponentType.Building]: {
+    "A 10 Fondations": {
+      "A 1011 Fondations et Dalles Inférieures": [
+        "A 101101 Murs De Fondation Et Empattement",
+        "A 101102 Pilastres Aux Murs De Fondation",
+        "A 101103 Revêtement Et Finition Extérieurs Sur Murs De Fondations",
+        "A 101104 Système De Drainage Des Fondations",
+        "A 101105 Pieux, Micropieux, Radiers",
+        "A 101106 Dalles Sur Sol",
+        "A 101107 Fosses D'Ascenseurs"
+      ]
+    },
+    "A 20 Construction En Sous-Sol": {
+      "A 2021 Construction En Sous-Sol": [
+        "A 202101 Plancher De Vide Sanitaire",
+        "A 202102 Plafond De Vide Sanitaire",
+        "A 202103 Coupe-Feu De Vide Sanitaire",
+        "A 202104 Protection Contre L'Humidité De Sous-Sol Et De Vide Sanitaire",
+        "A 202105 Isolation De Murs De Sous-Sol Et De Vide Sanitaire",
+        "A 202106 Trappe D'Accès De Vide Sanitaire",
+        "A 202107 Grille De Ventilation De Vide Sanitaire"
+      ]
+    },
+    "B 10 Superstructure": {
+      "B 1011 Planchers Et Murs Structuraux": [
+        "B 101101 Planchers Des Bâtiments",
+        "B 101102 Faux-Planchers Au Sous-Sol Et Au Rez-De-Chaussée",
+        "B 101103 Murs Mitoyens",
+        "B 101104 Murs Porteurs Intérieurs Et Extérieurs, Poutres Et Colonnes"
+      ],
+      "B 1012 Balcons, Paliers, Escaliers, Rampes Et Échelles Extérieures": [
+        "B 101201 Structure Des Balcons, Paliers Et Escaliers Extérieurs",
+        "B 101202 Planchers Des Balcons, Rampes Et Marches Escaliers",
+        "B 101203 Balustrades Et Mains Courantes Extérieures",
+        "B 101204 Peinture Des Balcons, Des Paliers Et Des Escaliers Extérieurs",
+        "B 101205 Échelles D'issues Intégrées",
+        "B 101206 Paliers De Services Intégrés (Eau, Combustible, Etc.)"
+      ]
+    },
+    "B 20 Enveloppe Extérieure": {
+      "B 2011 Parements Et Murs Extérieurs": [
+        "B 201101 Parement (Moulures Et Solins Inclus)",
+        "B 201102 Liteaux Libres Des Ouvertures Extérieures",
+        "B 201103 Allèges Non Intégrées Aux Ouvertures Extérieures",
+        "B 201104 Isolation, Pare-Vapeur, Pare-Air Du Bâtiment",
+        "B 201105 Étanchéité Interne (Solin Souple, Etc.)",
+        "B 201106 Persiennes Et Grillages Extérieurs",
+        "B 201108 Joints Et Calfeutrage Au Parement",
+        "B 201109 Peinture Et Teinture Au Parement",
+        "B 201110 Second Parement (Moulures Et Solins Inclus)"
+      ],
+      "B 2021 Fenêtres": [
+        "B 202101 Cadres Et Allèges Intégrés",
+        "B 202102 Parties Ouvrantes",
+        "B 202103 Parties De Verre Fixe",
+        "B 202104 Moustiquaires",
+        "B 202105 Quincaillerie De Fenêtres",
+        "B 202108 Calfeutrage Au Périmètre Des Fenêtres",
+        "B 202109 Peinture Et Teinture Des Fenêtres"
+      ],
+      "B 2031 Portes Extérieures": [
+        "B 203101 Cadres De Portes Extérieures",
+        "B 203102 Portes",
+        "B 203103 Contre-Portes",
+        "B 203104 Quincaillerie De Portes Extérieures",
+        "B 203105 Ferme-Portes Extérieurs",
+        "B 203106 Seuils De Portes Extérieures",
+        "B 203107 Coupe-Froid De Portes",
+        "B 203108 Calfeutrage Au Périmètre Des Portes",
+        "B 203109 Peinture Et Teinture Des Portes Extérieures",
+        "B 203110 Vitrage De Portes",
+        "B 203111 Moustiquaires (Porte-Fenêtre)",
+        "B 203112 Portes-Fenêtres"
+      ]
+    },
+    "B 30 Toit, Marquises Et Terrasses": {
+      "B 3011 Couverture": [
+        "B 301101 Membrane De Toit",
+        "B 301102 Solinage De Toit",
+        "B 301103 Structure De Toit",
+        "B 301104 Ventilateurs De Toit (À Gravité, Statiques Et Mobiles)",
+        "B 301105 Circulation Sur Le Toit",
+        "B 301106 Avant-Toit Et Soffites D'Avant-Toit",
+        "B 301107 Gouttières Et Descentes Pluviales",
+        "B 301108 Câbles Chauffants Et Protection Au Toit",
+        "B 301109 Marquises"
+      ],
+      "B 3021 Ouvertures De Toit": [
+        "B 302101 Lanterneaux",
+        "B 302102 Ouvertures Et Sorties Mécaniques Au Toit",
+        "B 302103 Trappe D'Accès Au Toit"
+      ],
+      "B 3091 Composants D'Entretoit": [
+        "B 309101 Trappe D'Accès À L'Entretoit",
+        "B 309102 Circulation Dans L'Entretoit",
+        "B 309103 Isolation Et Pare-Vapeur À L'Entretoit",
+        "B 309104 Coupe-Feu Dans L'Entretoit",
+        "B 309105 Ventilateurs Muraux D'Entretoit"
+      ]
+    },
+    "C 10 Construction Intérieure": {
+      "C 1011 Cloisons": [
+        "C 101101 Cloisonnements Coupe-Feu",
+        "C 101102 Autres Cloisonnements",
+        "C 101103 Balustrades Intérieures",
+        "C 101104 Trappes D'Accès Dans Les Cloisonnements Coupe-Feu"
+      ],
+      "C 1021 Portes Intérieures": [
+        "C 102101 Portes",
+        "C 102102 Quincaillerie De Portes Intérieures",
+        "C 102103 Ferme-Portes Intérieurs",
+        "C 102104 Cadres",
+        "C 102110 Vitrage De Porte"
+      ],
+      "C 1031 Accessoires Intégrés": [
+        "C 103101 Cloisons Démontables Et Grillages",
+        "C 103102 Accessoires Des Locaux Communautaires",
+        "C 103103 Cases Postales Et Boîtes Aux Lettres",
+        "C 103104 Mains Courantes Des Corridors",
+        "C 103105 Signalisation Et Identification De Pièces",
+        "C 103106 Plans D'Évacuation Du Sous-Bâtiment"
+      ]
+    },
+    "C 20 Escaliers": {
+      "C 2011 Escaliers": [
+        "C 201101 Construction Des Marches Et Paliers",
+        "C 201102 Mains Courantes Et Balustrades",
+        "C 201103 Revêtement Des Marches, Contremarches Et Paliers",
+        "C 201104 Revêtement Des Mains Courantes Et Balustrades",
+        "C 201105 Nez De Marche Et Paliers"
+      ]
+    },
+    "C 30 Finition Intérieure": {
+      "C 3011 Peinture Des Murs, Plafonds, Escaliers Et Autres Finis Intérieurs": [
+        "C 301101 Peinture Des Murs Et Plafonds",
+        "C 301102 Autres Finitions Des Murs Et Plafonds",
+        "C 301103 Plafonds Suspendus",
+        "C 301104 Peinture Des Marches, Contre-Marches Et Paliers",
+        "C 301105 Peinture Des Mains Courantes Et Balustrades",
+        "C 301106 Peinture Et Teinture De Portes Et Cadres"
+      ],
+      "C 3021 Finitions De Planchers": [
+        "C 302101 Couvre-Sols Souples Et Tapis",
+        "C 302102 Céramique, Pierre, Etc.",
+        "C 302103 Finition De Planchers En Bois",
+        "C 302104 Finition De Planchers En Béton",
+        "C 302105 Grilles Gratte-Pieds Et Tapis-Brosse",
+        "C 302106 Plinthes"
+      ],
+      "C 3022 Aires De Stationnement Intérieur (Garage)": [
+        "C 302201 Revêtements De Plancher Des Garages",
+        "C 302202 Bordures, Butoirs Et Dos-D'Âne Intérieurs",
+        "C 302203 Glissières De Sécurité Et Contrôles D'Accès Intérieurs",
+        "C 302204 Lignes De Peinture Et Marquage Intérieurs",
+        "C 302205 Signalisation Intérieure"
+      ]
+    },
+    "D 10 Ascenseurs, Vide-Ordures, Etc.": {
+      "D 1011 Ascenseurs, Plates-Formes, Etc.": [
+        "D 101101 Cabines D'Ascenseurs",
+        "D 101102 Contrôles D'Ascenseurs",
+        "D 101103 Système De Communication En Cabine",
+        "D 101104 Mécanique D'Ascenseurs",
+        "D 101105 Cylindres D'Ascenseurs"
+      ],
+      "D 1091 Chutes À Ordures": [
+        "D 109101 Trappe D'Accès Au Vide-Ordures"
+      ]
+    },
+    "D 20 Plomberie": {
+      "D 2011 Appareils De Plomberie (Communs)": [
+        "D 201101 Appareils Sanitaires",
+        "D 201102 Appareils D'Entretien",
+        "D 201103 Appareils Thérapeutiques"
+      ],
+      "D 2021 Réseau D'Eau Domestique": [
+        "D 202101 Équipement De Pompage De Surpression Et Panneau De Contrôle",
+        "D 202102 Tuyauterie De Distribution D'Eau Froide",
+        "D 202103 Tuyauterie De Distribution D'Eau Chaude Domestique",
+        "D 202104 Système De Traitement D'Eau"
+      ],
+      "D 2022 Chauffe-Eau Domestique": [
+        "D 202201 Unité De Chauffage",
+        "D 202202 Unité De Préchauffage",
+        "D 202203 Unité De Réserve D'Eau"
+      ],
+      "D 2031 Réseau Sanitaire Et Pluvial": [
+        "D 203101 Réseau De Drainage Sanitaire Et Évents",
+        "D 203102 Fosses Intérieures Et Pompes Submersibles",
+        "D 203103 Drains Et Puisards De Planchers",
+        "D 203104 Réseau De Drainage Pluvial De Toit"
+      ]
+    },
+    "D 30 Chauffage, Ventilation, CVC": {
+      "D 3011 Source D'Énergie Autre Qu'Électrique": [
+        "D 301101 Approvisionnement En Huile De Chauffage Et Réservoirs (Intérieurs Et Extérieurs)",
+        "D 301102 Approvisionnement Et Réseau Intérieur De Gaz Naturel",
+        "D 301103 Approvisionnement En Gaz Propane Et Réservoirs",
+        "D 301104 Approvisionnement En Charbon",
+        "D 301105 Approvisionnement En Vapeur",
+        "D 301106 Approvisionnement En Eau Chaude",
+        "D 301107 Système D'Énergie Solaire",
+        "D 301108 Système D'Énergie Éolienne"
+      ],
+      "D 3021 Système Central De Chauffage (Eau Chaude, Air Chaud)": [
+        "D 302101 Chaudière Pour Chauffage",
+        "D 302102 Cheminées, Conduits De Fumée Et Évents",
+        "D 302103 Boîtier De Relais (Système De Contrôle)",
+        "D 302104 Pare-Feu (Base Et Autres)",
+        "D 302105 Chapeau De Cheminée"
+      ],
+      "D 3041 Distribution De CVC": [
+        "D 304101 Systèmes D'Alimentation Et De Distribution D'Air",
+        "D 304102 Système D'Évacuation D'Air (Sans Échangeur)",
+        "D 304103 Système D'Apport D'Air de Combustion Des Locaux De Mécanique",
+        "D 304104 Système De Pressurisation Et De Désenfumage",
+        "D 304105 Système De Détection De Monoxyde De Carbone",
+        "D 304106 Système De Hottes Commerciales",
+        "D 304107 Régulation Et Instrumentation (Ventilation)",
+        "D 304108 Système D'Apport D'Air Frais Des Locaux De Mécanique"
+      ],
+      "D 3042 Réseau De Chauffage (Eau Chaude, Air Chaud)": [
+        "D 304201 Systèmes De Distribution De Chauffage À L'Eau Chaude",
+        "D 304202 Radiateurs, Aérotherme De Chauffage À L'Eau Chaude",
+        "D 304203 Réseau De Gaines",
+        "D 304204 Grilles"
+      ],
+      "D 3051 Unité CVC Autonome Ou Monobloc": [
+        "D 305101 Chauffage Par Plinthes, Thermostats",
+        "D 305102 Aérotherme",
+        "D 305103 Chauffage Radiant",
+        "D 305104 Ventilateur (Sans Conduits)",
+        "D 305105 Unité De Chauffage-Ventilation (Type Hôtel)",
+        "D 305106 Climatiseur"
+      ]
+    },
+    "D 40 Protection Incendie": {
+      "D 4011 Gicleurs": [
+        "D 401101 Équipement De Pompage De Surpression, Gicleurs",
+        "D 401102 Réseau De Gicleurs",
+        "D 401103 Panneau De Commande, Gicleurs"
+      ],
+      "D 4021 Canalisations Et Robinets D'Incendie": [
+        "D 402101 Canalisation D'Alimentation En Eau (Intérieure)",
+        "D 402102 Équipement De Pompage (Incendie)",
+        "D 402103 Cabinets Et Boyaux D'Incendie",
+        "D 402104 Bornes-Fontaines"
+      ],
+      "D 4031 Accessoires De Protection Incendie": [
+        "D 403101 Extincteurs Portatifs",
+        "D 403102 Cabinets D'Extincteurs Portatifs Ou Supports"
+      ],
+      "D 4091 Système D'Extinction Pour Hottes Commerciales": []
+    },
+    "D 50 Électricité": {
+      "D 5011 Entrée Électrique Et Distribution": [
+        "D 501101 Distribution Électrique, Principale Et Délesteur De Charge",
+        "D 501102 Transformateurs (Intérieurs Et Extérieurs)",
+        "D 501103 Compteurs Individuels Et Communs",
+        "D 501104 Conduit Et Câblage (Jusqu'à La Distribution)"
+      ],
+      "D 5021 Éclairage Et Distribution Secondaire": [
+        "D 502101 Câblage Et Dispositif De Filerie",
+        "D 502102 Appareils D'Éclairage Du Bâtiment",
+        "D 502103 Interrupteurs Et Prises"
+      ],
+      "D 5031 Système De Détection Et D'Alarme Incendie": [
+        "D 503101 Réseau De Détection, Supervision",
+        "D 503102 Stations Manuelles D'Alarme-Incendie",
+        "D 503103 Avertisseurs Sonores Et Visuels",
+        "D 503104 Système De Communication D'Urgence Des Pompiers"
+      ],
+      "D 5032 Système De Communication Et Autres (Intérieur Et Extérieur)": [
+        "D 503201 Interphone Et Système D'Appels Visiteurs",
+        "D 503202 Distribution Téléphonique",
+        "D 503203 Distribution Du Signal De Télévision",
+        "D 503204 Système De Caméras De Visiteurs",
+        "D 503205 Système D'Alarme Intrusion",
+        "D 503206 Système D'Appels De Soutien Médical",
+        "D 503207 Antennes De Réception (Télé, Communication, Etc.)"
+      ],
+      "D 5091 Indicateurs De Sortie, Éclairage D'Urgence Sur Batteries": [
+        "D 509101 Indicateurs De Sortie D'Urgence",
+        "D 509102 Éclairage D'Urgence Sur Batteries"
+      ],
+      "D 5092 Génératrice D'Urgence": [
+        "D 509201 Génératrice",
+        "D 509202 Réservoir De Combustible"
+      ]
+    },
+    "E 10 Équipements": {
+      "E 1011 Équipements De Buanderie": [],
+      "E 1091 Équipements De Services Alimentaires": [],
+      "E 1092 Équipements D'Entretien": [
+        "E 109201 Véhicules De Tous Genres",
+        "E 109202 Équipements D'Entretien Extérieur",
+        "E 109203 Équipements D'Entretien Intérieur",
+        "E 109204 Aspirateurs Centraux Et Réseau",
+        "E 109205 Compacteur À Déchets",
+        "E 109206 Équipements De Manutention Des Déchets Solides",
+        "E 109207 Conteneurs À Déchets"
+      ]
+    },
+    "E 20 Ameublement Et Décoration": {
+      "E 2011 Ameublement Et Décoration (Fixes Et Mobiles)": []
+    },
+    "E 30 Salle De Bains Et Cuisine Communautaires": {
+      "E 3011 Salle De Bains Communautaire (Réfection)": [
+        "E 301101 Alcôve Du Bain (Finition Murs, Etc.)",
+        "E 301102 Lavabo",
+        "E 301103 Toilette",
+        "E 301104 Ventilation, Conduits Et Commandes",
+        "E 301105 Éclairage",
+        "E 301106 Accessoires (Pharmacie, Etc.)",
+        "E 301107 Bain",
+        "E 301108 Robinetterie De Bain",
+        "E 301109 Robinetterie De Lavabo",
+        "E 301110 Vanité De Lavabo",
+        "E 301111 Plancher",
+        "E 301112 Chauffage",
+        "E 301113 Drain, Siphon"
+      ],
+      "E 3021 Cuisine Communautaire (Réfection)": [
+        "E 302101 Armoires",
+        "E 302102 Évier",
+        "E 302103 Hotte De Cuisinière",
+        "E 302104 Comptoir",
+        "E 302105 Drain, Siphon",
+        "E 302106 Cuisinière",
+        "E 302107 Réfrigérateur",
+        "E 302108 Appareil D'Éclairage",
+        "E 302109 Robinetterie De L'Évier"
+      ]
+    }
+  },
+  [ComponentType.Site]: {
+    "G 20 Amélioration Sur Le Site (Immeuble)": {
+      "G 2021 Aires De Stationnement Et Accès (Immeuble)": [
+        "G 202101 Revêtements Et Infrastructure",
+        "G 202102 Bordures, Butoirs Et Dos-D'Âne",
+        "G 202103 Glissières De Sécurité Et Contrôles D'Accès",
+        "G 202104 Lignes De Peinture Et Marquage",
+        "G 202105 Signalisation"
+      ],
+      "G 2031 Circulation Piétonnière (Immeuble)": [
+        "G 203101 Revêtements Et Bordures Des Surfaces Piétonnières",
+        "G 203102 Infrastructure Des Surfaces Piétonnières"
+      ],
+      "G 2032 Escaliers Et Rampes Extérieurs (Immeuble)": [
+        "G 203201 Marches Et Revêtements Des Escaliers Et Rampes Extérieurs",
+        "G 203202 Balustrade Et Mains Courantes Des Escaliers Et Rampes Extérieurs",
+        "G 203203 Infrastructure Des Escaliers Et Rampes Extérieurs"
+      ],
+      "G 2041 Terrasses Et Dalles Extérieures (Immeuble)": [
+        "G 204101 Revêtements Des Terrasses Extérieures",
+        "G 204102 Infrastructure Des Terrasses Extérieures"
+      ],
+      "G 2042 Murs De Soutènement, Talus En Pierre, Etc. (Immeuble)": [
+        "G 204201 Construction Des Murs De Soutènement",
+        "G 204202 Infrastructure Des Murs De Soutènement",
+        "G 204203 Garde-Corps Aux Murs De Soutènement"
+      ],
+      "G 2043 Remises Et Autres Constructions (Immeuble)": [
+        "G 204304 Margelles, Murets, Etc.",
+        "G 204301 Remises Pour Locataires",
+        "G 204302 Remises Pour Entretien",
+        "G 204303 Conteneurs À Déchets (Construction)",
+        "G 204304 Ajouts Au Bâtiment"
+      ],
+      "G 2044 Autres Aménagements Du Site Et Aménagement Paysager (Immeuble)": [
+        "G 204401 Murets Décoratifs Et Boîtes À Fleurs",
+        "G 204402 Écrans, Clôtures Et Barrières",
+        "G 204403 Surfaces Gazonnées",
+        "G 204404 Arbres, Arbustes Et Plates-Bandes",
+        "G 204405 Peinture Murs, Clôtures, Équipements Mécaniques Et Électriques",
+        "G 204406 Peinture, Teinture Et Traitement Clôtures",
+        "G 204407 Peinture Et Traitement Béton, Dallage, Asphalte",
+        "G 204408 Décontamination Du Site"
+      ]
+    },
+    "G 30 Services De Mécanique Sur Le Site (Immeuble)": {
+      "G 3011 Alimentation Municipale En Eau (Immeuble)": [],
+      "G 3012 Alimentation En Eau (Puits Artésien) (Immeuble)": [
+        "G 301201 Canalisation D'Alimentation En Eau Potable Et Valves",
+        "G 301202 Puits Artésien Ou De Surface"
+      ],
+      "G 3021 Égout Sanitaire Municipal (Immeuble)": [
+        "G 302101 Réseau D'Égout Ou Combiné",
+        "G 302102 Regards De Nettoyage"
+      ],
+      "G 3022 Égout Sanitaire (Traitement) (Immeuble)": [
+        "G 302201 Unité D'Absorption Des Eaux Usées",
+        "G 302202 Unité De Traitement (Fosse Ou Autonome)",
+        "G 302203 Réseau De Canalisation"
+      ],
+      "G 3031 Égout Pluvial (Immeuble)": [
+        "G 303101 Réseau D'Égout Pluvial, Regards, Réducteurs De Débit",
+        "G 303102 Puisards De Drainage Du Site",
+        "G 303103 Caniveau De Drainage D'Entrée De Garage",
+        "G 303104 Bassins De Captation Et Fossés"
+      ]
+    },
+    "G 40 Services D'Électricité Sur Le Site (Immeuble)": {
+      "G 4011 Distribution Électrique Et Éclairage (Immeuble)": [
+        "G 401101 Réseau D'Alimentation Et De Distribution Électrique",
+        "G 401102 Réseau De Conduits Pour Système De Communication",
+        "G 401103 Frises Chauffe-Moteurs",
+        "G 401104 Appareils D'Éclairage Muraux Des Aménagements",
+        "G 401105 Poteaux, Lampadaires, Canalisation De L'Éclairage Extérieur",
+        "G 401106 Contrôle De L'Éclairage Extérieur"
+      ]
+    },
+    "G 90 Autres Composants Du Site (Immeuble)": {
+      "G 9011 Tunnels De Service Et Pour Piétons (Immeuble)": []
+    },
+    "Q 20 Amélioration Sur Le Site (Commun)": {
+      "Q 2021 Aires De Stationnement Et Accès (Commun)": [
+        "Q 202101 Revêtements Et Infrastructure",
+        "Q 202102 Bordures, Butoirs Et Dos-D'Âne",
+        "Q 202103 Glissières De Sécurité Et Contrôles D'Accès",
+        "Q 202104 Lignes De Peinture Et Marquage",
+        "Q 202105 Signalisation"
+      ],
+      "Q 2031 Circulation Piétonnière (Commun)": [
+        "Q 203101 Revêtements Et Bordures Des Surfaces Piétonnières",
+        "Q 203102 Infrastructure Des Surfaces Piétonnières"
+      ],
+      "Q 2032 Escaliers Et Rampes Extérieurs (Commun)": [
+        "Q 203201 Marches Et Revêtements Des Escaliers Et Rampes Extérieurs",
+        "Q 203202 Balustrade Et Mains Courantes Des Escaliers Et Rampes Extérieurs",
+        "Q 203203 Infrastructure Des Escaliers Et Rampes Extérieurs"
+      ],
+      "Q 2041 Terrasses Et Dalles Extérieures (Commun)": [
+        "Q 204101 Revêtements Des Terrasses Extérieures",
+        "Q 204102 Infrastructure Des Terrasses Extérieures"
+      ],
+      "Q 2042 Murs De Soutènement, Talus En Pierre, Etc. (Commun)": [
+        "Q 204201 Construction Des Murs De Soutènement",
+        "Q 204202 Infrastructure Des Murs De Soutènement",
+        "Q 204203 Garde-Corps Aux Murs De Soutènement"
+      ],
+      "Q 2043 Remises Et Autres Constructions (Commun)": [
+        "Q 204304 Margelles, Murets, Etc.",
+        "Q 204301 Remises Pour Locataires",
+        "Q 204302 Remises Pour Entretien",
+        "Q 204303 Conteneurs À Déchets (Construction)",
+        "Q 204304 Ajouts Au Bâtiment"
+      ],
+      "Q 2044 Autres Aménagements Du Site Et Aménagement Paysager (Commun)": [
+        "Q 204401 Murets Décoratifs Et Boîtes À Fleurs",
+        "Q 204402 Écrans, Clôtures Et Barrières",
+        "Q 204403 Surfaces Gazonnées",
+        "Q 204404 Arbres, Arbustes Et Plates-Bandes",
+        "Q 204405 Peinture Murs, Clôtures, Équipements Mécaniques Et Électriques",
+        "Q 204406 Peinture, Teinture Et Traitement Clôtures",
+        "Q 204407 Peinture Et Traitement Béton, Dallage, Asphalte",
+        "Q 204408 Décontamination Du Site"
+      ]
+    },
+    "Q 30 Services De Mécanique Sur Le Site (Commun)": {
+      "Q 3011 Alimentation Municipale En Eau (Commun)": [],
+      "Q 3012 Alimentation En Eau (Puits Artésien) (Commun)": [
+        "Q 301201 Canalisation D'Alimentation En Eau Potable Et Valves",
+        "Q 301202 Puits Artésien Ou De Surface"
+      ],
+      "Q 3021 Égout Sanitaire Municipal (Commun)": [
+        "Q 302101 Réseau D'Égout Ou Combiné",
+        "Q 302102 Regards De Nettoyage"
+      ],
+      "Q 3022 Égout Sanitaire (Traitement) (Commun)": [
+        "Q 302201 Unité D'Absorption Des Eaux Usées",
+        "Q 302202 Unité De Traitement (Fosse Ou Autonome)",
+        "Q 302203 Réseau De Canalisation"
+      ],
+      "Q 3031 Égout Pluvial (Commun)": [
+        "Q 303101 Réseau D'Égout Pluvial, Regards, Réducteurs De Débit",
+        "Q 303102 Puisards De Drainage Du Site",
+        "Q 303103 Caniveau De Drainage D'Entrée De Garage",
+        "Q 303104 Bassins De Captation Et Fossés"
+      ]
+    },
+    "Q 40 Services D'Électricité Sur Le Site (Commun)": {
+      "Q 4011 Distribution Électrique Et Éclairage (Commun)": [
+        "Q 401101 Réseau D'Alimentation Et De Distribution Électrique",
+        "Q 401102 Réseau De Conduits Pour Système De Communication",
+        "Q 401103 Frises Chauffe-Moteurs",
+        "Q 401104 Appareils D'Éclairage Muraux Des Aménagements",
+        "Q 401105 Poteaux, Lampadaires, Canalisation De L'Éclairage Extérieur",
+        "Q 401106 Contrôle De L'Éclairage Extérieur"
+      ]
+    },
+    "Q 90 Autres Composants Du Site (Commun)": {
+      "Q 9011 Tunnels De Service Et Pour Piétons (Commun)": []
+    }
+  },
+  [ComponentType.Unit]: {
+    "H 1011 Salle De Bain (Réfection)": {
+      "H 1011 Salle De Bain (Réfection)": [
+        "H 101101 Alcôve Du Bain (Finition Murs, Etc.)",
+        "H 101102 Lavabo",
+        "H 101103 Toilette",
+        "H 101104 Ventilation, Conduits Et Contrôles",
+        "H 101105 Éclairage",
+        "H 101106 Accessoires (Pharmacie, Etc.)",
+        "H 101107 Bain",
+        "H 101108 Robinetterie De Bain",
+        "H 101109 Robinetterie De Lavabo",
+        "H 101110 Vanité De Lavabo",
+        "H 101111 Plancher",
+        "H 101112 Chauffage",
+        "H 101113 Drain, Siphon"
+      ]
+    },
+    "H 1021 Cuisine (Réfection)": {
+      "H 1021 Cuisine (Réfection)": [
+        "H 102101 Armoires",
+        "H 102102 Évier",
+        "H 102103 Hotte De Cuisinière",
+        "H 102104 Comptoir",
+        "H 102105 Drain, Siphon",
+        "H 102106 Cuisinière",
+        "H 102107 Réfrigérateur",
+        "H 102108 Appareil D'Éclairage",
+        "H 102109 Robinetterie De L'Évier"
+      ]
+    },
+    "H 1031 Portes Intérieures Du Logement": {
+      "H 1031 Portes Intérieures Du Logement": [
+        "H 103101 Portes",
+        "H 103102 Quincaillerie Des Portes",
+        "H 103103 Cadres De Portes",
+        "H 103104 Portes Et Cadres (Garde-Robes)"
+      ]
+    },
+    "H 1041 Finis De Planchers Du Logement": {
+      "H 1041 Finis De Planchers Du Logement": [
+        "H 104101 Finis De Planchers",
+        "H 104102 Finis Des Marches Et Contre-Marches",
+        "H 104103 Finis Des Rampes Pour Personnes Handicapées",
+        "H 104104 Nez De Marche Et Palier",
+        "H 104105 Plinthes"
+      ]
+    },
+    "H 1051 Plomberie (Distribution)": {
+      "H 1051 Plomberie (Distribution)": [
+        "H 105101 Distribution D'Eau Domestique Du Logement",
+        "H 105102 Valve D'Arrêt D'Eau Du Logement",
+        "H 105103 Réseau Des Eaux Usées Du Logement",
+        "H 105104 Chauffe-Eau"
+      ]
+    },
+    "H 1061 Électricité (Distribution Et Communication)": {
+      "H 1061 Électricité (Distribution Et Communication)": [
+        "H 106101 Panneau Principal Du Logement",
+        "H 106102 Appareils D'Éclairage",
+        "H 106103 Prises",
+        "H 106104 Prise Du Chauffage D'Urgence",
+        "H 106105 Avertisseurs De Fumée Autonomes",
+        "H 106106 Distribution Télécommunication (Télé, Téléphone, Etc.)",
+        "H 106107 Interrupteurs",
+        "H 106108 Finis De Plancher Du Logement",
+        "H 106109 Chauffage Électrique",
+        "H 106110 Détecteurs Thermiques Reliés Au Système D'Alarme"
+      ]
+    },
+    "H 1071 Autres Composants Du Logement": {
+      "H 1071 Autres Composants Du Logement": [
+        "H 107101 Autres Armoires Et Comptoirs Du Logement",
+        "H 107102 Tablettes, Pôles, Fixations Et Autres Boiseries",
+        "H 107103 Mains Courantes Et Balustrades",
+        "H 107104 Construction Des Escaliers, Paliers Et Rampes",
+        "H 107105 Sécheuse Et Conduits",
+        "H 107106 Échangeur D'Air Et Conduits"
+      ]
+    },
+    "H 1072 Murs": {
+      "H 1072 Murs": [
+        "H 107201 Peinture",
+        "H 107203 Murs Extérieurs",
+        "H 107204 Cloisonnements Coupe-Feu",
+        "H 107205 Autres Cloisonnements (Construction Et Revêtements)"
+      ]
+    },
+    "H 1073 Plafonds": {
+      "H 1073 Plafonds": [
+        "H 107301 Peinture",
+        "H 107303 Plafonds Aux Toits",
+        "H 107304 Plafonds Coupe-Feu",
+        "H 107305 Autres Plafonds",
+        "H 107306 Plafonds Suspendus"
+      ]
+    },
+    "H 1074 Système De Chauffage (Eau Chaude, Air Pulsé)": {
+      "H 1074 Système De Chauffage (Eau Chaude, Air Pulsé)": [
+        "H 107401 Système (Chaudière, Cheminée, Contrôle)",
+        "H 107402 Système De Distribution De Chauffage"
+      ]
+    }
+  }
+};
