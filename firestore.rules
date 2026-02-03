@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper: user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Users: authenticated users can read; only admins can write (simplified for M1: any auth user)
+    match /users/{userId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Buildings, units, components, tasks, providers, requests, expenses, notifications
+    match /buildings/{id} { allow read, write: if isAuthenticated(); }
+    match /units/{id} { allow read, write: if isAuthenticated(); }
+    match /components/{id} { allow read, write: if isAuthenticated(); }
+    match /tasks/{id} { allow read, write: if isAuthenticated(); }
+    match /providers/{id} { allow read, write: if isAuthenticated(); }
+    match /requests/{id} { allow read, write: if isAuthenticated(); }
+    match /expenses/{id} { allow read, write: if isAuthenticated(); }
+    match /contingency_docs/{id} { allow read, write: if isAuthenticated(); }
+    match /notifications/{id} { allow read, write: if isAuthenticated(); }
+  }
+}
