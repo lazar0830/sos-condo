@@ -133,7 +133,7 @@ const SideNav: React.FC<SideNavProps> = ({
           </h1>
         </div>
         
-        <nav className="flex-grow p-4 space-y-1 overflow-y-auto">
+        <nav className="sidenav-nav flex-grow p-4 space-y-1 overflow-y-auto min-h-0">
           {navItems.map(item => (
               <NavItem
                   key={item.id}

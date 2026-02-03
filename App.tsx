@@ -837,7 +837,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen text-gray-800 dark:text-gray-200">
+    <div className="flex h-screen overflow-hidden text-gray-800 dark:text-gray-200">
       <SideNav 
         currentView={view} 
         onNavigate={handleNavigate}
@@ -852,7 +852,7 @@ const App: React.FC = () => {
         onMarkAllAsRead={handleMarkAllNotificationsRead}
         onNotificationClick={handleNotificationClick}
       />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
         <header className="lg:hidden bg-white dark:bg-gray-800 shadow-sm dark:border-b dark:border-gray-700 z-10">
           <div className="flex justify-between items-center p-4">
@@ -879,7 +879,7 @@ const App: React.FC = () => {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-8">
+        <main className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-8">
             {renderContent()}
         </main>
       </div>

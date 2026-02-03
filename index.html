@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="overflow-hidden h-screen">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -42,9 +42,14 @@
 }
 </script>
 <link rel="stylesheet" href="/index.css">
+<style>
+  /* Hide sidebar nav scrollbar - keeps one main scrollbar only */
+  .sidenav-nav { scrollbar-width: none; -ms-overflow-style: none; }
+  .sidenav-nav::-webkit-scrollbar { display: none; }
+</style>
 </head>
-  <body class="bg-gray-50 dark:bg-gray-900">
-    <div id="root"></div>
+  <body class="bg-gray-50 dark:bg-gray-900 overflow-hidden h-screen">
+    <div id="root" class="h-full"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
