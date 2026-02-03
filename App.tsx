@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, User, Comment, Document, StatusChange, Component, ComponentImage, Unit, Expense, Notification as NotificationType } from './types';
 import { UserRole, ServiceRequestStatus, Recurrence, TaskStatus } from './types';
 import { initGemini } from './services/geminiService';
-import useLocalStorage from './hooks/useLocalStorage';
-import { initialUsers, initialBuildings, initialProviders, initialTasks, initialServiceRequests, initialComponents, initialUnits, initialContingencyDocuments, initialExpenses, initialNotifications } from './data/initialData';
+import { useAppData } from './hooks/useAppData';
+import * as fs from './services/firestoreService';
+import * as authService from './services/authService';
+import { initialBuildings, initialProviders, initialTasks, initialServiceRequests, initialComponents, initialUnits, initialContingencyDocuments, initialExpenses, initialNotifications } from './data/initialData';
 
 import SideNav from './components/SideNav';
 import BuildingDashboard from './components/BuildingDashboard';
@@ -54,20 +56,36 @@ const App: React.FC = () => {
     setGeminiReady(initGemini());
   }, []);
 
-  // --- Data State (Local Storage) ---
-  const [users, setUsers] = useLocalStorage<User[]>('users', initialUsers);
-  const [buildings, setBuildings] = useLocalStorage<Building[]>('buildings', initialBuildings);
-  const [tasks, setTasks] = useLocalStorage<MaintenanceTask[]>('tasks', initialTasks);
-  const [providers, setProviders] = useLocalStorage<ServiceProvider[]>('providers', initialProviders);
-  const [serviceRequests, setServiceRequests] = useLocalStorage<ServiceRequest[]>('requests', initialServiceRequests);
-  const [components, setComponents] = useLocalStorage<Component[]>('components', initialComponents);
-  const [units, setUnits] = useLocalStorage<Unit[]>('units', initialUnits);
-  const [contingencyDocuments, setContingencyDocuments] = useLocalStorage<Document[]>('contingency_docs', initialContingencyDocuments);
-  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', initialExpenses);
-  const [notifications, setNotifications] = useLocalStorage<NotificationType[]>('notifications', initialNotifications);
-  
-  // Auth State
+  // Auth State (must be before useAppData, which subscribes only when authenticated)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    const unsub = authService.subscribeToAuth(async (fbUser) => {
+      if (!fbUser) {
+        setCurrentUser(null);
+      } else {
+        const profile = await fs.getUserById(fbUser.uid);
+        setCurrentUser(profile || null);
+      }
+      setAuthChecked(true);
+    });
+    return () => { unsub?.(); };
+  }, []);
+
+  // --- Data: Firestore only (subscribes only when authenticated) ---
+  const {
+    users,
+    buildings,
+    tasks,
+    providers,
+    serviceRequests,
+    components,
+    units,
+    contingencyDocuments,
+    expenses,
+    notifications,
+  } = useAppData(!!currentUser);
 
   // UI State
   const [view, setView] = useState<View>('dashboard');
@@ -124,117 +142,92 @@ const App: React.FC = () => {
 
   const handleResetData = () => {
     if (window.confirm("Are you sure you want to reset all data to the initial state? This action cannot be undone.")) {
-        setUsers(initialUsers);
-        setBuildings(initialBuildings);
-        setTasks(initialTasks);
-        setProviders(initialProviders);
-        setServiceRequests(initialServiceRequests);
-        setComponents(initialComponents);
-        setUnits(initialUnits);
-        setContingencyDocuments(initialContingencyDocuments);
-        setExpenses(initialExpenses);
-        setNotifications(initialNotifications);
-        setNotification({ type: 'success', message: "App data has been reset." });
-        if (currentUser && !initialUsers.find(u => u.id === currentUser.id)) {
-            setCurrentUser(null);
-        }
+      setNotification({ type: 'success', message: "Reset is not supported. Use Firebase Console to clear data if needed." });
     }
   };
 
-  // --- Handlers ---
-  const handleLogin = async (email: string, pass: string): Promise<boolean> => {
-    // Mock login logic
-    const user = users.find(u => u.email === email && u.password === pass);
-    if (user) {
-        setCurrentUser(user);
-        return true;
+  const handleLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    const result = await authService.signIn(email, password);
+    if (result.user) {
+      setCurrentUser(result.user);
+      return { success: true };
     }
-    return false;
+    return { success: false, error: result.error };
+  };
+
+  const handleSignUp = async (email: string, password: string, username: string): Promise<{ success: boolean; error?: string }> => {
+    const result = await authService.signUp(email, password, username);
+    if (result.user) {
+      setCurrentUser(result.user);
+      return { success: true };
+    }
+    return { success: false, error: result.error };
   };
 
   const handleLogout = async () => {
+    await authService.logOut();
     setCurrentUser(null);
     setView('dashboard');
   };
 
-  const handleSaveBuilding = (buildingData: Omit<Building, 'id'> | Building) => {
-    if ('id' in buildingData) {
-        setBuildings(prev => prev.map(b => b.id === buildingData.id ? buildingData : b));
-    } else {
-        const newBuilding = { 
-            ...buildingData, 
-            id: crypto.randomUUID(),
-            createdBy: buildingData.createdBy || currentUser?.id || 'system' 
-        };
-        setBuildings(prev => [...prev, newBuilding]);
-    }
+  const handleSaveBuilding = async (buildingData: Omit<Building, 'id'> | Building) => {
+    const building: Building = 'id' in buildingData
+      ? buildingData as Building
+      : { ...buildingData, id: crypto.randomUUID(), createdBy: buildingData.createdBy || currentUser?.id || 'system' } as Building;
+    await fs.setBuilding(building);
     setNotification({ type: 'success', message: 'Property saved successfully!' });
     handleCloseBuildingModal();
   };
 
-  const handleDeleteBuilding = (buildingId: string) => {
-    setBuildings(prev => prev.filter(b => b.id !== buildingId));
-    // Cascade delete related items
-    setTasks(prev => prev.filter(t => t.buildingId !== buildingId));
-    setComponents(prev => prev.filter(c => c.buildingId !== buildingId));
-    setUnits(prev => prev.filter(u => u.buildingId !== buildingId));
-    // Note: Requests are linked to tasks, so they become orphaned or we delete them too
-    const tasksToDelete = tasks.filter(t => t.buildingId === buildingId).map(t => t.id);
-    setServiceRequests(prev => prev.filter(r => !tasksToDelete.includes(r.taskId)));
-    
+  const handleDeleteBuilding = async (buildingId: string) => {
+    const tasksToDelete = tasks.filter(t => t.buildingId === buildingId);
+    for (const t of tasksToDelete) await fs.deleteTask(t.id);
+    const reqsToDelete = serviceRequests.filter(r => tasksToDelete.some(t => t.id === r.taskId));
+    for (const r of reqsToDelete) await fs.deleteRequest(r.id);
+    for (const c of components.filter(c => c.buildingId === buildingId)) await fs.deleteComponent(c.id);
+    for (const u of units.filter(u => u.buildingId === buildingId)) await fs.deleteUnit(u.id);
+    for (const e of expenses.filter(e => e.buildingId === buildingId)) await fs.deleteExpense(e.id);
+    await fs.deleteBuilding(buildingId);
     setSelectedBuildingId(null);
-    setNotification({ type: 'success', message: `Property deleted.` });
+    setNotification({ type: 'success', message: 'Property deleted.' });
   };
 
-  const handleSaveUnit = (unitData: Omit<Unit, 'id' | 'images'> | Unit) => {
-    if ('id' in unitData) {
-        setUnits(prev => prev.map(u => u.id === unitData.id ? unitData as Unit : u));
-    } else {
-        const newUnit: Unit = { ...unitData, id: crypto.randomUUID(), images: [] };
-        setUnits(prev => [...prev, newUnit]);
-    }
+  const handleSaveUnit = async (unitData: Omit<Unit, 'id' | 'images'> | Unit) => {
+    const unit: Unit = 'id' in unitData ? unitData as Unit : { ...unitData, id: crypto.randomUUID(), images: [] };
+    await fs.setUnit(unit);
     setNotification({ type: 'success', message: 'Unit saved successfully!' });
     handleCloseUnitModal();
   };
-  
-  const handleDeleteUnit = (unitId: string) => {
+
+  const handleDeleteUnit = async (unitId: string) => {
     const isUsedInTask = tasks.some(t => t.unitId === unitId);
     const isUsedInComponent = components.some(c => c.unitId === unitId);
     if (isUsedInTask || isUsedInComponent) {
       setNotification({ type: 'error', message: 'Cannot delete unit. It is currently associated with tasks or components.' });
       return;
     }
-    setUnits(prev => prev.filter(u => u.id !== unitId));
+    await fs.deleteUnit(unitId);
     setNotification({ type: 'success', message: 'Unit deleted successfully.' });
   };
-  
+
   const handleAddUnitImages = async (unitId: string, files: FileList) => {
     const imagePromises = Array.from(files).map(async file => {
       const base64 = await fileToBase64(file);
-      return {
-        id: crypto.randomUUID(),
-        url: base64,
-        uploadedAt: new Date().toISOString(),
-      };
+      return { id: crypto.randomUUID(), url: base64, uploadedAt: new Date().toISOString() };
     });
     const newImages = await Promise.all(imagePromises);
-    
-    setUnits(prev => prev.map(u => {
-        if (u.id === unitId) {
-            return { ...u, images: [...u.images, ...newImages] };
-        }
-        return u;
-    }));
+    const unit = units.find(u => u.id === unitId);
+    if (!unit) return;
+    const updated = { ...unit, images: [...unit.images, ...newImages] };
+    await fs.setUnit(updated);
     setNotification({ type: 'success', message: `${newImages.length} image(s) added.` });
   };
 
-  const handleDeleteUnitImage = (unitId: string, imageId: string) => {
-    setUnits(prev => prev.map(u => {
-        if (u.id === unitId) {
-            return { ...u, images: u.images.filter(img => img.id !== imageId) };
-        }
-        return u;
-    }));
+  const handleDeleteUnitImage = async (unitId: string, imageId: string) => {
+    const unit = units.find(u => u.id === unitId);
+    if (!unit) return;
+    const updated = { ...unit, images: unit.images.filter(img => img.id !== imageId) };
+    await fs.setUnit(updated);
     setNotification({ type: 'success', message: 'Image deleted.' });
   };
 
@@ -272,70 +265,42 @@ const App: React.FC = () => {
     return instances;
   };
 
-  const handleSaveTask = (taskData: Omit<MaintenanceTask, 'id'> | MaintenanceTask) => {
+  const handleSaveTask = async (taskData: Omit<MaintenanceTask, 'id'> | MaintenanceTask) => {
     const isMasterRecurring = taskData.recurrence !== Recurrence.OneTime;
-    
     if ('id' in taskData) {
-        // Updating existing task
-        const updatedTask = taskData;
-        
-        if (isMasterRecurring) {
-             // If master, we might need to regenerate instances if dates/recurrence changed
-             // For simplicity in this demo, we'll update the master and if it has instances, maybe update them?
-             // Complex logic skipped for local storage demo simplicity. We just update the object.
-             setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
-        } else {
-             setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
-        }
+      await fs.setTask(taskData as MaintenanceTask);
     } else {
-        // Creating new task
-        const newTaskId = crypto.randomUUID();
-        // FIX: Explicitly cast to MaintenanceTask to avoid strict UUID type inference issues
-        const newTask = { ...taskData, id: newTaskId } as MaintenanceTask;
-        
-        // FIX: Explicitly type the array to MaintenanceTask[]
-        let newTasksToAdd: MaintenanceTask[] = [newTask];
-        
-        if (isMasterRecurring) {
-            const instances = generateRecurringTasks(newTask).map(inst => ({
-                ...inst,
-                id: crypto.randomUUID()
-            }));
-            newTasksToAdd = [newTask, ...instances];
-        }
-        
-        setTasks(prev => [...prev, ...newTasksToAdd]);
+      const newTaskId = crypto.randomUUID();
+      const newTask = { ...taskData, id: newTaskId } as MaintenanceTask;
+      await fs.setTask(newTask);
+      if (isMasterRecurring) {
+        const instances = generateRecurringTasks(newTask).map(inst => ({ ...inst, id: crypto.randomUUID() }));
+        for (const t of instances) await fs.setTask(t as MaintenanceTask);
+      }
     }
-
     setNotification({ type: 'success', message: 'Task saved successfully!' });
     handleCloseTaskModal();
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks(prev => {
-        const taskToDelete = prev.find(t => t.id === taskId);
-        if (taskToDelete && taskToDelete.recurrence !== Recurrence.OneTime) {
-            // Delete master and all instances
-            return prev.filter(t => t.id !== taskId && t.recurringTaskId !== taskId);
-        }
-        return prev.filter(t => t.id !== taskId);
-    });
+  const handleDeleteTask = async (taskId: string) => {
+    const taskToDelete = tasks.find(t => t.id === taskId);
+    if (taskToDelete?.recurrence !== Recurrence.OneTime) {
+      for (const t of tasks.filter(t => t.recurringTaskId === taskId || t.id === taskId)) await fs.deleteTask(t.id);
+    } else {
+      await fs.deleteTask(taskId);
+    }
     setNotification({ type: 'success', message: 'Task deleted successfully!' });
   };
 
-  const handleSaveComponent = (componentData: Omit<Component, 'id'> | Component) => {
-    if ('id' in componentData) {
-        setComponents(prev => prev.map(c => c.id === componentData.id ? componentData : c));
-    } else {
-        const newComponent = { ...componentData, id: crypto.randomUUID() };
-        setComponents(prev => [...prev, newComponent]);
-    }
+  const handleSaveComponent = async (componentData: Omit<Component, 'id'> | Component) => {
+    const component: Component = 'id' in componentData ? componentData as Component : { ...componentData, id: crypto.randomUUID(), images: (componentData as Component).images ?? [] };
+    await fs.setComponent(component);
     setNotification({ type: 'success', message: 'Component saved successfully!' });
     handleCloseComponentModal();
   };
 
-  const handleDeleteComponent = (componentId: string) => {
-    setComponents(prev => prev.filter(c => c.id !== componentId));
+  const handleDeleteComponent = async (componentId: string) => {
+    await fs.deleteComponent(componentId);
     setNotification({ type: 'success', message: 'Component deleted successfully.' });
     setSelectedComponentId(null);
   };
@@ -343,174 +308,104 @@ const App: React.FC = () => {
   const handleAddComponentImage = async (componentId: string, files: FileList) => {
     const imagePromises = Array.from(files).map(async file => {
       const base64 = await fileToBase64(file);
-      return {
-        id: crypto.randomUUID(),
-        url: base64,
-        uploadedAt: new Date().toISOString(),
-      };
+      return { id: crypto.randomUUID(), url: base64, uploadedAt: new Date().toISOString() };
     });
-
     const newImages = await Promise.all(imagePromises);
-    setComponents(prev => prev.map(c => {
-        if (c.id === componentId) {
-            return { ...c, images: [...c.images, ...newImages] };
-        }
-        return c;
-    }));
+    const component = components.find(c => c.id === componentId);
+    if (!component) return;
+    const updated = { ...component, images: [...component.images, ...newImages] };
+    await fs.setComponent(updated);
     setNotification({ type: 'success', message: `${newImages.length} image(s) added.` });
   };
 
-  const handleDeleteComponentImage = (componentId: string, imageId: string) => {
-    setComponents(prev => prev.map(c => {
-        if (c.id === componentId) {
-            return { ...c, images: c.images.filter(img => img.id !== imageId) };
-        }
-        return c;
-    }));
+  const handleDeleteComponentImage = async (componentId: string, imageId: string) => {
+    const component = components.find(c => c.id === componentId);
+    if (!component) return;
+    const updated = { ...component, images: component.images.filter(img => img.id !== imageId) };
+    await fs.setComponent(updated);
     setNotification({ type: 'success', message: 'Image deleted.' });
   };
 
-  const handleAddServiceRequest = (request: Omit<ServiceRequest, 'id' | 'comments' | 'documents' | 'statusHistory'>) => {
+  const handleAddServiceRequest = async (request: Omit<ServiceRequest, 'id' | 'comments' | 'documents' | 'statusHistory'>) => {
     if (!currentUser) return;
     const sourceTask = tasks.find(t => t.id === request.taskId);
-    
     const newRequest: ServiceRequest = {
         ...request,
         id: crypto.randomUUID(),
         comments: [],
         documents: [],
-        statusHistory: [{
-            status: ServiceRequestStatus.Sent,
-            changedAt: new Date().toISOString(),
-            changedBy: currentUser.username,
-        }],
+        statusHistory: [{ status: ServiceRequestStatus.Sent, changedAt: new Date().toISOString(), changedBy: currentUser.username }],
         unitId: sourceTask?.unitId,
         unitNumber: sourceTask?.unitNumber,
     };
-    
-    setServiceRequests(prev => [...prev, newRequest]);
-    
-    // Update task status
-    if (sourceTask) {
-        setTasks(prev => prev.map(t => t.id === sourceTask.id ? { ...t, status: TaskStatus.Sent } : t));
-    }
-    
+    await fs.setRequest(newRequest);
+    if (sourceTask) await fs.setTask({ ...sourceTask, status: TaskStatus.Sent });
     setNotification({ type: 'success', message: 'Service request sent!' });
   };
-  
-  const handleUpdateServiceRequestStatus = (id: string, status: ServiceRequestStatus) => {
-    if (!currentUser) return;
-    
-    setServiceRequests(prev => prev.map(req => {
-        if (req.id === id) {
-            const newStatusChange = {
-                status: status,
-                changedAt: new Date().toISOString(),
-                changedBy: currentUser.username
-            };
-            return {
-                ...req,
-                status,
-                statusHistory: [...(req.statusHistory || []), newStatusChange]
-            };
-        }
-        return req;
-    }));
 
-    // Side effects for Task status
+  const handleUpdateServiceRequestStatus = async (id: string, status: ServiceRequestStatus) => {
+    if (!currentUser) return;
     const req = serviceRequests.find(r => r.id === id);
-    if (req) {
-        const task = tasks.find(t => t.id === req.taskId);
-        if (task) {
-            let newTaskStatus = task.status;
-            if (status === ServiceRequestStatus.Accepted) newTaskStatus = TaskStatus.OnHold;
-            else if (status === ServiceRequestStatus.Refused) newTaskStatus = TaskStatus.New;
-            else if (status === ServiceRequestStatus.Completed) newTaskStatus = TaskStatus.Completed;
-            
-            if (newTaskStatus !== task.status) {
-                setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newTaskStatus } : t));
-            }
-        }
+    if (!req) return;
+    const updated = { ...req, status, statusHistory: [...(req.statusHistory || []), { status, changedAt: new Date().toISOString(), changedBy: currentUser.username }] };
+    await fs.setRequest(updated);
+    const task = tasks.find(t => t.id === req.taskId);
+    if (task) {
+      let newTaskStatus = task.status;
+      if (status === ServiceRequestStatus.Accepted) newTaskStatus = TaskStatus.OnHold;
+      else if (status === ServiceRequestStatus.Refused) newTaskStatus = TaskStatus.New;
+      else if (status === ServiceRequestStatus.Completed) newTaskStatus = TaskStatus.Completed;
+      if (newTaskStatus !== task.status) await fs.setTask({ ...task, status: newTaskStatus });
     }
     setNotification({ type: 'success', message: 'Request status updated.' });
   };
 
-  const handleUpdateRequest = (request: ServiceRequest) => {
-    setServiceRequests(prev => prev.map(r => r.id === request.id ? request : r));
+  const handleUpdateRequest = async (request: ServiceRequest) => {
+    await fs.setRequest(request);
     setNotification({ type: 'success', message: 'Service request updated.' });
     handleCloseRequestModal();
   };
 
-  const handleDeleteProvider = (providerId: string) => {
-    setProviders(prev => prev.filter(p => p.id !== providerId));
+  const handleDeleteProvider = async (providerId: string) => {
+    await fs.deleteProvider(providerId);
     setNotification({ type: 'success', message: 'Provider deleted successfully!' });
   };
-  
+
   const handleSaveUser = (userData: Omit<User, 'id'> | User, password?: string): boolean => {
     if (!currentUser) return false;
-    
-    if ('id' in userData) {
-        setUsers(prev => prev.map(u => u.id === userData.id ? userData : u));
-    } else {
-        const newUser = { ...userData, id: crypto.randomUUID(), password: password };
-        setUsers(prev => [...prev, newUser]);
-    }
+    const user: User = 'id' in userData ? userData as User : { ...userData, id: crypto.randomUUID(), password };
+    fs.setUser(user);
     setNotification({ type: 'success', message: 'User saved successfully.' });
     handleCloseUserModal();
     return true;
   };
-  
-  const handleDeleteUser = (userId: string) => {
-    if (userId === currentUser?.id) {
-        setNotification({ type: 'error', message: "You cannot delete your own account."});
-        return;
-    }
-    const userToDelete = users.find(u => u.id === userId);
-    if (userToDelete?.role === UserRole.SuperAdmin) {
-        setNotification({ type: 'error', message: "The Super Admin account cannot be deleted."});
-        return;
-    }
 
-    setUsers(prev => prev.filter(u => u.id !== userId));
+  const handleDeleteUser = async (userId: string) => {
+    if (userId === currentUser?.id) { setNotification({ type: 'error', message: "You cannot delete your own account."}); return; }
+    const userToDelete = users.find(u => u.id === userId);
+    if (userToDelete?.role === UserRole.SuperAdmin) { setNotification({ type: 'error', message: "The Super Admin account cannot be deleted."}); return; }
+    await fs.deleteUser(userId);
     setNotification({ type: 'success', message: 'User profile deleted.' });
   };
-  
+
   const handleSaveProviderAndUser = (data: { providerData: Omit<ServiceProvider, 'id'> | ServiceProvider, userData: { email: string, username: string, password?: string } }) => {
     if (!currentUser) return false;
-    
     let userId = data.providerData.userId;
-    
-    // Create or Update User
     if (userId) {
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, username: data.userData.username, email: data.userData.email } : u));
+      const existingUser = users.find(u => u.id === userId);
+      if (existingUser) {
+        const u = { ...existingUser, username: data.userData.username, email: data.userData.email };
+        fs.setUser(u);
+      }
     } else {
-        const newUserId = crypto.randomUUID();
-        const newUser: User = { 
-            id: newUserId, 
-            email: data.userData.email, 
-            username: data.userData.username, 
-            role: UserRole.ServiceProvider,
-            password: data.userData.password || 'password123', // Default or provided
-            createdBy: currentUser.id
-        };
-        setUsers(prev => [...prev, newUser]);
-        userId = newUserId;
+      userId = crypto.randomUUID();
+      const newUser: User = { id: userId, email: data.userData.email, username: data.userData.username, role: UserRole.ServiceProvider, password: data.userData.password || 'password123', createdBy: currentUser.id };
+      fs.setUser(newUser);
     }
-    
-    // Create or Update Provider
-    if ('id' in data.providerData) {
-        const updatedProvider = { ...data.providerData, userId };
-        setProviders(prev => prev.map(p => p.id === updatedProvider.id ? updatedProvider : p));
-    } else {
-        const newProvider = { 
-            ...data.providerData, 
-            id: crypto.randomUUID(),
-            userId,
-            createdBy: currentUser.id 
-        };
-        setProviders(prev => [...prev, newProvider]);
-    }
-
+    const provider: ServiceProvider = 'id' in data.providerData
+      ? { ...data.providerData, userId } as ServiceProvider
+      : { ...data.providerData, id: crypto.randomUUID(), userId, createdBy: currentUser.id } as ServiceProvider;
+    fs.setProvider(provider);
     setNotification({ type: 'success', message: 'Provider and User saved successfully.' });
     handleCloseProviderUserModal();
     return true;
@@ -518,127 +413,88 @@ const App: React.FC = () => {
 
   const handleUpdateCurrentUser = async (data: { email?: string; username?: string; }) => {
     if (!currentUser) return { success: false, message: 'No user logged in.' };
-    
-    setUsers(prev => prev.map(u => {
-        if (u.id === currentUser.id) {
-            return { ...u, ...data };
-        }
-        return u;
-    }));
-    
-    // Update local session
+    const updated = { ...currentUser, ...data };
+    await fs.setUser(updated);
     setCurrentUser(prev => prev ? { ...prev, ...data } : null);
-    
     return { success: true, message: 'Account updated successfully.' };
   };
 
-  const handleSaveProviderProfile = (provider: ServiceProvider) => {
-    setProviders(prev => prev.map(p => p.id === provider.id ? provider : p));
+  const handleSaveProviderProfile = async (provider: ServiceProvider) => {
+    await fs.setProvider(provider);
     setNotification({ type: 'success', message: 'Provider profile updated.' });
   };
 
-  const handleAddComment = (requestId: string, commentText: string) => {
+  const handleAddComment = async (requestId: string, commentText: string) => {
     if (!currentUser) return;
-    
-    const newComment: Comment = {
-      id: crypto.randomUUID(),
-      authorId: currentUser.id,
-      authorName: currentUser.username,
-      text: commentText,
-      createdAt: new Date().toISOString(),
-    };
-    
-    setServiceRequests(prev => prev.map(req => {
-        if (req.id === requestId) {
-            return { ...req, comments: [...req.comments, newComment] };
-        }
-        return req;
-    }));
+    const newComment: Comment = { id: crypto.randomUUID(), authorId: currentUser.id, authorName: currentUser.username, text: commentText, createdAt: new Date().toISOString() };
+    const req = serviceRequests.find(r => r.id === requestId);
+    if (!req) return;
+    const updated = { ...req, comments: [...req.comments, newComment] };
+    await fs.setRequest(updated);
     setNotification({ type: 'success', message: 'Comment added.' });
   };
 
   const handleAddDocument = async (requestId: string, file: File) => {
     if (!currentUser) return;
-    
     const base64 = await fileToBase64(file);
-    const newDocument: Document = {
-      id: crypto.randomUUID(),
-      name: file.name,
-      url: base64,
-      uploadedAt: new Date().toISOString(),
-      uploadedBy: currentUser.username,
-    };
-    
-    setServiceRequests(prev => prev.map(req => {
-        if (req.id === requestId) {
-            return { ...req, documents: [...req.documents, newDocument] };
-        }
-        return req;
-    }));
+    const newDocument: Document = { id: crypto.randomUUID(), name: file.name, url: base64, uploadedAt: new Date().toISOString(), uploadedBy: currentUser.username };
+    const req = serviceRequests.find(r => r.id === requestId);
+    if (!req) return;
+    const updated = { ...req, documents: [...req.documents, newDocument] };
+    await fs.setRequest(updated);
     setNotification({ type: 'success', message: 'Document uploaded.' });
   };
 
-  const handleDeleteDocument = (requestId: string, documentId: string) => {
-    setServiceRequests(prev => prev.map(req => {
-        if (req.id === requestId) {
-            return { ...req, documents: req.documents.filter(doc => doc.id !== documentId) };
-        }
-        return req;
-    }));
+  const handleDeleteDocument = async (requestId: string, documentId: string) => {
+    const req = serviceRequests.find(r => r.id === requestId);
+    if (!req) return;
+    const updated = { ...req, documents: req.documents.filter(d => d.id !== documentId) };
+    await fs.setRequest(updated);
     setNotification({ type: 'success', message: 'Document deleted.' });
   };
 
   const handleAddContingencyDocument = async (file: File) => {
     if (!currentUser) return;
     const base64 = await fileToBase64(file);
-    const newDocument: Document = {
-      id: crypto.randomUUID(),
-      name: file.name,
-      url: base64,
-      uploadedAt: new Date().toISOString(),
-      uploadedBy: currentUser.username,
-    };
-    setContingencyDocuments(prev => [...prev, newDocument]);
+    const newDocument: Document = { id: crypto.randomUUID(), name: file.name, url: base64, uploadedAt: new Date().toISOString(), uploadedBy: currentUser.username };
+    await fs.setContingencyDocument(newDocument);
     setNotification({ type: 'success', message: 'Document uploaded successfully.' });
   };
 
-  const handleDeleteContingencyDocument = (documentId: string) => {
-    setContingencyDocuments(prev => prev.filter(doc => doc.id !== documentId));
+  const handleDeleteContingencyDocument = async (documentId: string) => {
+    await fs.deleteContingencyDocument(documentId);
     setNotification({ type: 'success', message: 'Document deleted.' });
   };
 
-  const handleAddExpense = (expenseData: Omit<Expense, 'id' | 'createdAt' | 'buildingName' | 'componentName'>) => {
+  const handleAddExpense = async (expenseData: Omit<Expense, 'id' | 'createdAt' | 'buildingName' | 'componentName'>) => {
     const building = buildings.find(b => b.id === expenseData.buildingId);
     const component = components.find(c => c.id === expenseData.componentId);
-
-    if (!building || !component) {
-        setNotification({ type: 'error', message: 'Invalid building or component selected.' });
-        return;
-    }
-
-    const newExpense = {
+    if (!building || !component) { setNotification({ type: 'error', message: 'Invalid building or component selected.' }); return; }
+    const newExpense: Expense = {
         ...expenseData,
         id: crypto.randomUUID(),
         buildingName: building.name,
         componentName: component.name,
         createdAt: new Date().toISOString(),
     };
-    setExpenses(prev => [...prev, newExpense]);
+    await fs.setExpense(newExpense);
     setNotification({ type: 'success', message: 'Expense added successfully.' });
   };
 
-  const handleDeleteExpense = (expenseId: string) => {
-    setExpenses(prev => prev.filter(e => e.id !== expenseId));
+  const handleDeleteExpense = async (expenseId: string) => {
+    await fs.deleteExpense(expenseId);
     setNotification({ type: 'success', message: 'Expense deleted.' });
   };
 
-    // --- Notification Handlers ---
-  const handleMarkNotificationRead = (notificationId: string) => {
-    setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n));
+  const handleMarkNotificationRead = async (notificationId: string) => {
+    const n = notifications.find(x => x.id === notificationId);
+    if (!n) return;
+    const updated = { ...n, isRead: true };
+    await fs.setNotification(updated);
   };
 
-  const handleMarkAllNotificationsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  const handleMarkAllNotificationsRead = async () => {
+    for (const n of notifications) await fs.setNotification({ ...n, isRead: true });
   };
   
   const handleNotificationClick = (view: string, id: string) => {
@@ -729,7 +585,7 @@ const App: React.FC = () => {
     );
   }
 
-  if (!currentUser) {
+  if (!authChecked || !currentUser) {
     return (
       <>
         {notification && (
@@ -739,7 +595,13 @@ const App: React.FC = () => {
             onClose={() => setNotification(null)}
           />
         )}
-        <LoginPage onLogin={handleLogin} />
+        {authChecked ? (
+          <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />
+        ) : (
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+          </div>
+        )}
       </>
     );
   }
