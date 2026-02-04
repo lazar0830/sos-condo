@@ -6,7 +6,7 @@ import { initGemini } from './services/geminiService';
 import { useAppData } from './hooks/useAppData';
 import * as fs from './services/firestoreService';
 import * as authService from './services/authService';
-import { initialBuildings, initialProviders, initialTasks, initialServiceRequests, initialComponents, initialUnits, initialContingencyDocuments, initialExpenses, initialNotifications } from './data/initialData';
+import { initialBuildings, initialTasks, initialServiceRequests, initialComponents, initialUnits, initialContingencyDocuments, initialExpenses, initialNotifications } from './data/initialData';
 
 import SideNav from './components/SideNav';
 import BuildingDashboard from './components/BuildingDashboard';
