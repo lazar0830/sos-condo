@@ -85,6 +85,7 @@ const App: React.FC = () => {
     contingencyDocuments,
     expenses,
     notifications,
+    componentCategories,
   } = useAppData(!!currentUser);
 
   // UI State
@@ -738,6 +739,7 @@ const App: React.FC = () => {
         return <ComponentsView 
             components={visibleComponents} 
             buildings={visibleBuildings} 
+            componentCategories={componentCategories}
             onAddComponent={() => handleOpenComponentModal(null)}
             onSelectComponent={handleSelectComponent}
         />;
@@ -922,6 +924,7 @@ const App: React.FC = () => {
           component={editingComponent}
           buildings={buildings}
           units={units}
+          componentCategories={componentCategories}
           onClose={handleCloseComponentModal}
           onSave={handleSaveComponent}
           onDelete={handleDeleteComponent}

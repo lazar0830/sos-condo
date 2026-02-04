@@ -4,7 +4,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Component, Building, ComponentImage, Unit } from '../types';
 import { ComponentType } from '../types';
-import { COMPONENT_TYPES, COMPONENT_CATEGORIES } from '../constants';
+import { COMPONENT_TYPES } from '../constants';
+import type { ComponentCategoriesData } from '../services/firestoreService';
 import Modal from './Modal';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -12,6 +13,7 @@ interface EditComponentModalProps {
   component: Component | null;
   buildings: Building[];
   units: Unit[];
+  componentCategories?: ComponentCategoriesData;
   onClose: () => void;
   onSave: (component: Omit<Component, 'id'> | Component) => void;
   onDelete: (componentId: string) => void;
@@ -27,7 +29,7 @@ const fileToBase64 = (file: File): Promise<string> => {
     });
 };
 
-const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buildings, units, onClose, onSave, onDelete, preselectedBuildingId }) => {
+const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buildings, units, componentCategories = {}, onClose, onSave, onDelete, preselectedBuildingId }) => {
   const isEditing = !!component;
   const [formData, setFormData] = useState({
     name: '',
@@ -50,23 +52,24 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
 
   const parentCategories = useMemo(() => {
     if (!formData.type) return [];
-    return Object.keys(COMPONENT_CATEGORIES[formData.type as ComponentType]);
-  }, [formData.type]);
+    const cats = componentCategories[formData.type as ComponentType];
+    return cats ? Object.keys(cats) : [];
+  }, [formData.type, componentCategories]);
 
   const subCategories = useMemo(() => {
     if (!formData.type || !formData.parentCategory) return [];
-    const cats = COMPONENT_CATEGORIES[formData.type as ComponentType];
+    const cats = componentCategories[formData.type as ComponentType];
     const parentCatData = cats ? cats[formData.parentCategory] : null;
     return parentCatData ? Object.keys(parentCatData) : [];
-  }, [formData.type, formData.parentCategory]);
+  }, [formData.type, formData.parentCategory, componentCategories]);
 
   const componentNames = useMemo(() => {
     if (!formData.type || !formData.parentCategory || !formData.subCategory) return [];
-    const cats = COMPONENT_CATEGORIES[formData.type as ComponentType];
+    const cats = componentCategories[formData.type as ComponentType];
     const parentCatData = cats ? cats[formData.parentCategory] : null;
     const subCatData = parentCatData ? parentCatData[formData.subCategory] : null;
     return subCatData || [];
-  }, [formData.type, formData.parentCategory, formData.subCategory]);
+  }, [formData.type, formData.parentCategory, formData.subCategory, componentCategories]);
 
   const buildingUnits = useMemo(() => {
     if (!formData.buildingId) return [];

@@ -13,6 +13,7 @@ import {
   initialExpenses,
   initialNotifications,
 } from '../data/initialData';
+import { COMPONENT_CATEGORIES } from '../constants';
 
 export function useAppData(authenticated: boolean) {
   const firestoreData = useFirestoreData({
@@ -31,13 +32,20 @@ export function useAppData(authenticated: boolean) {
   const seededRef = useRef(false);
   useEffect(() => {
     if (!isFirebaseConfigured() || firestoreData.loading || seededRef.current) return;
-    if (firestoreData.providers.length === 0) {
+    const needsProviderSeed = firestoreData.providers.length === 0;
+    const needsCategorySeed = Object.keys(firestoreData.componentCategories || {}).length === 0;
+    if (needsProviderSeed || needsCategorySeed) {
       seededRef.current = true;
       (async () => {
-        for (const p of initialProviders) await fs.setProvider(p);
+        if (needsProviderSeed) {
+          for (const p of initialProviders) await fs.setProvider(p);
+        }
+        if (needsCategorySeed) {
+          await fs.setComponentCategories(COMPONENT_CATEGORIES);
+        }
       })();
     }
-  }, [firestoreData.loading, firestoreData.providers.length]);
+  }, [firestoreData.loading, firestoreData.providers.length, firestoreData.componentCategories]);
 
   return firestoreData;
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { isFirebaseConfigured } from '../firebaseConfig';
 import * as fs from '../services/firestoreService';
+import type { ComponentCategoriesData } from '../services/firestoreService';
 import type {
   User,
   Building,
@@ -26,6 +27,7 @@ export function useFirestoreData(
     expenses: Expense[];
     contingencyDocs: Document[];
     notifications: Notification[];
+    componentCategories?: ComponentCategoriesData;
   },
   enabled: boolean
 ) {
@@ -39,6 +41,7 @@ export function useFirestoreData(
   const [expenses, setExpenses] = useState<Expense[]>(initial.expenses);
   const [contingencyDocs, setContingencyDocs] = useState<Document[]>(initial.contingencyDocs);
   const [notifications, setNotifications] = useState<Notification[]>(initial.notifications);
+  const [componentCategories, setComponentCategories] = useState<ComponentCategoriesData>(initial.componentCategories || {});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,6 +61,7 @@ export function useFirestoreData(
     unsubs.push(fs.subscribeToExpenses(setExpenses) || (() => {}));
     unsubs.push(fs.subscribeToContingencyDocs(setContingencyDocs) || (() => {}));
     unsubs.push(fs.subscribeToNotifications(setNotifications) || (() => {}));
+    unsubs.push(fs.subscribeToComponentCategories(setComponentCategories) || (() => {}));
 
     setLoading(false);
     return () => unsubs.forEach((u) => u());
@@ -74,6 +78,7 @@ export function useFirestoreData(
     contingencyDocuments: contingencyDocs,
     expenses,
     notifications,
+    componentCategories,
     loading,
   };
 }

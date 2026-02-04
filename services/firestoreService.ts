@@ -21,6 +21,7 @@ import type {
   Document,
   Notification,
 } from '../types';
+import { ComponentType } from '../types';
 
 const COLLECTIONS = {
   users: 'users',
@@ -33,7 +34,12 @@ const COLLECTIONS = {
   expenses: 'expenses',
   contingency_docs: 'contingency_docs',
   notifications: 'notifications',
+  component_categories: 'component_categories',
 } as const;
+
+export type ComponentCategoriesMap = {
+  [parent: string]: { [sub: string]: string[] };
+};
 
 function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
   return Object.fromEntries(
@@ -208,6 +214,32 @@ export async function setContingencyDocument(docData: Document): Promise<void> {
 export async function deleteContingencyDocument(id: string): Promise<void> {
   if (!db) return;
   await deleteDoc(doc(db, COLLECTIONS.contingency_docs, id));
+}
+
+// --- Component Categories ---
+export type ComponentCategoriesData = {
+  [key in ComponentType]?: ComponentCategoriesMap;
+};
+
+const CATEGORIES_DOC_ID = 'default';
+
+export async function getComponentCategories(): Promise<ComponentCategoriesData> {
+  if (!db) return {};
+  const snap = await getDoc(doc(db, COLLECTIONS.component_categories, CATEGORIES_DOC_ID));
+  if (!snap.exists()) return {};
+  return snap.data() as ComponentCategoriesData;
+}
+
+export async function setComponentCategories(data: ComponentCategoriesData): Promise<void> {
+  if (!db) return;
+  await setDoc(doc(db, COLLECTIONS.component_categories, CATEGORIES_DOC_ID), data);
+}
+
+export function subscribeToComponentCategories(cb: (data: ComponentCategoriesData) => void): Unsubscribe | null {
+  if (!db) return null;
+  return onSnapshot(doc(db, COLLECTIONS.component_categories, CATEGORIES_DOC_ID), (snap) => {
+    cb(snap.exists() ? (snap.data() as ComponentCategoriesData) : {});
+  });
 }
 
 // --- Notifications ---

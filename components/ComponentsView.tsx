@@ -2,32 +2,34 @@
 import React, { useState, useMemo } from 'react';
 import type { Component, Building } from '../types';
 import { ComponentType } from '../types';
-import { COMPONENT_TYPES, COMPONENT_CATEGORIES } from '../constants';
+import { COMPONENT_TYPES } from '../constants';
+import type { ComponentCategoriesData } from '../services/firestoreService';
 
 interface ComponentsViewProps {
   components: Component[];
   buildings: Building[];
+  componentCategories: ComponentCategoriesData;
   onAddComponent: () => void;
   onSelectComponent: (componentId: string) => void;
 }
 
-const ComponentsView: React.FC<ComponentsViewProps> = ({ components, buildings, onAddComponent, onSelectComponent }) => {
+const ComponentsView: React.FC<ComponentsViewProps> = ({ components, buildings, componentCategories = {}, onAddComponent, onSelectComponent }) => {
   const [typeFilter, setTypeFilter] = useState<ComponentType | ''>('');
   const [parentCategoryFilter, setParentCategoryFilter] = useState('');
   const [subCategoryFilter, setSubCategoryFilter] = useState('');
 
   const parentCategories = useMemo(() => {
     if (!typeFilter) return [];
-    return Object.keys(COMPONENT_CATEGORIES[typeFilter]);
-  }, [typeFilter]);
+    const cats = componentCategories[typeFilter as ComponentType];
+    return cats ? Object.keys(cats) : [];
+  }, [typeFilter, componentCategories]);
 
-  // FIX: Correctly extract the sub-category names (object keys) instead of returning the object itself.
   const subCategories = useMemo(() => {
     if (!typeFilter || !parentCategoryFilter) return [];
-    const cats = COMPONENT_CATEGORIES[typeFilter];
+    const cats = componentCategories[typeFilter as ComponentType];
     const parentCatData = cats ? cats[parentCategoryFilter] : null;
     return parentCatData ? Object.keys(parentCatData) : [];
-  }, [typeFilter, parentCategoryFilter]);
+  }, [typeFilter, parentCategoryFilter, componentCategories]);
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setTypeFilter(e.target.value as ComponentType | '');
