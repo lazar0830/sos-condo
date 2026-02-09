@@ -21,6 +21,7 @@ import FinancialSummaryView from './components/FinancialSummaryView';
 import ServiceProviderDashboard from './components/ServiceProviderDashboard';
 import MyAccountView from './components/MyAccountView';
 import AppManagementView from './components/AppManagementView';
+import PropertyManagersView from './components/PropertyManagersView';
 import EditServiceProviderUserModal from './components/EditServiceProviderUserModal';
 import EditRequestModal from './components/EditRequestModal';
 import EditBuildingModal from './components/EditBuildingModal';
@@ -37,7 +38,7 @@ import ContingencyFundView from './components/ContingencyFundView';
 import UnitDetailView from './components/UnitDetailView';
 import NotificationsView from './components/NotificationsView';
 
-export type View = 'dashboard' | 'financials' | 'properties' | 'tasks' | 'requests' | 'providers' | 'account' | 'management' | 'components' | 'tools' | 'contingencyFund' | 'notifications';
+export type View = 'dashboard' | 'financials' | 'properties' | 'tasks' | 'requests' | 'providers' | 'propertyManagers' | 'account' | 'management' | 'components' | 'tools' | 'contingencyFund' | 'notifications';
 export type Theme = 'light' | 'dark';
 
 const fileToBase64 = (file: File): Promise<string> => {
@@ -149,15 +150,6 @@ const App: React.FC = () => {
 
   const handleLogin = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     const result = await authService.signIn(email, password);
-    if (result.user) {
-      setCurrentUser(result.user);
-      return { success: true };
-    }
-    return { success: false, error: result.error };
-  };
-
-  const handleSignUp = async (email: string, password: string, username: string): Promise<{ success: boolean; error?: string }> => {
-    const result = await authService.signUp(email, password, username);
     if (result.user) {
       setCurrentUser(result.user);
       return { success: true };
@@ -372,11 +364,31 @@ const App: React.FC = () => {
     setNotification({ type: 'success', message: 'Provider deleted successfully!' });
   };
 
-  const handleSaveUser = (userData: Omit<User, 'id'> | User, password?: string): boolean => {
+  const handleSaveUser = async (userData: Omit<User, 'id'> | User, password?: string): Promise<boolean> => {
     if (!currentUser) return false;
-    const user: User = 'id' in userData ? userData as User : { ...userData, id: crypto.randomUUID(), password };
-    fs.setUser(user);
-    setNotification({ type: 'success', message: 'User saved successfully.' });
+    const isNew = !('id' in userData);
+    if (isNew && password) {
+      const role = (userData as Omit<User, 'id'>).role as 'Admin' | 'Property Manager';
+      const result = await authService.createUserForAdmin(
+        (userData as Omit<User, 'id'>).email,
+        password,
+        (userData as Omit<User, 'id'>).username,
+        role,
+        currentUser.id
+      );
+      if (result.error) {
+        setNotification({ type: 'error', message: result.error });
+        return false;
+      }
+      setNotification({ type: 'success', message: 'User created successfully. They can now log in.' });
+      handleCloseUserModal();
+      return true;
+    }
+    if (!isNew) {
+      const user = userData as User;
+      await fs.setUser(user);
+      setNotification({ type: 'success', message: 'User updated successfully.' });
+    }
     handleCloseUserModal();
     return true;
   };
@@ -389,25 +401,36 @@ const App: React.FC = () => {
     setNotification({ type: 'success', message: 'User profile deleted.' });
   };
 
-  const handleSaveProviderAndUser = (data: { providerData: Omit<ServiceProvider, 'id'> | ServiceProvider, userData: { email: string, username: string, password?: string } }) => {
+  const handleSaveProviderAndUser = async (data: { providerData: Omit<ServiceProvider, 'id'> | ServiceProvider, userData: { email: string, username: string, password?: string } }): Promise<boolean> => {
     if (!currentUser) return false;
-    let userId = data.providerData.userId;
-    if (userId) {
+    let userId: string;
+    if (data.providerData.userId) {
+      userId = data.providerData.userId;
       const existingUser = users.find(u => u.id === userId);
       if (existingUser) {
         const u = { ...existingUser, username: data.userData.username, email: data.userData.email };
-        fs.setUser(u);
+        await fs.setUser(u);
       }
     } else {
-      userId = crypto.randomUUID();
-      const newUser: User = { id: userId, email: data.userData.email, username: data.userData.username, role: UserRole.ServiceProvider, password: data.userData.password || 'password123', createdBy: currentUser.id };
-      fs.setUser(newUser);
+      const password = data.userData.password || 'password123';
+      const result = await authService.createUserForAdmin(
+        data.userData.email,
+        password,
+        data.userData.username,
+        'Service Provider',
+        currentUser.id
+      );
+      if (result.error) {
+        setNotification({ type: 'error', message: result.error });
+        return false;
+      }
+      userId = result.uid!;
     }
     const provider: ServiceProvider = 'id' in data.providerData
       ? { ...data.providerData, userId } as ServiceProvider
       : { ...data.providerData, id: crypto.randomUUID(), userId, createdBy: currentUser.id } as ServiceProvider;
-    fs.setProvider(provider);
-    setNotification({ type: 'success', message: 'Provider and User saved successfully.' });
+    await fs.setProvider(provider);
+    setNotification({ type: 'success', message: 'Provider and User saved successfully. They can now log in.' });
     handleCloseProviderUserModal();
     return true;
   };
@@ -597,7 +620,7 @@ const App: React.FC = () => {
           />
         )}
         {authChecked ? (
-          <LoginPage onLogin={handleLogin} onSignUp={handleSignUp} />
+          <LoginPage onLogin={handleLogin} />
         ) : (
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
             <div className="text-gray-500 dark:text-gray-400">Loading...</div>
@@ -607,32 +630,39 @@ const App: React.FC = () => {
     );
   }
 
-  // --- Data Scoping for Admin Role ---
+  // --- Data Scoping: Only Super Admin sees all. Others see only their own data. ---
   let visibleBuildings = buildings;
   let visibleTasks = tasks;
   let visibleComponents = components;
   let visibleUnits = units;
   let visibleServiceRequests = serviceRequests;
   let visibleExpenses = expenses;
+  let visibleProviders = providers;
+  let visibleContingencyDocuments = contingencyDocuments;
   let visibleNotifications = notifications.filter(n => n.userId === currentUser.id);
-  
+
+  const applyBuildingScope = (buildingIds: Set<string>) => {
+    visibleTasks = tasks.filter(t => buildingIds.has(t.buildingId));
+    const visibleTaskIds = new Set(visibleTasks.map(t => t.id));
+    visibleComponents = components.filter(c => buildingIds.has(c.buildingId));
+    visibleUnits = units.filter(u => buildingIds.has(u.buildingId));
+    visibleServiceRequests = serviceRequests.filter(sr => visibleTaskIds.has(sr.taskId));
+    visibleExpenses = expenses.filter(e => buildingIds.has(e.buildingId));
+  };
+
   if (currentUser.role === UserRole.Admin) {
-      const managedManagerIds = users
-          .filter(u => u.role === UserRole.PropertyManager && u.createdBy === currentUser.id)
-          .map(u => u.id);
-      
-      const visibleUserIds = [...managedManagerIds, currentUser.id];
-
-      visibleBuildings = buildings.filter(b => b.createdBy && visibleUserIds.includes(b.createdBy));
-      const visibleBuildingIds = new Set(visibleBuildings.map(b => b.id));
-
-      visibleTasks = tasks.filter(t => visibleBuildingIds.has(t.buildingId));
-      const visibleTaskIds = new Set(visibleTasks.map(t => t.id));
-
-      visibleComponents = components.filter(c => visibleBuildingIds.has(c.buildingId));
-      visibleUnits = units.filter(u => visibleBuildingIds.has(u.buildingId));
-      visibleServiceRequests = serviceRequests.filter(sr => visibleTaskIds.has(sr.taskId));
-      visibleExpenses = expenses.filter(e => visibleBuildingIds.has(e.buildingId));
+    const managedManagers = users.filter(u => u.role === UserRole.PropertyManager && u.createdBy === currentUser.id);
+    const visibleUserIds = [...managedManagers.map(u => u.id), currentUser.id];
+    const visibleUsernames = new Set([currentUser.username, ...managedManagers.map(u => u.username)]);
+    visibleBuildings = buildings.filter(b => b.createdBy && visibleUserIds.includes(b.createdBy));
+    visibleProviders = providers.filter(p => p.createdBy && visibleUserIds.includes(p.createdBy));
+    visibleContingencyDocuments = contingencyDocuments.filter(d => visibleUsernames.has(d.uploadedBy));
+    applyBuildingScope(new Set(visibleBuildings.map(b => b.id)));
+  } else if (currentUser.role === UserRole.PropertyManager) {
+    visibleBuildings = buildings.filter(b => b.createdBy === currentUser.id);
+    visibleProviders = providers.filter(p => p.createdBy === currentUser.id);
+    visibleContingencyDocuments = contingencyDocuments.filter(d => d.uploadedBy === currentUser.username);
+    applyBuildingScope(new Set(visibleBuildings.map(b => b.id)));
   }
 
   const selectedBuilding = visibleBuildings.find(b => b.id === selectedBuildingId);
@@ -664,7 +694,7 @@ const App: React.FC = () => {
           units={visibleUnits}
           components={visibleComponents}
           tasks={visibleTasks} 
-          providers={providers} 
+          providers={visibleProviders} 
           serviceRequests={visibleServiceRequests} 
           expenses={visibleExpenses}
           onEditTask={handleOpenTaskModal} 
@@ -684,7 +714,7 @@ const App: React.FC = () => {
       case 'financials':
         return <FinancialSummaryView tasks={visibleTasks} buildings={visibleBuildings} />;
       case 'contingencyFund':
-        return <ContingencyFundView documents={contingencyDocuments} onAddDocument={handleAddContingencyDocument} onDeleteDocument={handleDeleteContingencyDocument} expenses={visibleExpenses} onAddExpense={handleAddExpense} onDeleteExpense={handleDeleteExpense} buildings={visibleBuildings} components={visibleComponents} />;
+        return <ContingencyFundView documents={visibleContingencyDocuments} onAddDocument={handleAddContingencyDocument} onDeleteDocument={handleDeleteContingencyDocument} expenses={visibleExpenses} onAddExpense={handleAddExpense} onDeleteExpense={handleDeleteExpense} buildings={visibleBuildings} components={visibleComponents} />;
       case 'properties':
         if (selectedUnit && selectedUnitBuilding) {
             return <UnitDetailView 
@@ -693,7 +723,7 @@ const App: React.FC = () => {
                 components={visibleComponents}
                 tasks={visibleTasks}
                 serviceRequests={visibleServiceRequests}
-                providers={providers}
+                providers={visibleProviders}
                 onBack={() => setSelectedUnitId(null)}
                 onOpenUnitModal={handleOpenUnitModal}
                 onAddUnitImages={handleAddUnitImages}
@@ -705,7 +735,7 @@ const App: React.FC = () => {
             />
         }
         return selectedBuilding ? (
-          <BuildingDetailView building={selectedBuilding} tasks={buildingTasks} providers={providers} onOpenTaskModal={handleOpenTaskModal} onAddServiceRequest={handleAddServiceRequest} getTaskServiceRequests={getTaskServiceRequests} onBack={() => setSelectedBuildingId(null)} onEditBuilding={handleOpenBuildingModal} onSelectRequest={handleSelectRequest} components={visibleComponents.filter(c => c.buildingId === selectedBuildingId)} onSelectComponent={handleSelectComponent} onDeleteBuilding={handleDeleteBuilding} units={visibleUnits.filter(u => u.buildingId === selectedBuildingId)} onOpenUnitModal={handleOpenUnitModal} onDeleteUnit={handleDeleteUnit} onOpenComponentModal={handleOpenComponentModal} onSelectUnit={handleSelectUnit} />
+          <BuildingDetailView building={selectedBuilding} tasks={buildingTasks} providers={visibleProviders} onOpenTaskModal={handleOpenTaskModal} onAddServiceRequest={handleAddServiceRequest} getTaskServiceRequests={getTaskServiceRequests} onBack={() => setSelectedBuildingId(null)} onEditBuilding={handleOpenBuildingModal} onSelectRequest={handleSelectRequest} components={visibleComponents.filter(c => c.buildingId === selectedBuildingId)} onSelectComponent={handleSelectComponent} onDeleteBuilding={handleDeleteBuilding} units={visibleUnits.filter(u => u.buildingId === selectedBuildingId)} onOpenUnitModal={handleOpenUnitModal} onDeleteUnit={handleDeleteUnit} onOpenComponentModal={handleOpenComponentModal} onSelectUnit={handleSelectUnit} />
         ) : (
           <BuildingDashboard 
             buildings={visibleBuildings} 
@@ -725,7 +755,7 @@ const App: React.FC = () => {
                 building={building}
                 tasks={componentTasks}
                 serviceRequests={visibleServiceRequests}
-                providers={providers}
+                providers={visibleProviders}
                 onBack={() => setSelectedComponentId(null)}
                 onEditComponent={handleOpenComponentModal}
                 onAddImage={handleAddComponentImage}
@@ -744,7 +774,7 @@ const App: React.FC = () => {
             onSelectComponent={handleSelectComponent}
         />;
       case 'tasks':
-        return <MaintenanceTasksView tasks={visibleTasks} buildings={visibleBuildings} providers={providers} onEditTask={handleOpenTaskModal} onAddTask={() => handleOpenTaskModal(null)} onDeleteTask={handleDeleteTask} onAddServiceRequest={handleAddServiceRequest} />;
+        return <MaintenanceTasksView tasks={visibleTasks} buildings={visibleBuildings} providers={visibleProviders} onEditTask={handleOpenTaskModal} onAddTask={() => handleOpenTaskModal(null)} onDeleteTask={handleDeleteTask} onAddServiceRequest={handleAddServiceRequest} />;
       case 'requests':
         if (selectedRequest) {
           const task = visibleTasks.find(t => t.id === selectedRequest.taskId);
@@ -752,7 +782,15 @@ const App: React.FC = () => {
           const provider = providers.find(p => p.id === selectedRequest.providerId);
           return <ServiceRequestDetailView request={selectedRequest} task={task} building={building} provider={provider} currentUser={currentUser} onBack={() => setSelectedRequestId(null)} onUpdateRequestStatus={handleUpdateServiceRequestStatus} onAddComment={handleAddComment} onEditRequest={handleOpenRequestModal} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />;
         }
-        return <ServiceRequestsView requests={visibleServiceRequests} tasks={visibleTasks} buildings={visibleBuildings} providers={providers} onSelectRequest={handleSelectRequest} />;
+        return <ServiceRequestsView requests={visibleServiceRequests} tasks={visibleTasks} buildings={visibleBuildings} providers={visibleProviders} onSelectRequest={handleSelectRequest} />;
+      case 'propertyManagers':
+        if (currentUser.role !== UserRole.SuperAdmin) return <div>Access Denied</div>;
+        return <PropertyManagersView
+            managers={users.filter(u => u.role === UserRole.PropertyManager)}
+            onAddManager={() => handleOpenUserModal(null, UserRole.PropertyManager)}
+            onEditManager={(user) => handleOpenUserModal(user, UserRole.PropertyManager)}
+            onDeleteManager={handleDeleteUser}
+        />;
       case 'providers':
         return selectedProvider ? (
             <ServiceProviderDetailView 
@@ -768,7 +806,7 @@ const App: React.FC = () => {
             />
         ) : (
             <ServiceProvidersView 
-                providers={providers} 
+                providers={visibleProviders} 
                 onSelectProvider={handleSelectProvider}
                 onAddProvider={() => handleOpenProviderUserModal(null)} 
                 onDeleteProvider={handleDeleteProvider} 
@@ -792,7 +830,7 @@ const App: React.FC = () => {
             currentUser={currentUser} 
             admins={adminUsers}
             managers={managersForAdminView} 
-            providers={providers} 
+            providers={visibleProviders} 
             users={users} 
             onAddAdmin={() => handleOpenUserModal(null, UserRole.Admin)}
             onEditAdmin={(user) => handleOpenUserModal(user, UserRole.Admin)}
@@ -903,13 +941,13 @@ const App: React.FC = () => {
         />
       )}
       {isRequestModalOpen && editingRequest && (
-        <EditRequestModal request={editingRequest} providers={providers} tasks={tasks} buildings={buildings} onClose={handleCloseRequestModal} onSave={handleUpdateRequest} />
+        <EditRequestModal request={editingRequest} providers={visibleProviders} tasks={visibleTasks} buildings={visibleBuildings} onClose={handleCloseRequestModal} onSave={handleUpdateRequest} />
       )}
       {isBuildingModalOpen && (
         <EditBuildingModal building={editingBuilding} onClose={handleCloseBuildingModal} onSave={handleSaveBuilding} />
       )}
       {isTaskModalOpen && (
-        <EditTaskModal task={editingTask} buildings={buildings} providers={providers} components={components} units={units} onClose={handleCloseTaskModal} onSave={handleSaveTask} preselectedBuildingId={preselectedBuildingId} preselectedComponentId={preselectedComponentId} onDelete={handleDeleteTask} />
+        <EditTaskModal task={editingTask} buildings={visibleBuildings} providers={visibleProviders} components={visibleComponents} units={visibleUnits} onClose={handleCloseTaskModal} onSave={handleSaveTask} preselectedBuildingId={preselectedBuildingId} preselectedComponentId={preselectedComponentId} onDelete={handleDeleteTask} />
       )}
        {[UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role) && isUserModalOpen && (
         <EditUserModal 
@@ -922,8 +960,8 @@ const App: React.FC = () => {
       {isComponentModalOpen && (
         <EditComponentModal 
           component={editingComponent}
-          buildings={buildings}
-          units={units}
+          buildings={visibleBuildings}
+          units={visibleUnits}
           componentCategories={componentCategories}
           onClose={handleCloseComponentModal}
           onSave={handleSaveComponent}
