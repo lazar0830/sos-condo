@@ -1,6 +1,6 @@
 
-
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { MaintenanceTask, Building } from '../types';
 import { TaskStatus } from '../types';
 
@@ -10,6 +10,13 @@ interface FinancialSummaryViewProps {
 }
 
 type SortableKeys = 'buildingName' | 'name' | 'status' | 'taskDate' | 'cost';
+
+const statusToKey: Record<TaskStatus, string> = {
+  [TaskStatus.New]: 'statusNew',
+  [TaskStatus.Sent]: 'statusSent',
+  [TaskStatus.OnHold]: 'statusOnHold',
+  [TaskStatus.Completed]: 'statusCompleted',
+};
 
 const statusColorMap: { [key in TaskStatus]: string } = {
   [TaskStatus.New]: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
@@ -31,9 +38,10 @@ const YEAR_COLORS = [
 ];
 
 const FinancialSummaryView: React.FC<FinancialSummaryViewProps> = ({ tasks, buildings }) => {
+  const { t } = useTranslation();
   const [sortConfig, setSortConfig] = useState<{ key: SortableKeys; direction: 'ascending' | 'descending' } | null>({ key: 'taskDate', direction: 'descending' });
 
-  const getBuildingName = (buildingId: string) => buildings.find(b => b.id === buildingId)?.name || 'N/A';
+  const getBuildingName = (buildingId: string) => buildings.find(b => b.id === buildingId)?.name || t('maintenanceCost.unknownBuilding');
 
   const financialTasks = useMemo(() => {
     return tasks
@@ -138,12 +146,12 @@ const FinancialSummaryView: React.FC<FinancialSummaryViewProps> = ({ tasks, buil
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">Maintenance Cost</h2>
-        <p className="text-lg text-gray-500 dark:text-gray-400">A detailed breakdown of all maintenance costs.</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('maintenanceCost.title')}</h2>
+        <p className="text-lg text-gray-500 dark:text-gray-400">{t('maintenanceCost.subtitle')}</p>
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Projected Maintenance Cost</h3>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('maintenanceCost.projectedMaintenanceCost')}</h3>
         <div className="space-y-6">
           {costsByBuilding.length > 0 ? (
             costsByBuilding.map(({ buildingName, totalCost, costsByYear }) => (
@@ -191,7 +199,7 @@ const FinancialSummaryView: React.FC<FinancialSummaryViewProps> = ({ tasks, buil
               </div>
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-4">No cost data available to display chart.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-4">{t('maintenanceCost.noCostData')}</p>
           )}
         </div>
       </div>
@@ -201,11 +209,11 @@ const FinancialSummaryView: React.FC<FinancialSummaryViewProps> = ({ tasks, buil
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700/50">
               <tr>
-                <SortableHeader sortKey="buildingName">Property</SortableHeader>
-                <SortableHeader sortKey="name">Task</SortableHeader>
-                <SortableHeader sortKey="status">Status</SortableHeader>
-                <SortableHeader sortKey="taskDate">Date</SortableHeader>
-                <SortableHeader sortKey="cost">Cost</SortableHeader>
+                <SortableHeader sortKey="buildingName">{t('maintenanceCost.property')}</SortableHeader>
+                <SortableHeader sortKey="name">{t('maintenanceCost.task')}</SortableHeader>
+                <SortableHeader sortKey="status">{t('maintenanceCost.status')}</SortableHeader>
+                <SortableHeader sortKey="taskDate">{t('maintenanceCost.date')}</SortableHeader>
+                <SortableHeader sortKey="cost">{t('maintenanceCost.cost')}</SortableHeader>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -215,11 +223,11 @@ const FinancialSummaryView: React.FC<FinancialSummaryViewProps> = ({ tasks, buil
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{task.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[task.status]}`}>
-                      {task.status}
+                      {t(`maintenanceCost.${statusToKey[task.status]}`)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-semibold">{task.cost != null ? `$${task.cost.toFixed(2)}` : 'N/A'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-semibold">{task.cost != null ? `$${task.cost.toFixed(2)}` : t('maintenanceCost.unknownBuilding')}</td>
                 </tr>
               )) : (
                 <tr>
@@ -228,8 +236,8 @@ const FinancialSummaryView: React.FC<FinancialSummaryViewProps> = ({ tasks, buil
                         <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" />
                         </svg>
-                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">No Financial Data</h4>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">No tasks with both a date and a cost were found. Add costs to your tasks to see them here.</p>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">{t('maintenanceCost.noFinancialData')}</h4>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">{t('maintenanceCost.noFinancialDataHint')}</p>
                     </div>
                   </td>
                 </tr>
@@ -238,7 +246,7 @@ const FinancialSummaryView: React.FC<FinancialSummaryViewProps> = ({ tasks, buil
             {sortedTasks.length > 0 && (
                 <tfoot className="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <td colSpan={4} className="px-6 py-4 text-right text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Total</td>
+                        <td colSpan={4} className="px-6 py-4 text-right text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">{t('maintenanceCost.total')}</td>
                         <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-gray-100">${totalCost.toFixed(2)}</td>
                     </tr>
                 </tfoot>

@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { View, Theme } from '../App';
 import type { User, Notification } from '../types';
 import { UserRole } from '../types';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface SideNavProps {
   currentView: View;
@@ -60,6 +62,7 @@ const SideNav: React.FC<SideNavProps> = ({
   isMobileNavOpen, onCloseMobileNav, theme, onThemeChange,
   notifications, onMarkAsRead, onMarkAllAsRead, onNotificationClick 
 }) => {
+  const { t } = useTranslation();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
@@ -77,23 +80,23 @@ const SideNav: React.FC<SideNavProps> = ({
   const recentUnread = notifications.filter(n => !n.isRead).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
   
   const baseManagerNavItems: { id: View, name: string }[] = [
-    { id: 'dashboard', name: 'Dashboard' },
-    { id: 'contingencyFund', name: 'Fonds de prévoyance' },
-    { id: 'properties', name: 'All Properties' },
-    { id: 'components', name: 'Components' },
-    { id: 'tasks', name: 'Maintenance Tasks' },
-    { id: 'financials', name: 'Maintenance Cost' },
-    { id: 'requests', name: 'Service Requests' },
-    { id: 'providers', name: 'Service Providers' },
-    { id: 'tools', name: 'Tools' },
+    { id: 'dashboard', name: t('nav.dashboard') },
+    { id: 'contingencyFund', name: t('nav.contingencyFund') },
+    { id: 'properties', name: t('nav.allProperties') },
+    { id: 'components', name: t('nav.components') },
+    { id: 'tasks', name: t('nav.maintenanceTasks') },
+    { id: 'financials', name: t('nav.maintenanceCost') },
+    { id: 'requests', name: t('nav.serviceRequests') },
+    { id: 'providers', name: t('nav.serviceProviders') },
+    { id: 'tools', name: t('nav.tools') },
   ];
-  const propertyManagersItem: { id: View, name: string } = { id: 'propertyManagers', name: 'Property Managers' };
+  const propertyManagersItem: { id: View, name: string } = { id: 'propertyManagers', name: t('nav.propertyManagers') };
   const managerNavItems = currentUser.role === UserRole.SuperAdmin
     ? [...baseManagerNavItems.slice(0, 7), propertyManagersItem, ...baseManagerNavItems.slice(7)]
     : baseManagerNavItems;
   
   const providerNavItems: { id: View, name: string }[] = [
-      { id: 'dashboard', name: 'My Jobs' }
+      { id: 'dashboard', name: t('nav.myJobs') }
   ]
 
   const navItems = (currentUser.role === UserRole.ServiceProvider) ? providerNavItems : managerNavItems;
@@ -156,14 +159,15 @@ const SideNav: React.FC<SideNavProps> = ({
                   currentView={currentView}
                   onNavigate={handleNavigate}
                   icon={ICONS['management']}
-                  text="App Management"
+                  text={t('nav.appManagement')}
               />
           )}
         </nav>
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-2">
+            <div className="flex items-center justify-between p-2 gap-2">
+              <LanguageSwitcher />
                 <div className="flex-1 flex justify-center items-center bg-gray-100 dark:bg-gray-700 rounded-full p-1">
                   <button
                     onClick={onThemeChange}
@@ -190,8 +194,8 @@ const SideNav: React.FC<SideNavProps> = ({
                         <div className="origin-top-right absolute right-0 bottom-full mb-2 w-80 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700">
                             <div className="p-2">
                                 <div className="flex justify-between items-center px-2 py-1">
-                                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Notifications</h4>
-                                    {unreadCount > 0 && <button onClick={() => { onMarkAllAsRead(); setPopoverOpen(false); }} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Mark all as read</button>}
+                                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-100">{t('common.notifications')}</h4>
+                                    {unreadCount > 0 && <button onClick={() => { onMarkAllAsRead(); setPopoverOpen(false); }} className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">{t('common.markAllAsRead')}</button>}
                                 </div>
                                 <div className="mt-1 max-h-80 overflow-y-auto">
                                     {recentUnread.length > 0 ? recentUnread.map(notif => (
@@ -199,10 +203,10 @@ const SideNav: React.FC<SideNavProps> = ({
                                             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{notif.title}</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{notif.message}</p>
                                         </button>
-                                    )) : <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-4">No unread notifications.</p>}
+                                    )) : <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-4">{t('common.noUnreadNotifications')}</p>}
                                 </div>
                                 <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
-                                    <button onClick={() => { handleNavigate('notifications'); setPopoverOpen(false); }} className="w-full text-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">View all notifications</button>
+                                    <button onClick={() => { handleNavigate('notifications'); setPopoverOpen(false); }} className="w-full text-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">{t('common.viewAllNotifications')}</button>
                                 </div>
                             </div>
                         </div>
@@ -215,7 +219,7 @@ const SideNav: React.FC<SideNavProps> = ({
                   currentView={currentView}
                   onNavigate={handleNavigate}
                   icon={ICONS.account}
-                  text="My Account"
+                  text={t('nav.myAccount')}
               />
               <button
                   onClick={handleLogout}
@@ -224,7 +228,7 @@ const SideNav: React.FC<SideNavProps> = ({
                   <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                   </svg>
-                  <span className="ml-3">Logout</span>
+                  <span className="ml-3">{t('common.logout')}</span>
               </button>
           </div>
           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

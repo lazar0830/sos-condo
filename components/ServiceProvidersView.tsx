@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ServiceProvider, User } from '../types';
 import { UserRole } from '../types';
 import ConfirmationModal from './ConfirmationModal';
@@ -13,6 +13,7 @@ interface ServiceProvidersViewProps {
 }
 
 const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, onAddProvider, onSelectProvider, onDeleteProvider, currentUser }) => {
+  const { t } = useTranslation();
   const [deletingProvider, setDeletingProvider] = useState<ServiceProvider | null>(null);
 
   const handleOpenConfirmDelete = (provider: ServiceProvider) => {
@@ -31,14 +32,14 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">Service Providers</h2>
-            <p className="text-lg text-gray-500 dark:text-gray-400">Manage your contacts for maintenance tasks.</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('serviceProviders.title')}</h2>
+            <p className="text-lg text-gray-500 dark:text-gray-400">{t('serviceProviders.subtitle')}</p>
           </div>
            <button
             onClick={onAddProvider}
             className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
-            Add Provider
+            {t('serviceProviders.addProvider')}
           </button>
         </div>
 
@@ -81,7 +82,7 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
                         onClick={(e) => { e.stopPropagation(); handleOpenConfirmDelete(provider); }} 
                         className="px-3 py-1 text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900"
                     >
-                        Delete
+                        {t('serviceProviders.delete')}
                     </button>
                  )}
               </div>
@@ -94,9 +95,9 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
           isOpen={!!deletingProvider}
           onClose={() => setDeletingProvider(null)}
           onConfirm={handleConfirmDelete}
-          title="Confirm Provider Deletion"
-          message={`Are you sure you want to delete ${deletingProvider.name}? This will remove them from the system permanently.`}
-          confirmButtonText="Delete Provider"
+          title={t('serviceProviders.confirmDeletion')}
+          message={t('serviceProviders.confirmDeletionMessage', { name: deletingProvider.name })}
+          confirmButtonText={t('serviceProviders.deleteProvider')}
         />
       )}
     </>

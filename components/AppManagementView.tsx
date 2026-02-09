@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { User, ServiceProvider } from '../types';
 import { UserRole } from '../types';
 import ConfirmationModal from './ConfirmationModal';
@@ -24,6 +24,18 @@ interface AppManagementViewProps {
 
 type ActiveTab = 'admins' | 'managers' | 'providers';
 
+const roleToKey: Record<string, string> = {
+  [UserRole.Admin]: 'roleAdmin',
+  [UserRole.PropertyManager]: 'rolePropertyManager',
+  [UserRole.SuperAdmin]: 'roleSuperAdmin',
+};
+
+const addButtonKeys: Record<ActiveTab, string> = {
+  admins: 'addAdmin',
+  managers: 'addPropertyManager',
+  providers: 'addServiceProvider',
+};
+
 const AppManagementView: React.FC<AppManagementViewProps> = ({ 
     currentUser,
     admins,
@@ -41,6 +53,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
     onDeleteProvider,
     onResetData
 }) => {
+  const { t } = useTranslation();
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [deletingProvider, setDeletingProvider] = useState<ServiceProvider | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>(currentUser.role === UserRole.SuperAdmin ? 'admins' : 'managers');
@@ -71,12 +84,6 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
     return `${baseClass} text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white`;
   };
 
-  const addButtonText = {
-    admins: 'Add Admin',
-    managers: 'Add Property Manager',
-    providers: 'Add Service Provider',
-  };
-
   const handleAddClick = () => {
     switch(activeTab) {
         case 'admins': return onAddAdmin();
@@ -90,14 +97,14 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">App Management</h2>
-            <p className="text-lg text-gray-500 dark:text-gray-400">Create, edit, and manage user accounts.</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('appManagement.title')}</h2>
+            <p className="text-lg text-gray-500 dark:text-gray-400">{t('appManagement.subtitle')}</p>
           </div>
           <button
             onClick={handleAddClick}
             className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
-            {addButtonText[activeTab]}
+            {t(`appManagement.${addButtonKeys[activeTab]}`)}
           </button>
         </div>
 
@@ -105,15 +112,15 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
             <nav className="-mb-px flex space-x-6" aria-label="Tabs">
                 {currentUser.role === UserRole.SuperAdmin && (
                     <button onClick={() => setActiveTab('admins')} className={getTabClass('admins')}>
-                        Admins
+                        {t('appManagement.admins')}
                     </button>
                 )}
                 <button onClick={() => setActiveTab('managers')} className={getTabClass('managers')}>
-                    Property Managers
+                    {t('appManagement.propertyManagers')}
                 </button>
                 {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
                     <button onClick={() => setActiveTab('providers')} className={getTabClass('providers')}>
-                        Service Providers
+                        {t('appManagement.serviceProviders')}
                     </button>
                 )}
             </nav>
@@ -125,10 +132,10 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Display Name</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Login Email</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-                            <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.displayName')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.loginEmail')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.role')}</th>
+                            <th scope="col" className="relative px-6 py-3"><span className="sr-only">{t('appManagement.actions')}</span></th>
                         </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -136,17 +143,17 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                         <tr key={user.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{user.username}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.email}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.role}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{t(`appManagement.${roleToKey[user.role]}`)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <button onClick={() => onEditAdmin(user)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">Edit</button>
-                                <button onClick={() => setDeletingUser(user)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</button>
+                                <button onClick={() => onEditAdmin(user)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('appManagement.edit')}</button>
+                                <button onClick={() => setDeletingUser(user)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">{t('appManagement.delete')}</button>
                             </td>
                         </tr>
                         )) : (
                         <tr>
                             <td colSpan={4} className="text-center py-10">
-                            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">No Admins Found</h4>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1">Click "Add Admin" to create one.</p>
+                            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('appManagement.noAdminsFound')}</h4>
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">{t('appManagement.addAdminHint')}</p>
                             </td>
                         </tr>
                         )}
@@ -162,11 +169,11 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Display Name</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Login Email</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.displayName')}</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.loginEmail')}</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.role')}</th>
                         <th scope="col" className="relative px-6 py-3">
-                            <span className="sr-only">Actions</span>
+                            <span className="sr-only">{t('appManagement.actions')}</span>
                         </th>
                         </tr>
                     </thead>
@@ -175,17 +182,17 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                         <tr key={user.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{user.username}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.email}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.role}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{t(`appManagement.${roleToKey[user.role]}`)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <button onClick={() => onEditManager(user)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">Edit</button>
-                            <button onClick={() => setDeletingUser(user)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</button>
+                            <button onClick={() => onEditManager(user)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('appManagement.edit')}</button>
+                            <button onClick={() => setDeletingUser(user)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">{t('appManagement.delete')}</button>
                             </td>
                         </tr>
                         )) : (
                         <tr>
                             <td colSpan={4} className="text-center py-10">
-                            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">No Property Managers Found</h4>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1">Click "Add Property Manager" to create one.</p>
+                            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('appManagement.noPropertyManagersFound')}</h4>
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">{t('appManagement.addManagerHint')}</p>
                             </td>
                         </tr>
                         )}
@@ -201,12 +208,12 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Provider Name</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Specialty</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact Email</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact Person</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.providerName')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.specialty')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.contactEmail')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.contactPerson')}</th>
                             <th scope="col" className="relative px-6 py-3">
-                                <span className="sr-only">Actions</span>
+                                <span className="sr-only">{t('appManagement.actions')}</span>
                             </th>
                         </tr>
                     </thead>
@@ -218,15 +225,15 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.email}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.contactPerson || ''}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <button onClick={() => onEditProvider(provider)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">Edit</button>
-                            <button onClick={() => setDeletingProvider(provider)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</button>
+                            <button onClick={() => onEditProvider(provider)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('appManagement.edit')}</button>
+                            <button onClick={() => setDeletingProvider(provider)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">{t('appManagement.delete')}</button>
                             </td>
                         </tr>
                         )) : (
                         <tr>
                             <td colSpan={5} className="text-center py-10">
-                            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">No Service Providers Found</h4>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1">Click "Add Service Provider" to create one.</p>
+                            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('appManagement.noServiceProvidersFound')}</h4>
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">{t('appManagement.addProviderHint')}</p>
                             </td>
                         </tr>
                         )}
@@ -238,14 +245,14 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
 
         {currentUser.role === UserRole.SuperAdmin && (
             <div className="mt-12 bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-700/50">
-              <h3 className="text-xl font-bold text-red-800 dark:text-red-200">Danger Zone</h3>
-              <p className="text-red-700 dark:text-red-300 mt-2">This action is irreversible. It will delete all current data and reset the application to its initial sample state.</p>
+              <h3 className="text-xl font-bold text-red-800 dark:text-red-200">{t('appManagement.dangerZone')}</h3>
+              <p className="text-red-700 dark:text-red-300 mt-2">{t('appManagement.dangerZoneDescription')}</p>
               <div className="mt-4">
                 <button 
                     onClick={onResetData}
                     className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
-                    Reset All Application Data
+                    {t('appManagement.resetAllData')}
                 </button>
               </div>
             </div>
@@ -257,9 +264,9 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
           isOpen={!!deletingUser}
           onClose={() => setDeletingUser(null)}
           onConfirm={handleConfirmUserDelete}
-          title={`Confirm ${deletingUser.role} Deletion`}
-          message={`Are you sure you want to delete ${deletingUser.username}? This action cannot be undone.`}
-          confirmButtonText={`Delete ${deletingUser.role}`}
+          title={t('appManagement.confirmUserDeletion', { role: t(`appManagement.${roleToKey[deletingUser.role]}`) })}
+          message={t('appManagement.confirmUserDeletionMessage', { name: deletingUser.username })}
+          confirmButtonText={t('appManagement.deleteUser', { role: t(`appManagement.${roleToKey[deletingUser.role]}`) })}
         />
       )}
       {deletingProvider && (
@@ -267,9 +274,9 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
           isOpen={!!deletingProvider}
           onClose={() => setDeletingProvider(null)}
           onConfirm={handleConfirmProviderDelete}
-          title="Confirm Provider Deletion"
-          message={`Are you sure you want to delete ${deletingProvider.name}? This will also delete their associated user account.`}
-          confirmButtonText="Delete Provider"
+          title={t('appManagement.confirmProviderDeletion')}
+          message={t('appManagement.confirmProviderDeletionMessage', { name: deletingProvider.name })}
+          confirmButtonText={t('appManagement.deleteProvider')}
         />
       )}
     </>

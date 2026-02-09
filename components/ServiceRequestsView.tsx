@@ -1,5 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, MaintenanceTask, Building, ServiceProvider } from '../types';
 import { ServiceRequestStatus } from '../types';
 import { SERVICE_REQUEST_STATUSES } from '../constants';
@@ -23,26 +23,37 @@ const getSpecialtyColor = (specialty: string) => {
   return specialtyColors[index];
 };
 
+const statusToKey: Record<ServiceRequestStatus, string> = {
+  [ServiceRequestStatus.Sent]: 'statusSent',
+  [ServiceRequestStatus.Accepted]: 'statusAccepted',
+  [ServiceRequestStatus.Refused]: 'statusRefused',
+  [ServiceRequestStatus.InProgress]: 'statusInProgress',
+  [ServiceRequestStatus.Completed]: 'statusCompleted',
+};
+
 interface Filters {
   selectedBuildingIds: string[];
   selectedProviderIds: string[];
   selectedStatuses: ServiceRequestStatus[];
 }
 
-const FilterPill: React.FC<{ onRemove: () => void, children: React.ReactNode }> = ({ onRemove, children }) => (
+const FilterPill: React.FC<{ onRemove: () => void, children: React.ReactNode }> = ({ onRemove, children }) => {
+  const { t } = useTranslation();
+  return (
     <span className="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300">
       {children}
       <button type="button" onClick={onRemove} className="flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-200 focus:outline-none focus:bg-primary-700 focus:text-white">
-        <span className="sr-only">Remove filter</span>
+        <span className="sr-only">{t('serviceRequests.removeFilter')}</span>
         <svg className="h-3 w-3" stroke="currentColor" fill="none" viewBox="0 0 8 8">
             <path strokeLinecap="round" strokeWidth="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
       </button>
     </span>
-);
-
+  );
+};
 
 const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tasks, buildings, providers, onSelectRequest }) => {
+  const { t } = useTranslation();
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     selectedBuildingIds: [],
@@ -136,8 +147,8 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">Service Requests</h2>
-        <p className="text-lg text-gray-500 dark:text-gray-400">Track all maintenance requests sent to providers.</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('serviceRequests.title')}</h2>
+        <p className="text-lg text-gray-500 dark:text-gray-400">{t('serviceRequests.subtitle')}</p>
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -145,7 +156,7 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
           onClick={() => setFiltersVisible(!filtersVisible)}
           className="w-full flex justify-between items-center text-left text-lg font-semibold text-gray-700 dark:text-gray-200"
         >
-          <span>Filter Requests</span>
+          <span>{t('serviceRequests.filterRequests')}</span>
           <svg className={`w-5 h-5 text-gray-500 transform transition-transform ${filtersVisible ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -154,7 +165,7 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
           <div className="mt-4 pt-4 border-t dark:border-gray-700">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Property</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('serviceRequests.byProperty')}</label>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
                     {buildings.map(b => (
                       <div key={b.id} className="flex items-center">
@@ -165,7 +176,7 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Provider</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('serviceRequests.byProvider')}</label>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
                     {providers.map(p => (
                       <div key={p.id} className="flex items-center">
@@ -176,12 +187,12 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
                   </div>
                 </div>
                  <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Status</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('serviceRequests.byStatus')}</label>
                   <div className="space-y-2">
                     {SERVICE_REQUEST_STATUSES.map(s => (
                       <div key={s} className="flex items-center">
                         <input id={`status-${s}`} type="checkbox" checked={filters.selectedStatuses.includes(s)} onChange={() => handleMultiSelectChange('selectedStatuses', s)} className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
-                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{s}</label>
+                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{t(`serviceRequests.${statusToKey[s]}`)}</label>
                       </div>
                     ))}
                   </div>
@@ -189,7 +200,7 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
             </div>
             <div className="mt-6 pt-4 border-t dark:border-gray-700 flex justify-end">
                 <button onClick={handleResetFilters} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                    Reset All Filters
+                    {t('serviceRequests.resetAllFilters')}
                 </button>
             </div>
           </div>
@@ -199,12 +210,12 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
       {hasActiveFilters && (
         <div className="p-3 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-500/30">
             <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">Active Filters:</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">{t('serviceRequests.activeFilters')}</span>
                 {filters.selectedBuildingIds.map(id => <FilterPill key={id} onRemove={() => removeFilter('selectedBuildingIds', id)}>{buildings.find(b=>b.id===id)?.name}</FilterPill>)}
                 {filters.selectedProviderIds.map(id => <FilterPill key={id} onRemove={() => removeFilter('selectedProviderIds', id)}>{providers.find(p=>p.id===id)?.name}</FilterPill>)}
-                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{s}</FilterPill>)}
+                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{t(`serviceRequests.${statusToKey[s]}`)}</FilterPill>)}
                 <button onClick={handleResetFilters} className="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 font-medium ml-auto px-2">
-                    Clear All
+                    {t('serviceRequests.clearAll')}
                 </button>
             </div>
         </div>
@@ -216,12 +227,12 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700/50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Property</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Task</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Specialty</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Provider</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Sent</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.property')}</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.task')}</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.specialty')}</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.provider')}</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.dateSent')}</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.status')}</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -232,24 +243,24 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
                 const isOverdue = request.scheduledDate && new Date(request.scheduledDate + 'T12:00:00Z') < today && request.status !== ServiceRequestStatus.Completed;
                 return (
                   <tr key={request.id} onClick={() => onSelectRequest(request.id)} className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${isOverdue ? 'bg-red-50/50 dark:bg-red-900/20' : request.isUrgent ? 'bg-amber-50/50 dark:bg-amber-900/20' : ''}`}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{building?.name || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{building?.name || t('serviceRequests.unknown')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                          <div className="flex items-center space-x-2">
-                            <span>{task?.name || 'N/A'}</span>
+                            <span>{task?.name || t('serviceRequests.unknown')}</span>
                             {isOverdue && (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Overdue</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('serviceRequests.overdue')}</span>
                             )}
                             {request.isUrgent && !isOverdue && (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">Urgent</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{t('serviceRequests.urgent')}</span>
                             )}
                         </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm"><span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(request.specialty)}`}>{request.specialty}</span></td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider?.name || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider?.name || t('serviceRequests.unknown')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(request.sentAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[request.status]}`}>
-                          {request.status}
+                          {t(`serviceRequests.${statusToKey[request.status]}`)}
                         </span>
                     </td>
                   </tr>
@@ -257,8 +268,8 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
               }) : (
                 <tr>
                     <td colSpan={6} className="text-center py-10">
-                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">No service requests found</h4>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">{hasActiveFilters ? "Try adjusting your filters." : "Create a request from a task on the Properties page."}</p>
+                        <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('serviceRequests.noRequestsFound')}</h4>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1">{hasActiveFilters ? t('serviceRequests.noRequestsFilterHint') : t('serviceRequests.noRequestsEmptyHint')}</p>
                     </td>
                 </tr>
               )}

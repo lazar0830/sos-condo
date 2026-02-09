@@ -1,6 +1,7 @@
 
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Building, Component } from '../types';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -14,6 +15,7 @@ interface BuildingDashboardProps {
 }
 
 const BuildingDashboard: React.FC<BuildingDashboardProps> = ({ buildings, onAddBuilding, onSelectBuilding, components, onSelectComponent, onDeleteBuilding }) => {
+  const { t } = useTranslation();
   const [deletingBuilding, setDeletingBuilding] = useState<Building | null>(null);
 
   const hasAnyComponents = components.length > 0;
@@ -30,14 +32,14 @@ const BuildingDashboard: React.FC<BuildingDashboardProps> = ({ buildings, onAddB
       <div className="space-y-8">
         <div className="flex justify-between items-center">
             <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">My Properties</h2>
-                <p className="text-lg text-gray-500 dark:text-gray-400">Manage your buildings and maintenance tasks.</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('properties.title')}</h2>
+                <p className="text-lg text-gray-500 dark:text-gray-400">{t('properties.subtitle')}</p>
             </div>
             <button
                 onClick={onAddBuilding}
                 className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
-                Add Property
+                {t('properties.addProperty')}
             </button>
         </div>
         
@@ -70,7 +72,7 @@ const BuildingDashboard: React.FC<BuildingDashboardProps> = ({ buildings, onAddB
                   onClick={(e) => { e.stopPropagation(); setDeletingBuilding(building); }} 
                   className="px-3 py-1 text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900"
                 >
-                  Delete
+                  {t('properties.delete')}
                 </button>
               </div>
             </div>
@@ -78,7 +80,7 @@ const BuildingDashboard: React.FC<BuildingDashboardProps> = ({ buildings, onAddB
         </div>
 
         <div className="mt-12">
-          <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Building Components</h3>
+          <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{t('properties.buildingComponents')}</h3>
           {hasAnyComponents ? (
             <div className="space-y-8">
               {buildings.map(building => {
@@ -114,8 +116,8 @@ const BuildingDashboard: React.FC<BuildingDashboardProps> = ({ buildings, onAddB
               <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 18v-2.25a2.25 2.25 0 00-2.25-2.25h-2.25a2.25 2.25 0 00-2.25 2.25V18zM17.25 6.75v3.75m0 0l-3.75-3.75M17.25 10.5l3.75-3.75M3.75 15.75v-2.25a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25m-6.75 0h6.75" />
               </svg>
-              <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">No Components Found</h4>
-              <p className="text-gray-500 dark:text-gray-400 mt-1">There are no components associated with any properties yet.</p>
+              <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">{t('properties.noComponentsFound')}</h4>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">{t('properties.noComponentsHint')}</p>
             </div>
           )}
         </div>
@@ -125,9 +127,9 @@ const BuildingDashboard: React.FC<BuildingDashboardProps> = ({ buildings, onAddB
           isOpen={!!deletingBuilding}
           onClose={() => setDeletingBuilding(null)}
           onConfirm={handleConfirmDelete}
-          title="Confirm Property Deletion"
-          message={`Are you sure you want to permanently delete "${deletingBuilding.name}"? This will also delete all of its associated tasks, service requests, and components. This action cannot be undone.`}
-          confirmButtonText="Delete Property"
+          title={t('properties.confirmDeletion')}
+          message={t('properties.confirmDeletionMessage', { name: deletingBuilding.name })}
+          confirmButtonText={t('properties.deleteProperty')}
         />
       )}
     </>

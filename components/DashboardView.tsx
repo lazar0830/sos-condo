@@ -1,8 +1,7 @@
-
-
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, Unit, Component, Expense } from '../types';
-import { TaskStatus, ServiceRequestStatus, Recurrence } from '../types';
+import { TaskStatus, ServiceRequestStatus } from '../types';
 import ConfirmationModal from './ConfirmationModal';
 import CreateRequestModal from './CreateRequestModal';
 
@@ -35,6 +34,7 @@ const StatCard: React.FC<{ title: string; value: number | string; icon: React.Re
 );
 
 const PaginationControls: React.FC<{ currentPage: number, totalPages: number, onPageChange: (page: number) => void }> = ({ currentPage, totalPages, onPageChange }) => {
+  const { t } = useTranslation();
   if (totalPages <= 1) return null;
 
   return (
@@ -48,7 +48,7 @@ const PaginationControls: React.FC<{ currentPage: number, totalPages: number, on
           <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
           </svg>
-          Previous
+          {t('dashboard.previous')}
         </button>
       </div>
       <div className="hidden md:flex">
@@ -68,7 +68,7 @@ const PaginationControls: React.FC<{ currentPage: number, totalPages: number, on
           disabled={currentPage === totalPages}
           className="inline-flex items-center border-t-2 border-transparent pl-1 pt-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-200 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed"
         >
-          Next
+          {t('dashboard.next')}
           <svg className="ml-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
           </svg>
@@ -104,7 +104,13 @@ const getSpecialtyColor = (specialty: string) => {
 };
 
 
+const statusToKey: Record<string, string> = {
+  New: 'statusNew', Sent: 'statusSent', OnHold: 'statusOnHold', Completed: 'statusCompleted',
+  Accepted: 'statusAccepted', Refused: 'statusRefused', InProgress: 'statusInProgress',
+};
+
 const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, components, tasks, providers, serviceRequests, expenses, onEditTask, onSelectRequest, onDeleteTask, onAddServiceRequest, onSelectBuilding, onAddBuilding }) => {
+  const { t } = useTranslation();
   const [tasksPage, setTasksPage] = useState(1);
   const [requestsPage, setRequestsPage] = useState(1);
   const [deletingTask, setDeletingTask] = useState<MaintenanceTask | null>(null);
@@ -291,12 +297,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">Dashboard</h2>
-        <p className="text-lg text-gray-500 dark:text-gray-400">A high-level overview of your properties and operations.</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('dashboard.title')}</h2>
+        <p className="text-lg text-gray-500 dark:text-gray-400">{t('dashboard.subtitle')}</p>
       </div>
       
       <div>
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">My Properties</h3>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('dashboard.myProperties')}</h3>
         {buildings.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {buildings.map((building) => (
@@ -326,28 +332,28 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                 <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                 </svg>
-                <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100 mt-4">Welcome to S.O.S. Condo!</h4>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Get started by adding your first property to manage.</p>
+                <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100 mt-4">{t('dashboard.welcomeTitle')}</h4>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">{t('dashboard.welcomeSubtitle')}</p>
                 <button
                     onClick={onAddBuilding}
                     className="mt-6 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
-                    Add Your First Property
+                    {t('dashboard.addFirstProperty')}
                 </button>
             </div>
         )}
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Properties" value={buildings.length} icon={<svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>} />
-        <StatCard title="Units" value={units.length} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" /></svg>} />
-        <StatCard title="Components" value={components.length} icon={<svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 18v-2.25a2.25 2.25 0 00-2.25-2.25h-2.25a2.25 2.25 0 00-2.25 2.25V18zM17.25 6.75v3.75m0 0l-3.75-3.75M17.25 10.5l3.75-3.75M3.75 15.75v-2.25a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25m-6.75 0h6.75" /></svg>} />
-        <StatCard title="Maintenance Tasks" value={tasks.length} icon={<svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>} />
+        <StatCard title={t('dashboard.properties')} value={buildings.length} icon={<svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>} />
+        <StatCard title={t('dashboard.units')} value={units.length} icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" /></svg>} />
+        <StatCard title={t('dashboard.components')} value={components.length} icon={<svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 18v-2.25a2.25 2.25 0 00-2.25-2.25h-2.25a2.25 2.25 0 00-2.25 2.25V18zM17.25 6.75v3.75m0 0l-3.75-3.75M17.25 10.5l3.75-3.75M3.75 15.75v-2.25a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25m-6.75 0h6.75" /></svg>} />
+        <StatCard title={t('dashboard.maintenanceTasks')} value={tasks.length} icon={<svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>} />
       </div>
 
        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Projected Contingency Fund</h3>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('dashboard.projectedContingencyFund')}</h3>
                 <div>
                     <label htmlFor="contingencyGraphBuildingFilter" className="sr-only">Filter by building</label>
                     <select 
@@ -356,7 +362,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                         onChange={(e) => setContingencyGraphBuildingFilter(e.target.value)}
                         className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
                     >
-                        <option value="all">All Buildings</option>
+                        <option value="all">{t('dashboard.allBuildings')}</option>
                         {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                     </select>
                 </div>
@@ -435,7 +441,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                             </div>
                         )}
                         <div className="mt-4 text-center">
-                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Projected Cost:</span>
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('dashboard.totalProjectedCost')}</span>
                             <span className="ml-2 text-lg font-bold text-gray-800 dark:text-gray-100">${contingencyGraphData.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                     </div>
@@ -445,14 +451,14 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                     <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                     </svg>
-                    <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">No Expense Data</h4>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Add expenses in the Contingency Fund page to see the projection chart.</p>
+                    <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">{t('dashboard.noExpenseData')}</h4>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">{t('dashboard.addExpensesHint')}</p>
                 </div>
             )}
         </div>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Projected Maintenance Cost</h3>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('dashboard.projectedMaintenanceCost')}</h3>
         <div className="space-y-6">
           {costsByBuilding.length > 0 ? (
             costsByBuilding.map(({ buildingName, totalCost, costsByYear }) => (
@@ -499,14 +505,14 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
               </div>
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-4">No cost data available to display chart.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-4">{t('dashboard.noCostData')}</p>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Upcoming & Overdue Tasks (Next 30 Days)</h3>
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('dashboard.upcomingOverdueTasks')}</h3>
           <div className="space-y-4">
             {currentTasks.length > 0 ? currentTasks.map(task => {
               const isOverdue = new Date(task.taskDate! + 'T12:00:00Z') < today;
@@ -520,17 +526,17 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                       </div>
                       <div className="flex items-center space-x-2">
                          {isOverdue && (
-                           <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Overdue</span>
+                           <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('dashboard.overdue')}</span>
                          )}
                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
-                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{task.status}</span>
+                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`dashboard.${statusToKey[task.status]}`)}</span>
                       </div>
                     </div>
-                    <p className={`text-sm mt-2 ${isOverdue ? 'text-red-700 dark:text-red-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>Due: <strong>{new Date(task.taskDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>
+                    <p className={`text-sm mt-2 ${isOverdue ? 'text-red-700 dark:text-red-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>{t('dashboard.due')} <strong>{new Date(task.taskDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>
                  </div>
                  <div className="flex items-center justify-end p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/20 space-x-2">
                     <button onClick={(e) => { e.stopPropagation(); setTaskForRequest(task); }} className="px-3 py-1 text-xs font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 dark:text-primary-300 dark:bg-primary-900/50 dark:hover:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-500">
-                      Create Service Request
+                      {t('dashboard.createServiceRequest')}
                     </button>
                     <button onClick={(e) => { e.stopPropagation(); setDeletingTask(task); }} className="p-1.5 text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 rounded-full transition-colors" aria-label={`Delete ${task.name}`}>
                       <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -539,13 +545,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                     </button>
                   </div>
               </div>
-            )}) : <p className="text-gray-500 dark:text-gray-400 text-center py-4">No tasks scheduled in the next 30 days.</p>}
+            )}) : <p className="text-gray-500 dark:text-gray-400 text-center py-4">{t('dashboard.noTasksScheduled')}</p>}
           </div>
           {totalTaskPages > 1 && <PaginationControls currentPage={tasksPage} totalPages={totalTaskPages} onPageChange={setTasksPage} />}
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Upcoming & Overdue Service Requests (Next 30 Days)</h3>
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('dashboard.upcomingOverdueRequests')}</h3>
            <div className="space-y-4">
             {currentRequests.length > 0 ? currentRequests.map(sr => {
                 const requestDate = new Date(sr.scheduledDate! + 'T12:00:00Z');
@@ -559,21 +565,21 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-semibold text-gray-800 dark:text-gray-100">{getTaskName(sr.taskId)}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">To: {getProviderName(sr.providerId)}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.to')} {getProviderName(sr.providerId)}</p>
                       </div>
                        <div className="flex items-center space-x-2 flex-shrink-0">
                             {isRequestOverdue ? (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Overdue</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('dashboard.overdue')}</span>
                             ) : sr.isUrgent && (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">Urgent</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{t('dashboard.urgent')}</span>
                             )}
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[sr.status]}`}>{sr.status}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[sr.status]}`}>{t(`dashboard.${statusToKey[sr.status]}`)}</span>
                        </div>
                     </div>
-                    <p className={`text-sm mt-2 ${isRequestOverdue ? 'text-red-700 dark:text-red-300 font-bold' : sr.isUrgent ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>Scheduled: <strong>{new Date(sr.scheduledDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>
+                    <p className={`text-sm mt-2 ${isRequestOverdue ? 'text-red-700 dark:text-red-300 font-bold' : sr.isUrgent ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>{t('dashboard.scheduled')} <strong>{new Date(sr.scheduledDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>
                   </div>
                 )
-            }) : <p className="text-gray-500 dark:text-gray-400 text-center py-4">No overdue or upcoming service requests.</p>}
+            }) : <p className="text-gray-500 dark:text-gray-400 text-center py-4">{t('dashboard.noOverdueRequests')}</p>}
           </div>
           {totalRequestPages > 1 && <PaginationControls currentPage={requestsPage} totalPages={totalRequestPages} onPageChange={setRequestsPage} />}
         </div>
@@ -598,9 +604,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
             onDeleteTask(deletingTask.id);
             setDeletingTask(null);
           }}
-          title="Confirm Task Deletion"
-          message={`Are you sure you want to delete the task "${deletingTask.name}"? This action cannot be undone.`}
-          confirmButtonText="Delete Task"
+          title={t('dashboard.confirmTaskDeletion')}
+          message={t('dashboard.confirmTaskDeletionMessage', { name: deletingTask.name })}
+          confirmButtonText={t('dashboard.deleteTask')}
         />
       )}
     </div>

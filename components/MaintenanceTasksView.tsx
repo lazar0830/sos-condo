@@ -1,6 +1,6 @@
 
-
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { MaintenanceTask, Building, ServiceProvider, ServiceRequest } from '../types';
 import { TaskStatus, Recurrence } from '../types';
 import { TASK_STATUSES } from '../constants';
@@ -29,6 +29,23 @@ const statusColorMap: { [key in TaskStatus]: string } = {
 };
 
 const specialtyColors = ['bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300','bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300','bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300','bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/50 dark:text-fuchsia-300','bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300','bg-lime-100 text-lime-800 dark:bg-lime-900/50 dark:text-lime-300','bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300','bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300','bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300','bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300','bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-300','bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300'];
+const statusToKey: Record<TaskStatus, string> = {
+  [TaskStatus.New]: 'statusNew',
+  [TaskStatus.Sent]: 'statusSent',
+  [TaskStatus.OnHold]: 'statusOnHold',
+  [TaskStatus.Completed]: 'statusCompleted',
+};
+
+const recurrenceToKey: Record<Recurrence, string> = {
+  [Recurrence.OneTime]: 'recurrenceOneTime',
+  [Recurrence.Weekly]: 'recurrenceWeekly',
+  [Recurrence.BiWeekly]: 'recurrenceBiWeekly',
+  [Recurrence.Monthly]: 'recurrenceMonthly',
+  [Recurrence.Quarterly]: 'recurrenceQuarterly',
+  [Recurrence.SemiAnnually]: 'recurrenceSemiAnnually',
+  [Recurrence.Annually]: 'recurrenceAnnually',
+};
+
 const getSpecialtyColor = (specialty: string) => {
   if (!specialty) return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
   let hash = 0;
@@ -48,6 +65,7 @@ const TaskTable: React.FC<{
   onOpenCreateRequest: (task: MaintenanceTask) => void,
   onOpenDelete: (task: MaintenanceTask) => void,
 }> = ({ tasks, onEditTask, providers, onOpenCreateRequest, onOpenDelete }) => {
+  const { t } = useTranslation();
   const sortedTasks = [...tasks].sort((a, b) => {
     // Determine the master ID for each task. For a master, it's its own ID. For an instance, it's recurringTaskId.
     const masterIdA = a.recurringTaskId || a.id;
@@ -77,13 +95,13 @@ const TaskTable: React.FC<{
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
         <thead className="bg-gray-50/50 dark:bg-gray-700/50">
           <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Task</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">Specialty</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">Date</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">Provider</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Cost</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">Status</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">Actions</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('maintenanceTasks.task')}</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">{t('maintenanceTasks.specialty')}</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">{t('maintenanceTasks.date')}</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">{t('maintenanceTasks.provider')}</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">{t('maintenanceTasks.cost')}</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">{t('maintenanceTasks.status')}</th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">{t('maintenanceTasks.actions')}</th>
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -99,9 +117,9 @@ const TaskTable: React.FC<{
                 <td onClick={() => onEditTask(task)} className="px-6 py-4 cursor-pointer">
                   <div className="flex items-center space-x-2">
                     <div className={`text-sm font-medium break-words ${task.recurringTaskId ? 'pl-4 text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-gray-100'}`}>{task.name}</div>
-                    {isOverdue && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Overdue</span>}
+                    {isOverdue && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('maintenanceTasks.overdue')}</span>}
                   </div>
-                  <div className={`text-sm text-gray-500 dark:text-gray-400 ${task.recurringTaskId ? 'pl-4' : ''}`}>{task.recurrence}</div>
+                  <div className={`text-sm text-gray-500 dark:text-gray-400 ${task.recurringTaskId ? 'pl-4' : ''}`}>{t(`maintenanceTasks.${recurrenceToKey[task.recurrence]}`)}</div>
                 </td>
                 <td onClick={() => onEditTask(task)} className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer">
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
@@ -112,11 +130,11 @@ const TaskTable: React.FC<{
                     `${new Date(task.startDate + 'T12:00:00Z').toLocaleDateString()} - ${new Date(task.endDate + 'T12:00:00Z').toLocaleDateString()}`
                   }
                 </td>
-                <td onClick={() => onEditTask(task)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 cursor-pointer">{provider?.name || 'Not Assigned'}</td>
+                <td onClick={() => onEditTask(task)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 cursor-pointer">{provider?.name || t('maintenanceTasks.notAssigned')}</td>
                 <td onClick={() => onEditTask(task)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 cursor-pointer">{task.cost ? `$${task.cost.toFixed(2)}` : 'N/A'}</td>
                 <td onClick={() => onEditTask(task)} className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[task.status]}`}>
-                    {task.status}
+                    {t(`maintenanceTasks.${statusToKey[task.status]}`)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -126,7 +144,7 @@ const TaskTable: React.FC<{
                       disabled={isMasterRecurring}
                       className="px-3 py-1 text-xs rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 dark:text-primary-300 dark:bg-primary-900/50 dark:hover:bg-primary-900 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
                     >
-                      Create Service Request
+                      {t('maintenanceTasks.createServiceRequest')}
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); onOpenDelete(task); }} 
@@ -157,6 +175,7 @@ interface Filters {
 }
 
 const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buildings, providers, onAddTask, onEditTask, onDeleteTask, onAddServiceRequest }) => {
+  const { t } = useTranslation();
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filters, setFilters] = useLocalStorage<Filters>('maintenanceTasksFilters', {
     selectedBuildingIds: [],
@@ -237,8 +256,8 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
     filters.startDate !== '' ||
     filters.endDate !== '';
 
-  const getBuildingName = (buildingId: string) => buildings.find(b => b.id === buildingId)?.name || 'Unknown Property';
-  const getProviderName = (providerId: string) => providers.find(p => p.id === providerId)?.name || 'Unknown Provider';
+  const getBuildingName = (buildingId: string) => buildings.find(b => b.id === buildingId)?.name || t('maintenanceTasks.unknownProperty');
+  const getProviderName = (providerId: string) => providers.find(p => p.id === providerId)?.name || t('maintenanceTasks.unknownProvider');
 
   const groupTasksByProperty = (tasksToGroup: MaintenanceTask[]) => {
     return tasksToGroup.reduce((acc, task) => {
@@ -265,14 +284,14 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
   };
 
   const confirmDeleteMessage = deletingTask?.recurrence !== Recurrence.OneTime
-    ? "This is a master recurring task. Deleting it will also remove all of its scheduled occurrences. This action cannot be undone."
-    : `Are you sure you want to permanently delete the task "${deletingTask?.name}"?`;
+    ? t('maintenanceTasks.confirmDeletionRecurring')
+    : t('maintenanceTasks.confirmDeletionOneTime', { name: deletingTask?.name || '' });
   
   const buildingForRequest = taskForRequest ? buildings.find(b => b.id === taskForRequest.buildingId) : null;
 
-  const TaskSection: React.FC<{title: string, groupedTasks: Record<string, MaintenanceTask[]>}> = ({title, groupedTasks}) => (
+  const TaskSection: React.FC<{titleKey: string, noTasksKey: string, groupedTasks: Record<string, MaintenanceTask[]>}> = ({titleKey, noTasksKey, groupedTasks}) => (
     <section>
-      <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 pb-2 border-b-2 border-primary-200 dark:border-primary-500/30">{title}</h3>
+      <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 pb-2 border-b-2 border-primary-200 dark:border-primary-500/30">{t(`maintenanceTasks.${titleKey}`)}</h3>
       {Object.keys(groupedTasks).length > 0 ? (
         <div className="space-y-6">
           {Object.entries(groupedTasks).map(([buildingId, propertyTasks]) => (
@@ -290,37 +309,40 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
         </div>
       ) : (
         <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-          <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">No {title.toLowerCase()} found.</h4>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters or adding new tasks.</p>
+          <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">{t(`maintenanceTasks.${noTasksKey}`)}</h4>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('maintenanceTasks.noTasksHint')}</p>
         </div>
       )}
     </section>
   );
   
-  const FilterPill: React.FC<{ onRemove: () => void, children: React.ReactNode }> = ({ onRemove, children }) => (
+  const FilterPill: React.FC<{ onRemove: () => void, children: React.ReactNode }> = ({ onRemove, children }) => {
+    const { t } = useTranslation();
+    return (
     <span className="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300">
       {children}
       <button type="button" onClick={onRemove} className="flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-200 focus:outline-none focus:bg-primary-700 focus:text-white">
-        <span className="sr-only">Remove filter</span>
+        <span className="sr-only">{t('maintenanceTasks.removeFilter')}</span>
         <svg className="h-3 w-3" stroke="currentColor" fill="none" viewBox="0 0 8 8">
             <path strokeLinecap="round" strokeWidth="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
       </button>
     </span>
   );
+  };
 
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">Maintenance Tasks</h2>
-          <p className="text-lg text-gray-500 dark:text-gray-400">View and manage all scheduled tasks across your properties.</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('maintenanceTasks.title')}</h2>
+          <p className="text-lg text-gray-500 dark:text-gray-400">{t('maintenanceTasks.subtitle')}</p>
         </div>
         <button
           onClick={onAddTask}
           className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
         >
-          Add New Task
+          {t('maintenanceTasks.addNewTask')}
         </button>
       </div>
 
@@ -329,7 +351,7 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
           onClick={() => setFiltersVisible(!filtersVisible)}
           className="w-full flex justify-between items-center text-left text-lg font-semibold text-gray-700 dark:text-gray-200"
         >
-          <span>Filter Tasks</span>
+          <span>{t('maintenanceTasks.filterTasks')}</span>
           <svg className={`w-5 h-5 text-gray-500 dark:text-gray-400 transform transition-transform ${filtersVisible ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -338,7 +360,7 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
           <div className="mt-4 pt-4 border-t dark:border-gray-700">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Property</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('maintenanceTasks.byProperty')}</label>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
                     {buildings.map(b => (
                       <div key={b.id} className="flex items-center">
@@ -349,19 +371,19 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Status</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('maintenanceTasks.byStatus')}</label>
                   <div className="space-y-2">
                     {TASK_STATUSES.map(s => (
                       <div key={s} className="flex items-center">
                         {/* FIX: Cast enum value 's' to string to satisfy the function signature. */}
                         <input id={`status-${s}`} type="checkbox" checked={filters.selectedStatuses.includes(s)} onChange={() => handleMultiSelectChange('selectedStatuses', s as string)} className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
-                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{s}</label>
+                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{t(`maintenanceTasks.${statusToKey[s]}`)}</label>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Provider</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('maintenanceTasks.byProvider')}</label>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
                     {providers.map(p => (
                       <div key={p.id} className="flex items-center">
@@ -372,15 +394,15 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">By Date Range</label>
+                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('maintenanceTasks.byDateRange')}</label>
                   <input type="date" name="startDate" id="startDate" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="mt-1 block w-full input" />
-                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">to</label>
+                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">{t('maintenanceTasks.to')}</label>
                   <input type="date" name="endDate" id="endDate" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="mt-1 block w-full input" />
                 </div>
             </div>
             <div className="mt-6 pt-4 border-t dark:border-gray-700 flex justify-end">
                 <button onClick={handleResetFilters} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                    Reset All Filters
+                    {t('maintenanceTasks.resetAllFilters')}
                 </button>
             </div>
             <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; }`}</style>
@@ -391,21 +413,21 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
       {hasActiveFilters && (
         <div className="p-3 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-500/30">
             <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">Active Filters:</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">{t('maintenanceTasks.activeFilters')}</span>
                 {filters.selectedBuildingIds.map(id => <FilterPill key={id} onRemove={() => removeFilter('selectedBuildingIds', id)}>{getBuildingName(id)}</FilterPill>)}
-                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{s}</FilterPill>)}
+                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{t(`maintenanceTasks.${statusToKey[s]}`)}</FilterPill>)}
                 {filters.selectedProviderIds.map(id => <FilterPill key={id} onRemove={() => removeFilter('selectedProviderIds', id)}>{getProviderName(id)}</FilterPill>)}
-                {filters.startDate && <FilterPill onRemove={() => removeFilter('startDate')}>From: {filters.startDate}</FilterPill>}
-                {filters.endDate && <FilterPill onRemove={() => removeFilter('endDate')}>To: {filters.endDate}</FilterPill>}
+                {filters.startDate && <FilterPill onRemove={() => removeFilter('startDate')}>{t('maintenanceTasks.from')} {filters.startDate}</FilterPill>}
+                {filters.endDate && <FilterPill onRemove={() => removeFilter('endDate')}>{t('maintenanceTasks.to')} {filters.endDate}</FilterPill>}
                 <button onClick={handleResetFilters} className="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 font-medium ml-auto px-2">
-                    Clear All
+                    {t('maintenanceTasks.clearAll')}
                 </button>
             </div>
         </div>
       )}
 
-      <TaskSection title="One-Time Tasks" groupedTasks={groupedOneTimeTasks} />
-      <TaskSection title="Recurring Tasks" groupedTasks={groupedRecurringTasks} />
+      <TaskSection titleKey="oneTimeTasks" noTasksKey="noOneTimeTasksFound" groupedTasks={groupedOneTimeTasks} />
+      <TaskSection titleKey="recurringTasks" noTasksKey="noRecurringTasksFound" groupedTasks={groupedRecurringTasks} />
       
       {taskForRequest && buildingForRequest && (
         <CreateRequestModal
@@ -422,9 +444,9 @@ const MaintenanceTasksView: React.FC<MaintenanceTasksViewProps> = ({ tasks, buil
           isOpen={!!deletingTask}
           onClose={() => setDeletingTask(null)}
           onConfirm={handleConfirmDelete}
-          title="Confirm Task Deletion"
+          title={t('maintenanceTasks.confirmDeletion')}
           message={confirmDeleteMessage}
-          confirmButtonText="Delete Task"
+          confirmButtonText={t('maintenanceTasks.deleteTask')}
         />
       )}
     </div>
