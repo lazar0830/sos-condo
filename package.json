@@ -9,13 +9,15 @@
     "preview": "vite preview",
     "deploy": "npm run build && firebase deploy",
     "deploy:hosting": "npm run build && firebase deploy --only hosting",
-    "deploy:functions": "cd functions && npm install && npm run build && cd .. && firebase deploy --only functions"
+    "deploy:functions": "cd functions && npm install && npm run build && cd .. && firebase deploy --only functions",
+    "seed:categories": "node scripts/seed-component-categories.mjs"
   },
   "dependencies": {
-    "react-dom": "^19.2.0",
-    "react": "^19.2.0",
     "@google/genai": "^1.27.0",
-    "firebase": "^11.4.0"
+    "firebase": "^11.4.0",
+    "firebase-admin": "^13.6.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

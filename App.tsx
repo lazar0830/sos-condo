@@ -655,12 +655,18 @@ const App: React.FC = () => {
     const visibleUserIds = [...managedManagers.map(u => u.id), currentUser.id];
     const visibleUsernames = new Set([currentUser.username, ...managedManagers.map(u => u.username)]);
     visibleBuildings = buildings.filter(b => b.createdBy && visibleUserIds.includes(b.createdBy));
-    visibleProviders = providers.filter(p => p.createdBy && visibleUserIds.includes(p.createdBy));
+    // Admin sees all providers (global + PM-created)
     visibleContingencyDocuments = contingencyDocuments.filter(d => visibleUsernames.has(d.uploadedBy));
     applyBuildingScope(new Set(visibleBuildings.map(b => b.id)));
   } else if (currentUser.role === UserRole.PropertyManager) {
     visibleBuildings = buildings.filter(b => b.createdBy === currentUser.id);
-    visibleProviders = providers.filter(p => p.createdBy === currentUser.id);
+    // PM sees: providers added by Super Admin/Admin (global), or by themselves
+    visibleProviders = providers.filter(p => {
+      const creator = users.find(u => u.id === p.createdBy);
+      if (!creator) return false;
+      if (creator.role === UserRole.SuperAdmin || creator.role === UserRole.Admin) return true;
+      return p.createdBy === currentUser.id;
+    });
     visibleContingencyDocuments = contingencyDocuments.filter(d => d.uploadedBy === currentUser.username);
     applyBuildingScope(new Set(visibleBuildings.map(b => b.id)));
   }

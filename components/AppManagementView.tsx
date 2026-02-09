@@ -111,7 +111,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                 <button onClick={() => setActiveTab('managers')} className={getTabClass('managers')}>
                     Property Managers
                 </button>
-                {currentUser.role === UserRole.SuperAdmin && (
+                {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
                     <button onClick={() => setActiveTab('providers')} className={getTabClass('providers')}>
                         Service Providers
                     </button>
@@ -195,7 +195,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
             </div>
         )}
 
-        {activeTab === 'providers' && currentUser.role === UserRole.SuperAdmin && (
+        {activeTab === 'providers' && (currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

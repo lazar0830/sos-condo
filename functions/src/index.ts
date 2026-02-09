@@ -18,23 +18,29 @@ export const createUser = functions.https.onCall(async (data: CreateUserRequest,
   const callerUid = context.auth.uid;
   const db = admin.firestore();
 
-  // Verify caller is Super Admin or Admin
+  // Verify caller is Super Admin, Admin, or Property Manager
   const callerDoc = await db.collection('users').doc(callerUid).get();
   if (!callerDoc.exists) {
     throw new functions.https.HttpsError('permission-denied', 'User profile not found.');
   }
   const callerRole = callerDoc.data()?.role;
-  if (callerRole !== 'Super Admin' && callerRole !== 'Admin') {
-    throw new functions.https.HttpsError('permission-denied', 'Only Super Admin or Admin can create users.');
+  const canCreateUsers = callerRole === 'Super Admin' || callerRole === 'Admin' || callerRole === 'Property Manager';
+  if (!canCreateUsers) {
+    throw new functions.https.HttpsError('permission-denied', 'Only Super Admin, Admin, or Property Manager can create users.');
   }
 
-  // Super Admin can create Admin; Admin can create Property Manager and Service Provider
+  // Super Admin: Admin, Property Manager, Service Provider
+  // Admin: Property Manager, Service Provider
+  // Property Manager: Service Provider only
   const { email, password, username, role, createdBy } = data;
   if (!email || !password || !username || !role || !createdBy) {
     throw new functions.https.HttpsError('invalid-argument', 'Missing required fields.');
   }
   if (role === 'Admin' && callerRole !== 'Super Admin') {
     throw new functions.https.HttpsError('permission-denied', 'Only Super Admin can create Admins.');
+  }
+  if (role === 'Property Manager' && callerRole === 'Property Manager') {
+    throw new functions.https.HttpsError('permission-denied', 'Property Managers cannot create other Property Managers.');
   }
 
   const auth = admin.auth();

@@ -76,7 +76,7 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
                 </div>
               </div>
               <div className="p-2 bg-gray-50 dark:bg-gray-700/50 border-t dark:border-gray-700 text-right">
-                 {(currentUser.role === UserRole.SuperAdmin || provider.createdBy === currentUser.id) && (
+                 {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || provider.createdBy === currentUser.id) && (
                     <button 
                         onClick={(e) => { e.stopPropagation(); handleOpenConfirmDelete(provider); }} 
                         className="px-3 py-1 text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900"
