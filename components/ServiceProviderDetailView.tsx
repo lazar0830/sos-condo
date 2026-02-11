@@ -1,6 +1,7 @@
 
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ServiceProvider, ServiceRequest, MaintenanceTask, Building, User } from '../types';
 import { ServiceRequestStatus, UserRole } from '../types';
 
@@ -44,6 +45,7 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
   onSaveProvider,
   currentUser,
 }) => {
+  const { t } = useTranslation();
     
   const getRequestDetails = (request: ServiceRequest) => {
     const task = tasks.find(t => t.id === request.taskId);
@@ -75,7 +77,7 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
     <div className="space-y-8">
         <button onClick={onBack} className="flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 mb-6">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-            Back to All Providers
+            {t('serviceProviderDetail.backToAllProviders')}
         </button>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -115,7 +117,7 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                                   <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
                                   <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
                               </svg>
-                              Edit
+                              {t('serviceProviderDetail.edit')}
                           </button>
                         )}
                     </div>
@@ -133,7 +135,7 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                         {provider.contactPerson && (
                         <div className="flex items-center">
                             <svg className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.095a1.23 1.23 0 00.41-1.412A9.99 9.99 0 0010 12c-2.31 0-4.438.784-6.131 2.095z" /></svg>
-                            <span>Contact: <strong>{provider.contactPerson}</strong></span>
+                            <span>{t('serviceProviderDetail.contact')}: <strong>{provider.contactPerson}</strong></span>
                         </div>
                         )}
                         {provider.website && (
@@ -150,16 +152,16 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
             </div>
         </div>
 
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Assigned Service Requests</h3>
+        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{t('serviceProviderDetail.assignedServiceRequests')}</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Property</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Task</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Scheduled Date</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceProviderDetail.tableProperty')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceProviderDetail.tableTask')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceProviderDetail.tableScheduledDate')}</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceProviderDetail.tableStatus')}</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -175,14 +177,14 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                                         <div className="flex items-center space-x-2">
                                             <span>{task?.name || 'N/A'}</span>
                                             {isOverdue && (
-                                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Overdue</span>
+                                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('serviceProviderDetail.overdue')}</span>
                                             )}
                                             {request.isUrgent && !isOverdue && (
-                                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">Urgent</span>
+                                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{t('serviceProviderDetail.urgent')}</span>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : 'Not set'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : t('serviceProviderDetail.notSet')}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[request.status]}`}>
                                             {request.status}
@@ -193,8 +195,8 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                         }) : (
                             <tr>
                                 <td colSpan={4} className="text-center py-10">
-                                    <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">No Service Requests Found</h4>
-                                    <p className="text-gray-500 dark:text-gray-400 mt-1">This provider has no assigned requests.</p>
+                                    <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('serviceProviderDetail.noServiceRequestsFound')}</h4>
+                                    <p className="text-gray-500 dark:text-gray-400 mt-1">{t('serviceProviderDetail.noAssignedRequests')}</p>
                                 </td>
                             </tr>
                         )}

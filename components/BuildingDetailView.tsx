@@ -1,6 +1,7 @@
 
 
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, Component, Unit } from '../types';
 import { TaskStatus, Recurrence, ServiceRequestStatus } from '../types';
 import CreateRequestModal from './CreateRequestModal';
@@ -41,7 +42,7 @@ const getSpecialtyColor = (specialty: string) => {
   return specialtyColors[index];
 };
 
-const PaginationControls: React.FC<{ currentPage: number, totalPages: number, onPageChange: (page: number) => void }> = ({ currentPage, totalPages, onPageChange }) => {
+const PaginationControls: React.FC<{ currentPage: number, totalPages: number, onPageChange: (page: number) => void, t: (key: string) => string }> = ({ currentPage, totalPages, onPageChange, t }) => {
   if (totalPages <= 1) return null;
 
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -57,7 +58,7 @@ const PaginationControls: React.FC<{ currentPage: number, totalPages: number, on
           <svg className="mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
           </svg>
-          Previous
+          {t('buildingDetail.previous')}
         </button>
       </div>
       <div className="hidden md:flex">
@@ -77,7 +78,7 @@ const PaginationControls: React.FC<{ currentPage: number, totalPages: number, on
           disabled={currentPage === totalPages}
           className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-200 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:cursor-not-allowed"
         >
-          Next
+          {t('buildingDetail.next')}
           <svg className="ml-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
           </svg>
@@ -95,6 +96,7 @@ interface Filters {
 }
 
 const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks, providers, onOpenTaskModal, onAddServiceRequest, getTaskServiceRequests, onBack, onEditBuilding, onSelectRequest, components, onSelectComponent, onDeleteBuilding, units, onOpenUnitModal, onDeleteUnit, onOpenComponentModal, onSelectUnit }) => {
+  const { t } = useTranslation();
   const [isCreateRequestModalOpen, setIsCreateRequestModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
   const [recurringPage, setRecurringPage] = useState(1);
@@ -277,20 +279,20 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
           <div onClick={() => onOpenTaskModal(task)} className="cursor-pointer flex-grow">
             <div className="flex items-center space-x-3 mb-2 flex-wrap gap-y-2">
               <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{task.name}</h4>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{task.status}</span>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${recurrenceColorMap[task.recurrence]}`}>{task.recurrence}</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`maintenanceTasks.status.${task.status}`)}</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${recurrenceColorMap[task.recurrence]}`}>{t(`maintenanceTasks.recurrence.${task.recurrence}`)}</span>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm">{task.description}</p>
             <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-4 flex-wrap">
-              {provider && <span>Provider: <strong>{provider.name}</strong></span>}
-              {task.cost != null && <span>Cost: <strong>${task.cost.toFixed(2)}</strong></span>}
-              {task.taskDate && <span className="font-semibold">Date: {new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString()}</span>}
-              {isMasterRecurring && task.startDate && task.endDate && <span className="font-semibold">Range: {new Date(task.startDate + 'T12:00:00Z').toLocaleDateString()} to {new Date(task.endDate + 'T12:00:00Z').toLocaleDateString()}</span>}
+              {provider && <span>{t('buildingDetail.providerLabel')} <strong>{provider.name}</strong></span>}
+              {task.cost != null && <span>{t('buildingDetail.costLabel')} <strong>${task.cost.toFixed(2)}</strong></span>}
+              {task.taskDate && <span className="font-semibold">{t('buildingDetail.dateLabel')} {new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString()}</span>}
+              {isMasterRecurring && task.startDate && task.endDate && <span className="font-semibold">{t('buildingDetail.rangeLabel')} {new Date(task.startDate + 'T12:00:00Z').toLocaleDateString()} {t('buildingDetail.to')} {new Date(task.endDate + 'T12:00:00Z').toLocaleDateString()}</span>}
             </div>
             {serviceRequests.length > 0 && (
               <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                {serviceRequests.length} service request(s) sent. Last on {new Date(serviceRequests[serviceRequests.length-1].sentAt).toLocaleDateString()}.
+                {t('buildingDetail.serviceRequestsSent', { count: serviceRequests.length, date: new Date(serviceRequests[serviceRequests.length-1].sentAt).toLocaleDateString() })}
               </div>
             )}
           </div>
@@ -300,7 +302,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                 onClick={(e) => { e.stopPropagation(); handleCreateRequestClick(task); }}
                 className="w-full md:w-auto px-3 py-2 text-sm font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-primary-900/50 dark:text-primary-300 dark:hover:bg-primary-900"
               >
-                Create Service Request
+                {t('buildingDetail.createServiceRequest')}
               </button>
             </div>
           )}
@@ -313,7 +315,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
     <span className="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300">
       {children}
       <button type="button" onClick={onRemove} className="flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-200 focus:outline-none focus:bg-primary-700 focus:text-white">
-        <span className="sr-only">Remove filter</span>
+        <span className="sr-only">{t('buildingDetail.removeFilter')}</span>
         <svg className="h-3 w-3" stroke="currentColor" fill="none" viewBox="0 0 8 8">
             <path strokeLinecap="round" strokeWidth="1.5" d="M1 1l6 6m0-6L1 7" />
         </svg>
@@ -331,7 +333,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
     <div>
       <button onClick={onBack} className="flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 mb-6">
         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-        Back to Properties
+        {t('buildingDetail.backToProperties')}
       </button>
 
       <div className="mb-8 overflow-hidden rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -361,7 +363,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                     <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
                     <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
                   </svg>
-                  Edit
+                  {t('buildingDetail.edit')}
               </button>
                <button
                   onClick={() => setIsConfirmingDelete(true)}
@@ -370,7 +372,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                   <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
                   </svg>
-                  Delete
+                  {t('buildingDetail.delete')}
               </button>
             </div>
         </div>
@@ -378,12 +380,12 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
         <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Units</h3>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('buildingDetail.units')}</h3>
             <button
                 onClick={() => onOpenUnitModal(null, building.id)}
                 className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none"
             >
-                Add New Unit
+                {t('buildingDetail.addNewUnit')}
             </button>
         </div>
         {units.length > 0 ? (
@@ -391,7 +393,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unit Number</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('buildingDetail.unitNumber')}</th>
                             <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
                         </tr>
                     </thead>
@@ -400,8 +402,8 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                             <tr key={unit.id} onClick={() => onSelectUnit(unit.id)} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{unit.unitNumber}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                                    <button onClick={(e) => { e.stopPropagation(); onOpenUnitModal(unit, building.id); }} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">Edit</button>
-                                    <button onClick={(e) => { e.stopPropagation(); setDeletingUnit(unit); }} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</button>
+                                    <button onClick={(e) => { e.stopPropagation(); onOpenUnitModal(unit, building.id); }} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('buildingDetail.edit')}</button>
+                                    <button onClick={(e) => { e.stopPropagation(); setDeletingUnit(unit); }} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">{t('buildingDetail.delete')}</button>
                                 </td>
                             </tr>
                         ))}
@@ -410,20 +412,20 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
             </div>
         ) : (
             <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-                <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">No Units Found</h4>
-                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Add units to this property to track maintenance at a more granular level.</p>
+                <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">{t('buildingDetail.noUnitsFound')}</h4>
+                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t('buildingDetail.addUnitsHint')}</p>
             </div>
         )}
       </div>
 
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Building Components</h3>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{t('buildingDetail.buildingComponents')}</h3>
             <button
                 onClick={() => onOpenComponentModal(null, building.id)}
                 className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
-                Add Component
+                {t('buildingDetail.addComponent')}
             </button>
         </div>
         {buildingComponents.length > 0 ? (
@@ -451,19 +453,19 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
             <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 18v-2.25a2.25 2.25 0 00-2.25-2.25h-2.25a2.25 2.25 0 00-2.25 2.25V18zM17.25 6.75v3.75m0 0l-3.75-3.75M17.25 10.5l3.75-3.75M3.75 15.75v-2.25a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25v2.25m-6.75 0h6.75" />
             </svg>
-            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">No Components Found</h4>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">There are no components associated with this property yet.</p>
+            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200 mt-2">{t('buildingDetail.noComponentsFound')}</h4>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">{t('buildingDetail.noComponentsHint')}</p>
           </div>
         )}
       </div>
 
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Maintenance Tasks</h3>
+        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{t('buildingDetail.maintenanceTasks')}</h3>
         <button
           onClick={() => onOpenTaskModal(null, building.id)}
           className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
         >
-          Add New Task
+          {t('buildingDetail.addNewTask')}
         </button>
       </div>
 
@@ -472,7 +474,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
           onClick={() => setFiltersVisible(!filtersVisible)}
           className="w-full flex justify-between items-center text-left text-lg font-semibold text-gray-700 dark:text-gray-200"
         >
-          <span>Filter Tasks</span>
+          <span>{t('buildingDetail.filterTasks')}</span>
           <svg className={`w-5 h-5 text-gray-500 dark:text-gray-400 transform transition-transform ${filtersVisible ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
@@ -481,18 +483,18 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
           <div className="mt-4 pt-4 border-t dark:border-gray-700">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Status</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('buildingDetail.byStatus')}</label>
                   <div className="space-y-2">
                     {TASK_STATUSES.map(s => (
                       <div key={s} className="flex items-center">
                         <input id={`status-${s}`} type="checkbox" checked={filters.selectedStatuses.includes(s)} onChange={() => handleMultiSelectChange('selectedStatuses', s)} className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
-                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{s}</label>
+                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{t(`maintenanceTasks.status.${s}`)}</label>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">By Provider</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('buildingDetail.byProvider')}</label>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
                     {providers.map(p => (
                       <div key={p.id} className="flex items-center">
@@ -503,15 +505,15 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">By Date Range</label>
+                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('buildingDetail.byDateRange')}</label>
                   <input type="date" name="startDate" id="startDate" value={filters.startDate} onChange={e => setFilters(prev => ({ ...prev, startDate: e.target.value }))} className="mt-1 block w-full input" />
-                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">to</label>
+                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">{t('buildingDetail.to')}</label>
                   <input type="date" name="endDate" id="endDate" value={filters.endDate} onChange={e => setFilters(prev => ({ ...prev, endDate: e.target.value }))} className="mt-1 block w-full input" />
                 </div>
             </div>
             <div className="mt-6 pt-4 border-t dark:border-gray-700 flex justify-end">
                 <button onClick={handleResetFilters} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                    Reset All Filters
+                    {t('buildingDetail.resetAllFilters')}
                 </button>
             </div>
             <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; }`}</style>
@@ -522,13 +524,13 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
       {hasActiveFilters && (
         <div className="p-3 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-500/30 mb-8">
             <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">Active Filters:</span>
-                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{s}</FilterPill>)}
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">{t('buildingDetail.activeFilters')}</span>
+                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{t(`maintenanceTasks.status.${s}`)}</FilterPill>)}
                 {filters.selectedProviderIds.map(id => <FilterPill key={id} onRemove={() => removeFilter('selectedProviderIds', id)}>{getProviderName(id)}</FilterPill>)}
-                {filters.startDate && <FilterPill onRemove={() => removeFilter('startDate')}>From: {filters.startDate}</FilterPill>}
-                {filters.endDate && <FilterPill onRemove={() => removeFilter('endDate')}>To: {filters.endDate}</FilterPill>}
+                {filters.startDate && <FilterPill onRemove={() => removeFilter('startDate')}>{t('buildingDetail.from')} {filters.startDate}</FilterPill>}
+                {filters.endDate && <FilterPill onRemove={() => removeFilter('endDate')}>{t('buildingDetail.to')} {filters.endDate}</FilterPill>}
                 <button onClick={handleResetFilters} className="text-sm text-primary-600 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200 font-medium ml-auto px-2">
-                    Clear All
+                    {t('buildingDetail.clearAll')}
                 </button>
             </div>
         </div>
@@ -536,53 +538,53 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <section>
-          <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-100 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">Recurring Tasks</h4>
+          <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-100 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">{t('buildingDetail.recurringTasks')}</h4>
           {recurringTasks.length > 0 ? (
             <>
               <div className="space-y-4">
                 {currentRecurringTasks.map(task => <TaskCard key={task.id} task={task} />)}
               </div>
-              <PaginationControls currentPage={recurringPage} totalPages={totalRecurringPages} onPageChange={setRecurringPage} />
+              <PaginationControls currentPage={recurringPage} totalPages={totalRecurringPages} onPageChange={setRecurringPage} t={t} />
             </>
           ) : (
              <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 h-full flex flex-col justify-center min-h-[120px]">
-                <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">No recurring tasks</h4>
-                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">No scheduled recurring maintenance found matching your filters.</p>
+                <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">{t('buildingDetail.noRecurringTasks')}</h4>
+                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t('buildingDetail.noRecurringTasksHint')}</p>
              </div>
           )}
         </section>
         
         <section>
-          <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-100 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">One-Time Tasks</h4>
+          <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-100 mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">{t('buildingDetail.oneTimeTasks')}</h4>
           {oneTimeTasks.length > 0 ? (
             <>
               <div className="space-y-4">
                 {currentOneTimeTasks.map(task => <TaskCard key={task.id} task={task} />)}
               </div>
-               <PaginationControls currentPage={oneTimePage} totalPages={totalOneTimePages} onPageChange={setOneTimePage} />
+               <PaginationControls currentPage={oneTimePage} totalPages={totalOneTimePages} onPageChange={setOneTimePage} t={t} />
             </>
           ) : (
             <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 h-full flex flex-col justify-center min-h-[120px]">
-                <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">No one-time tasks</h4>
-                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">No single-instance tasks found matching your filters.</p>
+                <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">{t('buildingDetail.noOneTimeTasks')}</h4>
+                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t('buildingDetail.noOneTimeTasksHint')}</p>
              </div>
           )}
         </section>
       </div>
 
       <div className="mt-12">
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Service Requests</h3>
+        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{t('buildingDetail.serviceRequestsTitle')}</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Task</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Specialty</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Provider</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Sent</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Scheduled Date</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('buildingDetail.tableTask')}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('buildingDetail.tableSpecialty')}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('buildingDetail.tableProvider')}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('buildingDetail.tableDateSent')}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('buildingDetail.tableScheduledDate')}</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('buildingDetail.tableStatus')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -596,17 +598,17 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                         <div className="flex items-center space-x-2">
                             <span>{task?.name || 'N/A'}</span>
                             {isOverdue && (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">Overdue</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('buildingDetail.overdue')}</span>
                             )}
                             {request.isUrgent && !isOverdue && (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">Urgent</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{t('buildingDetail.urgent')}</span>
                             )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm"><span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(request.specialty)}`}>{request.specialty}</span></td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider?.name || 'N/A'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(request.sentAt).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : 'Not set'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : t('buildingDetail.notSet')}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[request.status]}`}>
                           {request.status}
@@ -617,8 +619,8 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                 }) : (
                   <tr>
                       <td colSpan={6} className="text-center py-10">
-                          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200">No service requests found</h4>
-                          <p className="text-gray-500 dark:text-gray-400 mt-1">This property has no associated service requests.</p>
+                          <h4 className="text-lg font-medium text-gray-800 dark:text-gray-200">{t('buildingDetail.noServiceRequestsFound')}</h4>
+                          <p className="text-gray-500 dark:text-gray-400 mt-1">{t('buildingDetail.noServiceRequestsHintProperty')}</p>
                       </td>
                   </tr>
                 )}
@@ -643,9 +645,9 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
           isOpen={isConfirmingDelete}
           onClose={() => setIsConfirmingDelete(false)}
           onConfirm={handleConfirmDelete}
-          title="Confirm Property Deletion"
-          message={`Are you sure you want to permanently delete "${building.name}"? This will also delete all of its associated tasks, service requests, and components. This action cannot be undone.`}
-          confirmButtonText="Delete Property"
+          title={t('buildingDetail.confirmPropertyDeletionTitle')}
+          message={t('buildingDetail.confirmPropertyDeletionMessage', { name: building.name })}
+          confirmButtonText={t('buildingDetail.deleteProperty')}
         />
       )}
       {deletingUnit && (
@@ -653,9 +655,9 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
           isOpen={!!deletingUnit}
           onClose={() => setDeletingUnit(null)}
           onConfirm={handleConfirmUnitDelete}
-          title="Confirm Unit Deletion"
-          message={`Are you sure you want to permanently delete Unit "${deletingUnit.unitNumber}"? This action cannot be undone unless the unit is in use.`}
-          confirmButtonText="Delete Unit"
+          title={t('buildingDetail.confirmUnitDeletionTitle')}
+          message={t('buildingDetail.confirmUnitDeletionMessage', { unitNumber: deletingUnit.unitNumber })}
+          confirmButtonText={t('buildingDetail.deleteUnit')}
         />
       )}
     </div>

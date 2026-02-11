@@ -1,6 +1,7 @@
 
 
 import React, { useRef, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Unit, Building, Component, MaintenanceTask, ServiceRequest, ServiceProvider } from '../types';
 import CreateRequestModal from './CreateRequestModal';
 import { ServiceRequestStatus, TaskStatus } from '../types';
@@ -59,6 +60,7 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
     onOpenUnitModal, onAddUnitImages, onDeleteUnitImage, onSelectComponent, onSelectRequest,
     onOpenTaskModal, onAddServiceRequest
 }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [taskForRequest, setTaskForRequest] = useState<MaintenanceTask | null>(null);
   const [isCreateRequestModalOpen, setIsCreateRequestModalOpen] = useState(false);
@@ -90,11 +92,11 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
     <div className="space-y-8">
       <button onClick={onBack} className="flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-        Back to {building.name}
+        {t('unitDetail.backTo', { name: building.name })}
       </button>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400">Unit {unit.unitNumber}</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400">{t('unitDetail.unit')} {unit.unitNumber}</h2>
         <p className="text-lg text-gray-500 dark:text-gray-400 mt-1">{building.name} - {building.address}</p>
       </div>
 
@@ -102,27 +104,27 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
         <div className="lg:col-span-1 space-y-8">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Occupant</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('unitDetail.occupant')}</h3>
                     <button onClick={() => onOpenUnitModal(unit, building.id)} className="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
-                        {unit.occupant ? 'Edit' : 'Add'}
+                        {unit.occupant ? t('unitDetail.edit') : t('unitDetail.add')}
                     </button>
                 </div>
                 {unit.occupant ? (
                     <dl className="space-y-4">
-                        <DetailItem label="Name" value={unit.occupant.name} />
-                        <DetailItem label="Occupant Type" value={unit.occupant.type} />
-                        <DetailItem label="Start Date" value={unit.occupant.startDate ? new Date(unit.occupant.startDate + 'T12:00:00Z').toLocaleDateString() : null} />
-                        <DetailItem label="End Date" value={unit.occupant.endDate ? new Date(unit.occupant.endDate + 'T12:00:00Z').toLocaleDateString() : null} />
+                        <DetailItem label={t('unitDetail.name')} value={unit.occupant.name} />
+                        <DetailItem label={t('unitDetail.occupantType')} value={unit.occupant.type} />
+                        <DetailItem label={t('unitDetail.startDate')} value={unit.occupant.startDate ? new Date(unit.occupant.startDate + 'T12:00:00Z').toLocaleDateString() : null} />
+                        <DetailItem label={t('unitDetail.endDate')} value={unit.occupant.endDate ? new Date(unit.occupant.endDate + 'T12:00:00Z').toLocaleDateString() : null} />
                     </dl>
                 ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No occupant information has been added.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('unitDetail.noOccupantInfo')}</p>
                 )}
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Images</h3>
-                    <button onClick={() => fileInputRef.current?.click()} className="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">Upload</button>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('unitDetail.images')}</h3>
+                    <button onClick={() => fileInputRef.current?.click()} className="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">{t('unitDetail.upload')}</button>
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" multiple/>
                 </div>
                  {unit.images && unit.images.length > 0 ? (
@@ -139,14 +141,14 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
                         ))}
                     </div>
                 ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No images uploaded.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">{t('unitDetail.noImagesUploaded')}</p>
                 )}
             </div>
         </div>
 
         <div className="lg:col-span-2 space-y-8">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Components in this Unit</h3>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('unitDetail.componentsInUnit')}</h3>
                 {unitComponents.length > 0 ? (
                     <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                         {unitComponents.map(c => (
@@ -157,48 +159,48 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No components assigned to this unit.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('unitDetail.noComponentsAssigned')}</p>
                 )}
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Maintenance Tasks</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('unitDetail.maintenanceTasks')}</h3>
                     <button onClick={() => onOpenTaskModal(null, building.id)} className="px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none">
-                        Add New Task
+                        {t('unitDetail.addNewTask')}
                     </button>
                 </div>
                 {unitTasks.length > 0 ? (
                     <ul className="divide-y divide-gray-200 dark:divide-gray-700 -mx-6">
-                        {unitTasks.map(t => (
-                            <li key={t.id} className="py-3 px-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <div className="flex justify-between items-start cursor-pointer" onClick={() => onOpenTaskModal(t, building.id)}>
+                        {unitTasks.map(task => (
+                            <li key={task.id} className="py-3 px-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div className="flex justify-between items-start cursor-pointer" onClick={() => onOpenTaskModal(task, building.id)}>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{t.name}</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{t.description}</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{task.name}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{task.description}</p>
                                     </div>
                                     <div className="text-right flex-shrink-0 ml-4">
                                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {t.taskDate ? new Date(t.taskDate + 'T12:00:00Z').toLocaleDateString() : 'Recurring'}
+                                            {task.taskDate ? new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString() : t('unitDetail.recurring')}
                                         </p>
                                         <p className="text-xs">
-                                            <span className={`px-2 py-0.5 rounded-full ${getSpecialtyColor(t.specialty)}`}>{t.specialty}</span>
+                                            <span className={`px-2 py-0.5 rounded-full ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
                                         </p>
                                     </div>
                                 </div>
                                 <div className="mt-2 text-right">
-                                    <button onClick={() => handleCreateRequestClick(t)} className="px-3 py-1 text-xs font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none dark:bg-primary-900/50 dark:text-primary-300 dark:hover:bg-primary-900">
-                                        Create Service Request
+                                    <button onClick={() => handleCreateRequestClick(task)} className="px-3 py-1 text-xs font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none dark:bg-primary-900/50 dark:text-primary-300 dark:hover:bg-primary-900">
+                                        {t('unitDetail.createServiceRequest')}
                                     </button>
                                 </div>
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No tasks assigned to this unit.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('unitDetail.noTasksAssigned')}</p>
                 )}
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Service Requests</h3>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('unitDetail.serviceRequests')}</h3>
                 {unitServiceRequests.length > 0 ? (
                     <ul className="divide-y divide-gray-200 dark:divide-gray-700 -mx-6">
                         {unitServiceRequests.map(sr => (
@@ -206,7 +208,7 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
                                  <div className="flex justify-between items-start">
                                     <div>
                                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{getTaskName(sr.taskId)}</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">To: {getProviderName(sr.providerId)}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('unitDetail.to')} {getProviderName(sr.providerId)}</p>
                                     </div>
                                     <div className="text-right flex-shrink-0 ml-4">
                                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -221,7 +223,7 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No service requests for this unit.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('unitDetail.noServiceRequestsForUnit')}</p>
                 )}
             </div>
         </div>

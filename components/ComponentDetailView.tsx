@@ -1,6 +1,7 @@
 
 
 import React, { useRef, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Component, Building, MaintenanceTask, ServiceProvider, ServiceRequest } from '../types';
 import { ServiceRequestStatus, Recurrence, TaskStatus } from '../types';
 import ConfirmationModal from './ConfirmationModal';
@@ -81,6 +82,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
   onSelectRequest,
   onAddServiceRequest,
 }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isCreateRequestModalOpen, setIsCreateRequestModalOpen] = useState(false);
@@ -124,7 +126,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
         </svg>
-        Back to All Components
+        {t('componentDetail.backToAllComponents')}
       </button>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -144,7 +146,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                 <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
                 <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
                 </svg>
-                Edit
+                {t('componentDetail.edit')}
             </button>
             <button
                 onClick={() => setIsConfirmingDelete(true)}
@@ -153,7 +155,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                 <svg className="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
                 </svg>
-                Delete
+                {t('componentDetail.delete')}
             </button>
           </div>
         </div>
@@ -162,20 +164,20 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4 pb-3 border-b dark:border-gray-700">Details</h3>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4 pb-3 border-b dark:border-gray-700">{t('componentDetail.details')}</h3>
             <dl className="space-y-4">
-              <DetailItem label="Type" value={component.type} />
-              <DetailItem label="Category" value={`${component.parentCategory} / ${component.subCategory}`} />
-              <DetailItem label="Brand" value={component.brand} />
-              <DetailItem label="Model #" value={component.modelNumber} />
-              <DetailItem label="Serial #" value={component.serialNumber} />
-              <DetailItem label="Installation Date" value={component.installationDate ? new Date(component.installationDate + 'T12:00:00Z').toLocaleDateString() : null} />
-              <DetailItem label="Warranty End Date" value={component.warrantyEndDate ? new Date(component.warrantyEndDate + 'T12:00:00Z').toLocaleDateString() : null} />
+              <DetailItem label={t('componentDetail.type')} value={component.type} />
+              <DetailItem label={t('componentDetail.category')} value={`${component.parentCategory} / ${component.subCategory}`} />
+              <DetailItem label={t('componentDetail.brand')} value={component.brand} />
+              <DetailItem label={t('componentDetail.modelNumber')} value={component.modelNumber} />
+              <DetailItem label={t('componentDetail.serialNumber')} value={component.serialNumber} />
+              <DetailItem label={t('componentDetail.installationDate')} value={component.installationDate ? new Date(component.installationDate + 'T12:00:00Z').toLocaleDateString() : null} />
+              <DetailItem label={t('componentDetail.warrantyEndDate')} value={component.warrantyEndDate ? new Date(component.warrantyEndDate + 'T12:00:00Z').toLocaleDateString() : null} />
             </dl>
           </div>
            {component.notes && (
              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">Notes</h3>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">{t('componentDetail.notes')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{component.notes}</p>
              </div>
            )}
@@ -184,12 +186,12 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
         <div className="lg:col-span-2 space-y-8">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Images</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('componentDetail.images')}</h3>
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         className="px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                     >
-                        Add Image(s)
+                        {t('componentDetail.addImages')}
                     </button>
                     <input
                         type="file"
@@ -224,20 +226,20 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                         <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200 mt-2">No images yet</h4>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Add images to document this component.</p>
+                        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200 mt-2">{t('componentDetail.noImagesYet')}</h4>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t('componentDetail.addImagesHint')}</p>
                     </div>
                 )}
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Associated Maintenance</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('componentDetail.associatedMaintenance')}</h3>
                     <button
                         onClick={() => onOpenTaskModal(null, component.buildingId, component.id)}
                         className="px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                     >
-                        Add Task
+                        {t('componentDetail.addTask')}
                     </button>
                 </div>
                  {tasks.length > 0 ? (
@@ -259,14 +261,14 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                                             </div>
                                             <p className="text-gray-600 dark:text-gray-300 text-sm">{task.description}</p>
                                             <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-4 flex-wrap">
-                                                {provider && <span>Provider: <strong>{provider.name}</strong></span>}
-                                                {task.cost != null && <span>Cost: <strong>${task.cost.toFixed(2)}</strong></span>}
-                                                {task.taskDate && <span className="font-semibold">Date: {new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString()}</span>}
-                                                {isMasterRecurring && task.startDate && task.endDate && <span className="font-semibold">Range: {new Date(task.startDate + 'T12:00:00Z').toLocaleDateString()} to {new Date(task.endDate + 'T12:00:00Z').toLocaleDateString()}</span>}
+                                                {provider && <span>{t('componentDetail.provider')} <strong>{provider.name}</strong></span>}
+                                                {task.cost != null && <span>{t('componentDetail.cost')} <strong>${task.cost.toFixed(2)}</strong></span>}
+                                                {task.taskDate && <span className="font-semibold">{t('componentDetail.date')} {new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString()}</span>}
+                                                {isMasterRecurring && task.startDate && task.endDate && <span className="font-semibold">{t('componentDetail.range')} {new Date(task.startDate + 'T12:00:00Z').toLocaleDateString()} {t('componentDetail.to')} {new Date(task.endDate + 'T12:00:00Z').toLocaleDateString()}</span>}
                                             </div>
                                             {taskServiceRequests.length > 0 && (
                                                 <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                                                {taskServiceRequests.length} service request(s) sent.
+                                                {t('componentDetail.serviceRequestsSent', { count: taskServiceRequests.length })}
                                                 </div>
                                             )}
                                         </div>
@@ -276,7 +278,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                                                     onClick={(e) => { e.stopPropagation(); handleCreateRequestClick(task); }}
                                                     className="w-full md:w-auto px-3 py-2 text-sm font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-primary-900/50 dark:text-primary-300 dark:hover:bg-primary-900"
                                                 >
-                                                    Create Service Request
+                                                    {t('componentDetail.createServiceRequest')}
                                                 </button>
                                             </div>
                                         )}
@@ -287,23 +289,23 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                     </div>
                 ) : (
                      <div className="text-center py-6">
-                        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">No linked tasks</h4>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">No maintenance tasks are currently associated with this component.</p>
+                        <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">{t('componentDetail.noLinkedTasks')}</h4>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t('componentDetail.noLinkedTasksHint')}</p>
                     </div>
                 )}
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Associated Service Requests</h3>
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('componentDetail.associatedServiceRequests')}</h3>
                 {componentServiceRequests.length > 0 ? (
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Task</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Provider</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Scheduled</th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('componentDetail.tableTask')}</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('componentDetail.tableProvider')}</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('componentDetail.tableScheduled')}</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('componentDetail.tableStatus')}</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -322,8 +324,8 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                 </div>
                 ) : (
                 <div className="text-center py-6">
-                    <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">No Service Requests</h4>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">No service requests are linked to this component's tasks.</p>
+                    <h4 className="text-md font-medium text-gray-800 dark:text-gray-200">{t('componentDetail.noServiceRequests')}</h4>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t('componentDetail.noServiceRequestsHint')}</p>
                 </div>
                 )}
             </div>
@@ -336,9 +338,9 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
           isOpen={isConfirmingDelete}
           onClose={() => setIsConfirmingDelete(false)}
           onConfirm={handleConfirmDelete}
-          title="Confirm Component Deletion"
-          message={`Are you sure you want to delete the component "${component.name}"? This action cannot be undone.`}
-          confirmButtonText="Delete Component"
+          title={t('componentDetail.confirmDeletionTitle')}
+          message={t('componentDetail.confirmDeletionMessage', { name: component.name })}
+          confirmButtonText={t('componentDetail.deleteComponent')}
         />
       )}
       {isCreateRequestModalOpen && selectedTask && building && (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Notification } from '../types';
 
 interface NotificationsViewProps {
@@ -18,7 +19,7 @@ const getIcon = (view?: string) => {
     return view && ICONS[view] ? ICONS[view] : ICONS['default'];
 };
 
-const groupNotificationsByDate = (notifications: Notification[]) => {
+const groupNotificationsByDate = (notifications: Notification[], t: (key: string) => string) => {
   const groups: { [key: string]: Notification[] } = {};
   const today = new Date();
   const yesterday = new Date(today);
@@ -26,11 +27,11 @@ const groupNotificationsByDate = (notifications: Notification[]) => {
 
   notifications.forEach(notification => {
     const notificationDate = new Date(notification.createdAt);
-    let key = 'Older';
+    let key = t('notifications.older');
     if (notificationDate.toDateString() === today.toDateString()) {
-      key = 'Today';
+      key = t('notifications.today');
     } else if (notificationDate.toDateString() === yesterday.toDateString()) {
-      key = 'Yesterday';
+      key = t('notifications.yesterday');
     }
     if (!groups[key]) {
       groups[key] = [];
@@ -41,8 +42,9 @@ const groupNotificationsByDate = (notifications: Notification[]) => {
 };
 
 const NotificationsView: React.FC<NotificationsViewProps> = ({ notifications, onMarkAsRead, onMarkAllAsRead, onNavigate }) => {
+  const { t } = useTranslation();
   const sortedNotifications = [...notifications].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const groupedNotifications = groupNotificationsByDate(sortedNotifications);
+  const groupedNotifications = groupNotificationsByDate(sortedNotifications, t);
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
@@ -57,14 +59,14 @@ const NotificationsView: React.FC<NotificationsViewProps> = ({ notifications, on
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">Notifications</h2>
-          <p className="text-lg text-gray-500 dark:text-gray-400">View all your recent alerts and updates.</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('notifications.title')}</h2>
+          <p className="text-lg text-gray-500 dark:text-gray-400">{t('notifications.subtitle')}</p>
         </div>
         <button
           onClick={onMarkAllAsRead}
           className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
         >
-          Mark All as Read
+          {t('notifications.markAllAsRead')}
         </button>
       </div>
 
@@ -109,8 +111,8 @@ const NotificationsView: React.FC<NotificationsViewProps> = ({ notifications, on
             <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
             </svg>
-            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100 mt-2">All caught up!</h4>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">You have no new notifications.</p>
+            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100 mt-2">{t('notifications.allCaughtUp')}</h4>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">{t('notifications.noNewNotifications')}</p>
           </div>
         )}
       </div>

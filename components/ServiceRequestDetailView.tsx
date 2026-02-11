@@ -1,6 +1,7 @@
 
 
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, MaintenanceTask, Building, ServiceProvider, User, Comment, StatusChange } from '../types';
 import { ServiceRequestStatus, UserRole } from '../types';
 import { SERVICE_REQUEST_STATUSES } from '../constants';
@@ -45,6 +46,7 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
   onAddDocument,
   onDeleteDocument,
 }) => {
+    const { t } = useTranslation();
     const [newComment, setNewComment] = useState('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -58,9 +60,9 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
         return (
             <div>
                 <button onClick={onBack} className="flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 mb-6">
-                    &larr; Back
+                    &larr; {t('serviceRequestDetail.back')}
                 </button>
-                <p>Loading request details...</p>
+                <p>{t('serviceRequestDetail.loading')}</p>
             </div>
         );
     }
@@ -85,7 +87,7 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
     <div className="space-y-8">
       <button onClick={onBack} className="flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
-        Back to All Requests
+        {t('serviceRequestDetail.backToAllRequests')}
       </button>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -98,43 +100,43 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
             {/* --- Details Card --- */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Request Details</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('serviceRequestDetail.requestDetails')}</h3>
                     {!isProviderUser && (
                         <button
                             onClick={() => onEditRequest(request)}
                             className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
                         >
-                        Edit
+                        {t('serviceRequestDetail.edit')}
                         </button>
                     )}
                 </div>
                 <div className="space-y-4 text-sm">
                     <div>
-                        <label className="font-semibold text-gray-600 dark:text-gray-300">Provider</label>
+                        <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.provider')}</label>
                         <p className="text-gray-800 dark:text-gray-100">{provider.name}</p>
                     </div>
                     {request.unitNumber && (
                         <div>
-                            <label className="font-semibold text-gray-600 dark:text-gray-300">Unit</label>
+                            <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.unit')}</label>
                             <p className="text-gray-800 dark:text-gray-100">{request.unitNumber}</p>
                         </div>
                     )}
                     {request.componentName && (
                         <div>
-                            <label className="font-semibold text-gray-600 dark:text-gray-300">Component</label>
+                            <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.component')}</label>
                             <p className="text-gray-800 dark:text-gray-100">{request.componentName}</p>
                         </div>
                     )}
                     <div>
-                        <label className="font-semibold text-gray-600 dark:text-gray-300">Scheduled Date</label>
-                        <p className="text-gray-800 dark:text-gray-100">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : 'Not Set'}</p>
+                        <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.scheduledDate')}</label>
+                        <p className="text-gray-800 dark:text-gray-100">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : t('serviceRequestDetail.notSet')}</p>
                     </div>
                     <div>
-                        <label className="font-semibold text-gray-600 dark:text-gray-300">Estimated Cost</label>
+                        <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.estimatedCost')}</label>
                         <p className="text-gray-800 dark:text-gray-100">{request.cost ? `$${request.cost.toFixed(2)}` : 'N/A'}</p>
                     </div>
                      <div>
-                        <label className="font-semibold text-gray-600 dark:text-gray-300">Status</label>
+                        <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.status')}</label>
                         <select 
                             value={request.status} 
                             onChange={(e) => onUpdateRequestStatus(request.id, e.target.value as ServiceRequestStatus)}
@@ -151,9 +153,9 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
              {/* --- Documents Card --- */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Documents</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('serviceRequestDetail.documents')}</h3>
                     <button onClick={() => fileInputRef.current?.click()} className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
-                        Upload
+                        {t('serviceRequestDetail.upload')}
                     </button>
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                  </div>
@@ -177,7 +179,7 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
                             </div>
                         ))
                     ) : (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No documents uploaded.</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">{t('serviceRequestDetail.noDocuments')}</p>
                     )}
                  </div>
             </div>
@@ -185,19 +187,19 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
 
         {/* --- Comments and Activity Column --- */}
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Activity & Comments</h3>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('serviceRequestDetail.activityComments')}</h3>
             <form onSubmit={handleAddComment} className="mb-6">
                 <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     rows={3}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Leave a comment..."
+                    placeholder={t('serviceRequestDetail.commentPlaceholder')}
                     required
                 ></textarea>
                 <div className="flex justify-end mt-2">
                     <button type="submit" className="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none">
-                        Post Comment
+                        {t('serviceRequestDetail.postComment')}
                     </button>
                 </div>
             </form>
@@ -235,7 +237,7 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
                                         </div>
                                     </div>
                                     <div className="flex-1 text-sm text-gray-600 dark:text-gray-300">
-                                        <strong>{statusChange.changedBy}</strong> changed status to <span className={`font-semibold px-1.5 py-0.5 rounded-md ${statusColorMap[statusChange.status]}`}>{statusChange.status}</span>
+                                        <strong>{statusChange.changedBy}</strong> {t('serviceRequestDetail.changedStatusTo')} <span className={`font-semibold px-1.5 py-0.5 rounded-md ${statusColorMap[statusChange.status]}`}>{statusChange.status}</span>
                                         <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{new Date(statusChange.changedAt).toLocaleString()}</span>
                                     </div>
                                 </div>
@@ -243,7 +245,7 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
                         }
                     })
                 ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-4">No activity yet.</p>
+                    <p className="text-center text-gray-500 dark:text-gray-400 py-4">{t('serviceRequestDetail.noActivity')}</p>
                 )}
             </div>
         </div>

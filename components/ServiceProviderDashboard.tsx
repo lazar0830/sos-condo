@@ -1,6 +1,7 @@
 
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, MaintenanceTask, Building } from '../types';
 import { ServiceRequestStatus } from '../types';
 
@@ -24,6 +25,7 @@ const getSpecialtyColor = (specialty: string) => {
 };
 
 const ServiceProviderDashboard: React.FC<ServiceProviderDashboardProps> = ({ requests, tasks, buildings, onUpdateRequestStatus, onSelectRequest }) => {
+  const { t } = useTranslation();
   const getRequestDetails = (request: ServiceRequest) => {
     const task = tasks.find(t => t.id === request.taskId);
     const building = buildings.find(b => b.id === task?.buildingId);
@@ -54,20 +56,20 @@ const ServiceProviderDashboard: React.FC<ServiceProviderDashboardProps> = ({ req
         case ServiceRequestStatus.Sent:
             return (
                 <>
-                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Accepted)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700">Accept</button>
-                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Refused)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700">Refuse</button>
+                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Accepted)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700">{t('serviceProviderDashboard.accept')}</button>
+                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Refused)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700">{t('serviceProviderDashboard.refuse')}</button>
                 </>
             );
         case ServiceRequestStatus.Accepted:
             return (
                 <>
-                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.InProgress)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600">Start Work</button>
-                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Completed)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">Mark Completed</button>
+                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.InProgress)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600">{t('serviceProviderDashboard.startWork')}</button>
+                    <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Completed)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">{t('serviceProviderDashboard.markCompleted')}</button>
                 </>
             );
         case ServiceRequestStatus.InProgress:
             return (
-                <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Completed)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">Mark Completed</button>
+                <button onClick={(e) => handleButtonClick(e, ServiceRequestStatus.Completed)} className="px-3 py-1.5 text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">{t('serviceProviderDashboard.markCompleted')}</button>
             );
         default:
             return null; // No actions for Refused or Completed
@@ -77,8 +79,8 @@ const ServiceProviderDashboard: React.FC<ServiceProviderDashboardProps> = ({ req
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">My Service Requests</h2>
-        <p className="text-lg text-gray-500 dark:text-gray-400">Here are the jobs assigned to you.</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('serviceProviderDashboard.title')}</h2>
+        <p className="text-lg text-gray-500 dark:text-gray-400">{t('serviceProviderDashboard.subtitle')}</p>
       </div>
 
       {sortedRequests.length > 0 ? (
@@ -99,19 +101,19 @@ const ServiceProviderDashboard: React.FC<ServiceProviderDashboardProps> = ({ req
                   </div>
                   <div className="mt-2 space-y-3 text-sm">
                       <div>
-                          <p className="font-semibold text-gray-600 dark:text-gray-300">Scheduled Date</p>
+                          <p className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceProviderDashboard.scheduledDate')}</p>
                           <p className="text-gray-800 dark:text-gray-100">{request.scheduledDate 
                             ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-                            : 'Not yet scheduled'
+                            : t('serviceProviderDashboard.notYetScheduled')
                           }</p>
                       </div>
                       <div>
-                          <p className="font-semibold text-gray-600 dark:text-gray-300">Location</p>
+                          <p className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceProviderDashboard.location')}</p>
                           <p className="text-gray-800 dark:text-gray-100">{building?.address || 'N/A'}</p>
                       </div>
                       <div>
-                          <p className="font-semibold text-gray-600 dark:text-gray-300">Manager Notes</p>
-                          <p className="text-gray-500 dark:text-gray-400 italic">{request.notes || 'No additional notes.'}</p>
+                          <p className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceProviderDashboard.managerNotes')}</p>
+                          <p className="text-gray-500 dark:text-gray-400 italic">{request.notes || t('serviceProviderDashboard.noAdditionalNotes')}</p>
                       </div>
                   </div>
                 </div>
@@ -129,8 +131,8 @@ const ServiceProviderDashboard: React.FC<ServiceProviderDashboardProps> = ({ req
             <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100 mt-2">No service requests assigned</h4>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">You currently have no jobs in the system.</p>
+            <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100 mt-2">{t('serviceProviderDashboard.noRequestsAssigned')}</h4>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">{t('serviceProviderDashboard.noJobsInSystem')}</p>
         </div>
       )}
     </div>
