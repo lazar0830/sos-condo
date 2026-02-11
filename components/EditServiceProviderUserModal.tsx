@@ -89,16 +89,16 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.loginEmail')}</label>
-                    <input type="email" name="email" id="email" value={userData.email} onChange={handleUserChange} className="mt-1 block w-full input" required disabled={isEditing} />
+                    <input type="email" name="email" id="email" value={userData.email} onChange={handleUserChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required disabled={isEditing} />
                 </div>
                  <div>
                     <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.displayName')}</label>
-                    <input type="text" name="username" id="username" value={userData.username} onChange={handleUserChange} className="mt-1 block w-full input" required />
+                    <input type="text" name="username" id="username" value={userData.username} onChange={handleUserChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required />
                 </div>
                 {!isEditing && (
                     <div className="md:col-span-2">
                         <label htmlFor="password"className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.password')}</label>
-                        <input type="password" name="password" id="password" value={userData.password} onChange={handleUserChange} className="mt-1 block w-full input" placeholder={isEditing ? t('modals.editServiceProviderUser.passwordPlaceholder') : ''} required={!isEditing} />
+                        <input type="password" name="password" id="password" value={userData.password} onChange={handleUserChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" placeholder={isEditing ? t('modals.editServiceProviderUser.passwordPlaceholder') : ''} required={!isEditing} />
                     </div>
                 )}
             </div>
@@ -110,11 +110,11 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.providerName')}</label>
-                    <input type="text" name="name" id="name" value={providerData.name} onChange={handleProviderChange} className="mt-1 block w-full input" required />
+                    <input type="text" name="name" id="name" value={providerData.name} onChange={handleProviderChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required />
                 </div>
                 <div>
                     <label htmlFor="providerEmail" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.contactEmail')}</label>
-                    <input type="email" name="email" id="providerEmail" value={providerData.email} onChange={handleProviderChange} className="mt-1 block w-full input" required />
+                    <input type="email" name="email" id="providerEmail" value={providerData.email} onChange={handleProviderChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required />
                 </div>
                 <div>
                     <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.specialty')}</label>
@@ -123,7 +123,7 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
                         id="specialty" 
                         value={providerData.specialty} 
                         onChange={handleProviderChange} 
-                        className="mt-1 block w-full input"
+                        className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
                         required
                     >
                         {SERVICE_PROVIDER_SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -131,11 +131,11 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
                 </div>
                 <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.phone')}</label>
-                    <input type="tel" name="phone" id="phone" value={providerData.phone} onChange={handleProviderChange} className="mt-1 block w-full input" />
+                    <input type="tel" name="phone" id="phone" value={providerData.phone} onChange={handleProviderChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
                 <div className="md:col-span-2">
                     <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.contactPerson')}</label>
-                    <input type="text" name="contactPerson" id="contactPerson" value={providerData.contactPerson} onChange={handleProviderChange} className="mt-1 block w-full input" />
+                    <input type="text" name="contactPerson" id="contactPerson" value={providerData.contactPerson} onChange={handleProviderChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
             </div>
         </fieldset>
@@ -149,7 +149,6 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
           </button>
         </div>
       </form>
-       <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; } .input:disabled { background-color: #F3F4F6; color: #6B7280; cursor: not-allowed; } .dark .input:disabled { background-color: #1F2937; color: #4B5563; }`}</style>
     </Modal>
   );
 };

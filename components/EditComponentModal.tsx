@@ -232,7 +232,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                   <label htmlFor="buildingId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.property')}</label>
-                  <select name="buildingId" id="buildingId" value={formData.buildingId} onChange={handleChange} className="mt-1 block w-full input" required>
+                  <select name="buildingId" id="buildingId" value={formData.buildingId} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required>
                       <option value="" disabled>{t('modals.common.selectProperty')}</option>
                       {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
@@ -240,21 +240,21 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
               <div className="md:col-span-2 border-t dark:border-gray-700 pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                  <div>
                     <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.type')}</label>
-                    <select name="type" id="type" value={formData.type} onChange={handleTypeChange} className="mt-1 block w-full input" required>
+                    <select name="type" id="type" value={formData.type} onChange={handleTypeChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required>
                         <option value="" disabled>{t('modals.editComponent.selectType')}</option>
                         {COMPONENT_TYPES.map(cType => <option key={cType} value={cType}>{cType}</option>)}
                     </select>
                   </div>
                    <div>
                     <label htmlFor="parentCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.parentCategory')}</label>
-                    <select name="parentCategory" id="parentCategory" value={formData.parentCategory} onChange={handleParentCategoryChange} className="mt-1 block w-full input" disabled={parentCategories.length === 0} required>
+                    <select name="parentCategory" id="parentCategory" value={formData.parentCategory} onChange={handleParentCategoryChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" disabled={parentCategories.length === 0} required>
                         <option value="">{t('modals.editComponent.selectCategory')}</option>
                         {parentCategories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                    <div>
                     <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.subCategory')}</label>
-                    <select name="subCategory" id="subCategory" value={formData.subCategory} onChange={handleSubCategoryChange} className="mt-1 block w-full input" disabled={subCategories.length === 0} required>
+                    <select name="subCategory" id="subCategory" value={formData.subCategory} onChange={handleSubCategoryChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" disabled={subCategories.length === 0} required>
                         <option value="">{t('modals.editComponent.selectCategory')}</option>
                         {subCategories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
@@ -264,7 +264,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                <div className="md:col-span-2">
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.componentName')}</label>
                   {componentNames.length > 0 ? (
-                    <select name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full input" required>
+                    <select name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required>
                         <option value="">{t('modals.editComponent.selectComponent')}</option>
                         {componentNames.map(name => <option key={name} value={name}>{name}</option>)}
                     </select>
@@ -275,7 +275,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                         id="name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="mt-1 block w-full input"
+                        className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
                         required
                         placeholder={formData.subCategory ? t('modals.editComponent.enterComponentName') : t('modals.editComponent.selectCategoriesFirst')}
                         disabled={!formData.subCategory}
@@ -285,7 +285,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
 
                <div>
                   <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.locationOptional')}</label>
-                  <input type="text" name="location" id="location" value={formData.location} onChange={handleChange} className="mt-1 block w-full input" placeholder="e.g., Rooftop, Unit 502, Boiler Room" />
+                  <input type="text" name="location" id="location" value={formData.location} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" placeholder="e.g., Rooftop, Unit 502, Boiler Room" />
               </div>
               <div>
                   <label htmlFor="unitId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.unitOptional')}</label>
@@ -294,7 +294,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                       id="unitId"
                       value={formData.unitId}
                       onChange={handleUnitChange}
-                      className="mt-1 block w-full input"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
                       disabled={!formData.buildingId || buildingUnits.length === 0}
                   >
                       <option value="">
@@ -313,28 +313,28 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
               <div className="md:col-span-2 border-t dark:border-gray-700 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.brandOptional')}</label>
-                  <input type="text" name="brand" id="brand" value={formData.brand} onChange={handleChange} className="mt-1 block w-full input" />
+                  <input type="text" name="brand" id="brand" value={formData.brand} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
                 <div>
                   <label htmlFor="modelNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.modelOptional')}</label>
-                  <input type="text" name="modelNumber" id="modelNumber" value={formData.modelNumber} onChange={handleChange} className="mt-1 block w-full input" />
+                  <input type="text" name="modelNumber" id="modelNumber" value={formData.modelNumber} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
                 <div className="md:col-span-2">
                   <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.serialOptional')}</label>
-                  <input type="text" name="serialNumber" id="serialNumber" value={formData.serialNumber} onChange={handleChange} className="mt-1 block w-full input" />
+                  <input type="text" name="serialNumber" id="serialNumber" value={formData.serialNumber} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
                 <div>
                     <label htmlFor="installationDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.installationDateOptional')}</label>
-                    <input type="date" name="installationDate" id="installationDate" value={formData.installationDate} onChange={handleChange} className="mt-1 block w-full input" />
+                    <input type="date" name="installationDate" id="installationDate" value={formData.installationDate} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
                 <div>
                     <label htmlFor="warrantyEndDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.warrantyEndDateOptional')}</label>
-                    <input type="date" name="warrantyEndDate" id="warrantyEndDate" value={formData.warrantyEndDate} onChange={handleChange} className="mt-1 block w-full input" />
+                    <input type="date" name="warrantyEndDate" id="warrantyEndDate" value={formData.warrantyEndDate} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
               </div>
               <div className="md:col-span-2">
                   <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.notesOptional')}</label>
-                  <textarea name="notes" id="notes" value={formData.notes} onChange={handleChange} rows={3} className="mt-1 block w-full input"></textarea>
+                  <textarea name="notes" id="notes" value={formData.notes} onChange={handleChange} rows={3} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"></textarea>
               </div>
               <div className="md:col-span-2 border-t dark:border-gray-700 pt-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.images')}</label>
@@ -385,7 +385,6 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
             </div>
           </div>
         </form>
-         <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; } .dark .input::placeholder { color: #9CA3AF; } .dark .input:disabled { background-color: #1F2937; cursor: not-allowed; }`}</style>
       </Modal>
       {component && (
         <ConfirmationModal

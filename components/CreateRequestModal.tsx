@@ -1,6 +1,7 @@
 
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest } from '../types';
 import { ServiceRequestStatus } from '../types';
 import { generateServiceRequestEmail } from '../services/geminiService';
@@ -25,6 +26,7 @@ const getTwoDaysFromNow = () => {
 };
 
 const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task, providers, onClose, onAddServiceRequest, isForOverdueTask = false }) => {
+  const { t } = useTranslation();
   const [providerId, setProviderId] = useState(task.providerId || '');
   const [notes, setNotes] = useState('');
   const [generatedEmail, setGeneratedEmail] = useState('');
@@ -36,7 +38,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
   const handleGenerateEmail = async () => {
     const selectedProvider = providers.find(p => p.id === providerId);
     if (!selectedProvider) {
-      alert("Please select a service provider.");
+      alert(t('modals.createRequest.selectProviderAlert'));
       return;
     }
     setIsLoading(true);
@@ -47,11 +49,11 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
 
   const handleSendRequest = () => {
     if (!generatedEmail) {
-        alert("Please generate the email content first.");
+        alert(t('modals.createRequest.generateEmailAlert'));
         return;
     }
     if(!providerId) {
-        alert("Please select a provider.");
+        alert(t('modals.createRequest.selectProviderRequired'));
         return;
     }
     const selectedProvider = providers.find(p => p.id === providerId);
@@ -78,31 +80,33 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
 
   if (isSent) {
     return (
-        <Modal isOpen={true} onClose={onClose} title="Request Sent">
+        <Modal isOpen={true} onClose={onClose} title={t('modals.createRequest.titleSent')}>
             <div className="text-center py-8">
                 <svg className="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Service request successfully sent!</h3>
-                <p className="mt-1 text-gray-500 dark:text-gray-400">The modal will close shortly.</p>
+                <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">{t('modals.createRequest.successMessage')}</h3>
+                <p className="mt-1 text-gray-500 dark:text-gray-400">{t('modals.createRequest.closingMessage')}</p>
             </div>
         </Modal>
     );
   }
 
+  const inputClasses = "mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none";
+
   return (
-    <Modal isOpen={true} onClose={onClose} title={`Request for: ${task.name}`}>
+    <Modal isOpen={true} onClose={onClose} title={t('modals.createRequest.title', { name: task.name })}>
       <div className="space-y-4">
         <div>
-            <label htmlFor="provider" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Service Provider</label>
+            <label htmlFor="provider" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.createRequest.serviceProvider')}</label>
             <select
               id="provider"
               value={providerId}
               onChange={(e) => setProviderId(e.target.value)}
-              className="mt-1 block w-full input"
+              className={inputClasses}
               required
             >
-              <option value="" disabled>Select a provider...</option>
+              <option value="" disabled>{t('modals.common.selectProvider')}</option>
               {providers.filter(p => p.specialty === task.specialty).map(p => (
                 <option key={p.id} value={p.id}>{p.name} ({p.specialty})</option>
               ))}
@@ -110,33 +114,33 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
         </div>
         {isForOverdueTask && (
             <div>
-                <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Scheduled Date</label>
-                <input type="date" id="scheduledDate" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} className="mt-1 block w-full input" required />
-                <p className="mt-1 text-xs text-amber-600">This is for an overdue task. Please schedule promptly.</p>
+                <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.createRequest.scheduledDate')}</label>
+                <input type="date" id="scheduledDate" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} className={inputClasses} required />
+                <p className="mt-1 text-xs text-amber-600">{t('modals.createRequest.overdueWarning')}</p>
             </div>
         )}
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Additional Notes</label>
-          <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="mt-1 block w-full input" placeholder="e.g., Please call upon arrival."></textarea>
+          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.createRequest.additionalNotes')}</label>
+          <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClasses} placeholder={t('modals.createRequest.notesPlaceholder')}></textarea>
         </div>
         
         <div className="pt-2">
-            <button onClick={handleGenerateEmail} disabled={isLoading || !providerId} className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300">
+            <button onClick={handleGenerateEmail} disabled={isLoading || !providerId} className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 dark:disabled:bg-indigo-800">
                 {isLoading ? (
                     <>
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Generating with AI...
+                        {t('modals.createRequest.generatingWithAI')}
                     </>
-                ) : 'Generate Email Content'}
+                ) : t('modals.createRequest.generateEmailContent')}
             </button>
         </div>
 
         {generatedEmail && (
             <div className="space-y-2 pt-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Generated Email Preview</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.createRequest.generatedEmailPreview')}</label>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 max-h-48 overflow-y-auto">
                     <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 font-sans">{generatedEmail}</pre>
                 </div>
@@ -145,39 +149,13 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
 
         <div className="flex justify-end pt-4 space-x-2">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
-            Cancel
+            {t('modals.common.cancel')}
           </button>
-          <button type="button" onClick={handleSendRequest} disabled={!generatedEmail} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none disabled:bg-primary-300">
-            Send Request
+          <button type="button" onClick={handleSendRequest} disabled={!generatedEmail} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none disabled:bg-primary-300 dark:disabled:bg-primary-800">
+            {t('modals.createRequest.sendRequest')}
           </button>
         </div>
       </div>
-      <style>{`
-        .input { 
-          border-radius: 0.375rem; 
-          border: 1px solid #D1D5DB; 
-          padding: 0.5rem 0.75rem; 
-          width: 100%; 
-          appearance: none; 
-          background-color: #fff;
-          color: #111827;
-        } 
-        .input:focus { 
-          outline: 2px solid transparent; 
-          outline-offset: 2px; 
-          border-color: #3b82f6; 
-          box-shadow: 0 0 0 1px #3b82f6; 
-        }
-        .dark .input {
-          background-color: #374151;
-          border-color: #4B5563;
-          color: #F3F4F6;
-        }
-        .dark .input:focus {
-          border-color: #60a5fa;
-          box-shadow: 0 0 0 1px #60a5fa;
-        }
-      `}</style>
     </Modal>
   );
 };

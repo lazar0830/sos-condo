@@ -81,11 +81,11 @@ const EditProviderModal: React.FC<EditProviderModalProps> = ({ provider, onClose
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.providerName')}</label>
-            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full input" required />
+            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" required />
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.email')}</label>
-            <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full input" required />
+            <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" required />
           </div>
           <div>
             <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.specialty')}</label>
@@ -94,7 +94,7 @@ const EditProviderModal: React.FC<EditProviderModalProps> = ({ provider, onClose
                 id="specialty" 
                 value={formData.specialty} 
                 onChange={handleChange} 
-                className="mt-1 block w-full input"
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none"
                 required
             >
                 {SERVICE_PROVIDER_SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -102,27 +102,27 @@ const EditProviderModal: React.FC<EditProviderModalProps> = ({ provider, onClose
           </div>
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.phone')}</label>
-            <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="mt-1 block w-full input" />
+            <input type="tel" name="phone" id="phone" value={formData.phone} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" />
           </div>
            <div>
             <label htmlFor="businessOwner" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.businessOwner')}</label>
-            <input type="text" name="businessOwner" id="businessOwner" value={formData.businessOwner} onChange={handleChange} className="mt-1 block w-full input" />
+            <input type="text" name="businessOwner" id="businessOwner" value={formData.businessOwner} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" />
           </div>
           <div>
             <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.contactPerson')}</label>
-            <input type="text" name="contactPerson" id="contactPerson" value={formData.contactPerson} onChange={handleChange} className="mt-1 block w-full input" />
+            <input type="text" name="contactPerson" id="contactPerson" value={formData.contactPerson} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" />
           </div>
           <div className="md:col-span-2">
             <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.address')}</label>
-            <input type="text" name="address" id="address" value={formData.address} onChange={handleChange} className="mt-1 block w-full input" />
+            <input type="text" name="address" id="address" value={formData.address} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" />
           </div>
           <div className="md:col-span-2">
             <label htmlFor="website" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.website')}</label>
-            <input type="url" name="website" id="website" value={formData.website} onChange={handleChange} className="mt-1 block w-full input" placeholder="https://example.com" />
+            <input type="url" name="website" id="website" value={formData.website} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" placeholder="https://example.com" />
           </div>
           <div className="md:col-span-2">
             <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.notes')}</label>
-            <textarea name="notes" id="notes" value={formData.notes} onChange={handleChange} rows={3} className="mt-1 block w-full input"></textarea>
+            <textarea name="notes" id="notes" value={formData.notes} onChange={handleChange} rows={3} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none"></textarea>
           </div>
         </div>
         <div className="flex justify-end pt-4 space-x-2">
@@ -134,7 +134,6 @@ const EditProviderModal: React.FC<EditProviderModalProps> = ({ provider, onClose
           </button>
         </div>
       </form>
-       <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; }`}</style>
     </Modal>
   );
 };

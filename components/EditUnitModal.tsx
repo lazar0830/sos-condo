@@ -81,7 +81,7 @@ const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose
             name="unitNumber"
             value={formData.unitNumber}
             onChange={handleChange}
-            className="mt-1 block w-full input"
+            className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none"
             placeholder={t('modals.editUnit.unitNumberPlaceholder')}
             required
           />
@@ -92,23 +92,23 @@ const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose
             <div className="space-y-4">
                 <div>
                     <label htmlFor="occupant.name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.occupantName')}</label>
-                    <input type="text" id="occupant.name" name="occupant.name" value={formData.occupant.name} onChange={handleChange} className="mt-1 block w-full input" />
+                    <input type="text" id="occupant.name" name="occupant.name" value={formData.occupant.name} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className='md:col-span-1'>
                         <label htmlFor="occupant.type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.occupantType')}</label>
-                        <select id="occupant.type" name="occupant.type" value={formData.occupant.type} onChange={handleChange} className="mt-1 block w-full input">
+                        <select id="occupant.type" name="occupant.type" value={formData.occupant.type} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none">
                             <option value={OccupantType.Renter}>{t('modals.editUnit.renter')}</option>
                             <option value={OccupantType.Owner}>{t('modals.editUnit.owner')}</option>
                         </select>
                     </div>
                     <div>
                         <label htmlFor="occupant.startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.startDate')}</label>
-                        <input type="date" id="occupant.startDate" name="occupant.startDate" value={formData.occupant.startDate} onChange={handleChange} className="mt-1 block w-full input" />
+                        <input type="date" id="occupant.startDate" name="occupant.startDate" value={formData.occupant.startDate} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" />
                     </div>
                     <div>
                         <label htmlFor="occupant.endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.endDate')}</label>
-                        <input type="date" id="occupant.endDate" name="occupant.endDate" value={formData.occupant.endDate} onChange={handleChange} className="mt-1 block w-full input" />
+                        <input type="date" id="occupant.endDate" name="occupant.endDate" value={formData.occupant.endDate} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" />
                     </div>
                 </div>
             </div>
@@ -123,7 +123,6 @@ const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose
           </button>
         </div>
       </form>
-      <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; }`}</style>
     </Modal>
   );
 };

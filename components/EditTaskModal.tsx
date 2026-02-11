@@ -190,15 +190,15 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskName')}</label>
-                  <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full input" required />
+                  <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required />
               </div>
               <div className="md:col-span-2">
                   <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.descriptionOptional')}</label>
-                  <textarea name="description" id="description" value={formData.description} onChange={handleChange} rows={3} className="mt-1 block w-full input"></textarea>
+                  <textarea name="description" id="description" value={formData.description} onChange={handleChange} rows={3} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"></textarea>
               </div>
               <div>
                   <label htmlFor="buildingId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.property')}</label>
-                  <select name="buildingId" id="buildingId" value={formData.buildingId} onChange={handleChange} className="mt-1 block w-full input" required>
+                  <select name="buildingId" id="buildingId" value={formData.buildingId} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required>
                       <option value="" disabled>{t('modals.common.selectProperty')}</option>
                       {buildings.length > 0 ? (
                         buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)
@@ -209,14 +209,14 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
               </div>
               <div>
                   <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.specialty')}</label>
-                  <select name="specialty" id="specialty" value={formData.specialty} onChange={handleChange} className="mt-1 block w-full input" required disabled={!!formData.providerId}>
+                  <select name="specialty" id="specialty" value={formData.specialty} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required disabled={!!formData.providerId}>
                       <option value="" disabled>{t('modals.editTask.selectSpecialty')}</option>
                       {allSpecialties.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
               </div>
               <div>
                   <label htmlFor="providerId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.serviceProviderOptional')}</label>
-                  <select name="providerId" id="providerId" value={formData.providerId} onChange={handleChange} className="mt-1 block w-full input">
+                  <select name="providerId" id="providerId" value={formData.providerId} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed">
                       <option value="">{t('modals.common.none')}</option>
                       {providers.filter(p => p.specialty === formData.specialty).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
@@ -228,7 +228,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                       id="unitId"
                       value={formData.unitId}
                       onChange={handleChange}
-                      className="mt-1 block w-full input"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
                       disabled={!formData.buildingId || buildingUnits.length === 0}
                   >
                       <option value="">
@@ -250,7 +250,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                       id="componentId"
                       value={formData.componentId}
                       onChange={handleComponentChange}
-                      className="mt-1 block w-full input"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
                       disabled={!formData.buildingId || buildingComponents.length === 0}
                   >
                       <option value="">
@@ -267,37 +267,37 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
               </div>
                <div>
                   <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.status')}</label>
-                  <select name="status" id="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full input">
+                  <select name="status" id="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed">
                       {TASK_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
               </div>
               <div>
                 <label htmlFor="recurrence" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.recurrence')}</label>
-                <select name="recurrence" id="recurrence" value={formData.recurrence} onChange={handleChange} className="mt-1 block w-full input">
+                <select name="recurrence" id="recurrence" value={formData.recurrence} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed">
                     {RECURRENCE_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               {formData.recurrence === Recurrence.OneTime ? (
                    <div>
                       <label htmlFor="taskDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskDate')}</label>
-                      <input type="date" name="taskDate" id="taskDate" value={formData.taskDate} onChange={handleChange} className="mt-1 block w-full input" required/>
+                      <input type="date" name="taskDate" id="taskDate" value={formData.taskDate} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required/>
                   </div>
               ) : (
                   <>
                       <div>
                           <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskFirstDate')}</label>
-                          <input type="date" name="startDate" id="startDate" value={formData.startDate} onChange={handleChange} className="mt-1 block w-full input" required />
+                          <input type="date" name="startDate" id="startDate" value={formData.startDate} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required />
                       </div>
                       <div>
                           <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskEndDate')}</label>
-                          <input type="date" name="endDate" id="endDate" value={formData.endDate} onChange={handleChange} className="mt-1 block w-full input" required />
+                          <input type="date" name="endDate" id="endDate" value={formData.endDate} onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" required />
                       </div>
                   </>
               )}
                <div className="md:col-span-2">
                   <label htmlFor="cost" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.estimatedCost')}</label>
                   <div className="mt-1">
-                      <input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} className="block w-full input" placeholder="0.00" step="0.01" min="0" required />
+                      <input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} className="block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none" placeholder="0.00" step="0.01" min="0" required />
                   </div>
               </div>
           </div>
@@ -319,7 +319,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
             </div>
           </div>
         </form>
-         <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; } .dark .input::placeholder { color: #9CA3AF; } .dark .input:disabled { background-color: #1F2937; cursor: not-allowed; }`}</style>
       </Modal>
       {task && (
         <ConfirmationModal
