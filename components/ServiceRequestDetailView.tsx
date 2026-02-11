@@ -58,11 +58,23 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
 
     if (!task || !building || !provider) {
         return (
-            <div>
-                <button onClick={onBack} className="flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 mb-6">
-                    &larr; {t('serviceRequestDetail.back')}
+            <div className="space-y-4">
+                <button onClick={onBack} className="flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+                    {t('serviceRequestDetail.back')}
                 </button>
-                <p>{t('serviceRequestDetail.loading')}</p>
+                <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-6 text-center">
+                    <svg className="mx-auto h-12 w-12 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <h3 className="mt-4 text-lg font-semibold text-amber-800 dark:text-amber-200">{t('serviceRequestDetail.dataNotFound')}</h3>
+                    <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{t('serviceRequestDetail.dataNotFoundHint')}</p>
+                    <div className="mt-4 text-xs text-amber-600 dark:text-amber-400 space-y-1">
+                        {!task && <p>{t('serviceRequestDetail.taskMissing')}</p>}
+                        {!provider && <p>{t('serviceRequestDetail.providerMissing')}</p>}
+                        {task && !building && <p>{t('serviceRequestDetail.buildingMissing')}</p>}
+                    </div>
+                </div>
             </div>
         );
     }

@@ -277,12 +277,31 @@ const App: React.FC = () => {
 
   const handleDeleteTask = async (taskId: string) => {
     const taskToDelete = tasks.find(t => t.id === taskId);
+    
+    // Collect all task IDs to delete (including recurring instances)
+    const taskIdsToDelete: string[] = [];
     if (taskToDelete?.recurrence !== Recurrence.OneTime) {
-      for (const t of tasks.filter(t => t.recurringTaskId === taskId || t.id === taskId)) await fs.deleteTask(t.id);
+      taskIdsToDelete.push(...tasks.filter(t => t.recurringTaskId === taskId || t.id === taskId).map(t => t.id));
     } else {
-      await fs.deleteTask(taskId);
+      taskIdsToDelete.push(taskId);
     }
-    setNotification({ type: 'success', message: 'Task deleted successfully!' });
+    
+    // Delete all related service requests first
+    const relatedRequests = serviceRequests.filter(sr => taskIdsToDelete.includes(sr.taskId));
+    for (const request of relatedRequests) {
+      await fs.deleteRequest(request.id);
+    }
+    
+    // Then delete the tasks
+    for (const id of taskIdsToDelete) {
+      await fs.deleteTask(id);
+    }
+    
+    const deletedRequestCount = relatedRequests.length;
+    const message = deletedRequestCount > 0 
+      ? `Task deleted successfully! ${deletedRequestCount} related service request(s) also removed.`
+      : 'Task deleted successfully!';
+    setNotification({ type: 'success', message });
   };
 
   const handleSaveComponent = async (componentData: Omit<Component, 'id'> | Component) => {
@@ -360,8 +379,27 @@ const App: React.FC = () => {
   };
 
   const handleDeleteProvider = async (providerId: string) => {
+    // Delete all service requests associated with this provider first
+    const relatedRequests = serviceRequests.filter(sr => sr.providerId === providerId);
+    for (const request of relatedRequests) {
+      await fs.deleteRequest(request.id);
+    }
+    
+    // Then delete the provider
     await fs.deleteProvider(providerId);
-    setNotification({ type: 'success', message: 'Provider deleted successfully!' });
+    
+    const deletedRequestCount = relatedRequests.length;
+    const message = deletedRequestCount > 0 
+      ? `Provider deleted successfully! ${deletedRequestCount} related service request(s) also removed.`
+      : 'Provider deleted successfully!';
+    setNotification({ type: 'success', message });
+  };
+
+  const handleDeleteOrphanedRequests = async (requestIds: string[]) => {
+    for (const requestId of requestIds) {
+      await fs.deleteRequest(requestId);
+    }
+    setNotification({ type: 'success', message: `${requestIds.length} orphaned service request(s) deleted successfully!` });
   };
 
   const handleSaveUser = async (userData: Omit<User, 'id'> | User, password?: string): Promise<boolean> => {
@@ -785,7 +823,7 @@ const App: React.FC = () => {
         if (selectedRequest) {
           const task = visibleTasks.find(t => t.id === selectedRequest.taskId);
           const building = visibleBuildings.find(b => b.id === task?.buildingId);
-          const provider = providers.find(p => p.id === selectedRequest.providerId);
+          const provider = visibleProviders.find(p => p.id === selectedRequest.providerId);
           return <ServiceRequestDetailView request={selectedRequest} task={task} building={building} provider={provider} currentUser={currentUser} onBack={() => setSelectedRequestId(null)} onUpdateRequestStatus={handleUpdateServiceRequestStatus} onAddComment={handleAddComment} onEditRequest={handleOpenRequestModal} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />;
         }
         return <ServiceRequestsView requests={visibleServiceRequests} tasks={visibleTasks} buildings={visibleBuildings} providers={visibleProviders} onSelectRequest={handleSelectRequest} />;
@@ -820,7 +858,12 @@ const App: React.FC = () => {
             />
         );
        case 'tools':
-         return <ToolsView />;
+         return <ToolsView 
+           serviceRequests={serviceRequests}
+           tasks={tasks}
+           providers={providers}
+           onDeleteOrphanedRequests={handleDeleteOrphanedRequests}
+         />;
       case 'account':
         return <MyAccountView currentUser={currentUser} onUpdateCurrentUser={handleUpdateCurrentUser} onSaveProvider={handleSaveProviderProfile} serviceProviderProfile={providers.find(p => p.userId === currentUser.id)} />;
       case 'management':
