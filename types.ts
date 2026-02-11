@@ -183,6 +183,11 @@ export interface ServiceRequest {
   componentName?: string;
   unitId?: string;
   unitNumber?: string;
+  // Email tracking fields (set by Cloud Function)
+  emailSent?: boolean;
+  emailSentAt?: string;
+  emailMessageId?: string;
+  emailError?: string;
 }
 
 export interface Expense {
