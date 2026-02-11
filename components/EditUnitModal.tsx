@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Unit, OccupantType } from '../types';
 import Modal from './Modal';
 
@@ -11,6 +12,7 @@ interface EditUnitModalProps {
 }
 
 const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose, onSave }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     unitNumber: '',
     occupant: { name: '', type: OccupantType.Renter, startDate: '', endDate: '' }
@@ -49,7 +51,7 @@ const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.unitNumber.trim()) {
-        alert("Unit number cannot be empty.");
+        alert(t('modals.editUnit.unitNumberEmpty'));
         return;
     }
 
@@ -69,10 +71,10 @@ const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} title={isEditing ? 'Edit Unit' : 'Add New Unit'}>
+    <Modal isOpen={true} onClose={onClose} title={isEditing ? t('modals.editUnit.titleEdit') : t('modals.editUnit.titleAdd')}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="unitNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit Number / Name</label>
+          <label htmlFor="unitNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.unitNumber')}</label>
           <input
             type="text"
             id="unitNumber"
@@ -80,32 +82,32 @@ const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose
             value={formData.unitNumber}
             onChange={handleChange}
             className="mt-1 block w-full input"
-            placeholder="e.g., 101, PH-2, Suite B"
+            placeholder={t('modals.editUnit.unitNumberPlaceholder')}
             required
           />
         </div>
 
         <fieldset className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-            <legend className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Occupant Information (Optional)</legend>
+            <legend className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">{t('modals.editUnit.occupantInformation')}</legend>
             <div className="space-y-4">
                 <div>
-                    <label htmlFor="occupant.name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Occupant Name</label>
+                    <label htmlFor="occupant.name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.occupantName')}</label>
                     <input type="text" id="occupant.name" name="occupant.name" value={formData.occupant.name} onChange={handleChange} className="mt-1 block w-full input" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className='md:col-span-1'>
-                        <label htmlFor="occupant.type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Occupant Type</label>
+                        <label htmlFor="occupant.type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.occupantType')}</label>
                         <select id="occupant.type" name="occupant.type" value={formData.occupant.type} onChange={handleChange} className="mt-1 block w-full input">
-                            <option value={OccupantType.Renter}>Renter</option>
-                            <option value={OccupantType.Owner}>Owner</option>
+                            <option value={OccupantType.Renter}>{t('modals.editUnit.renter')}</option>
+                            <option value={OccupantType.Owner}>{t('modals.editUnit.owner')}</option>
                         </select>
                     </div>
                     <div>
-                        <label htmlFor="occupant.startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                        <label htmlFor="occupant.startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.startDate')}</label>
                         <input type="date" id="occupant.startDate" name="occupant.startDate" value={formData.occupant.startDate} onChange={handleChange} className="mt-1 block w-full input" />
                     </div>
                     <div>
-                        <label htmlFor="occupant.endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                        <label htmlFor="occupant.endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUnit.endDate')}</label>
                         <input type="date" id="occupant.endDate" name="occupant.endDate" value={formData.occupant.endDate} onChange={handleChange} className="mt-1 block w-full input" />
                     </div>
                 </div>
@@ -114,10 +116,10 @@ const EditUnitModal: React.FC<EditUnitModalProps> = ({ unit, buildingId, onClose
 
         <div className="flex justify-end pt-4 space-x-2">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
-            Cancel
+            {t('modals.common.cancel')}
           </button>
           <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">
-            {isEditing ? 'Save Changes' : 'Add Unit'}
+            {isEditing ? t('modals.common.saveChanges') : t('modals.editUnit.addUnit')}
           </button>
         </div>
       </form>

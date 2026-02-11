@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, ServiceProvider, MaintenanceTask, Building } from '../types';
 import { ServiceRequestStatus } from '../types';
 import { SERVICE_REQUEST_STATUSES } from '../constants';
@@ -14,6 +15,7 @@ interface EditRequestModalProps {
 }
 
 const EditRequestModal: React.FC<EditRequestModalProps> = ({ request, providers, tasks, buildings, onClose, onSave }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     providerId: request.providerId,
     notes: request.notes,
@@ -51,38 +53,38 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ request, providers,
   const building = buildings.find(b => b.id === task?.buildingId);
 
   return (
-    <Modal isOpen={true} onClose={onClose} title={`Edit Request: ${task?.name || ''}`}>
+    <Modal isOpen={true} onClose={onClose} title={t('modals.editRequest.title', { name: task?.name || '' })}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="p-4 bg-gray-50 rounded-md border border-gray-200 space-y-2">
+        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 space-y-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Property</h4>
-              <p className="text-md font-semibold text-gray-800">{building?.name}</p>
+              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('modals.editRequest.property')}</h4>
+              <p className="text-md font-semibold text-gray-800 dark:text-gray-200">{building?.name}</p>
             </div>
              <div>
-              <h4 className="text-sm font-medium text-gray-500">Task</h4>
-              <p className="text-md font-semibold text-gray-800">{task?.name}</p>
+              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('modals.editRequest.task')}</h4>
+              <p className="text-md font-semibold text-gray-800 dark:text-gray-200">{task?.name}</p>
             </div>
              <div>
-              <h4 className="text-sm font-medium text-gray-500">Specialty</h4>
-              <p className="text-md font-semibold text-gray-800">{formData.specialty}</p>
+              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('modals.editRequest.specialty')}</h4>
+              <p className="text-md font-semibold text-gray-800 dark:text-gray-200">{formData.specialty}</p>
             </div>
             {request.scheduledDate && (
                 <div>
-                    <h4 className="text-sm font-medium text-gray-500">Scheduled Date</h4>
-                    <p className="text-md font-semibold text-gray-800">{new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString()}</p>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('modals.editRequest.scheduledDate')}</h4>
+                    <p className="text-md font-semibold text-gray-800 dark:text-gray-200">{new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString()}</p>
                 </div>
             )}
             <div>
-                <h4 className="text-sm font-medium text-gray-500">Date Sent</h4>
-                <p className="text-md font-semibold text-gray-800">{new Date(request.sentAt).toLocaleDateString()}</p>
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('modals.editRequest.dateSent')}</h4>
+                <p className="text-md font-semibold text-gray-800 dark:text-gray-200">{new Date(request.sentAt).toLocaleDateString()}</p>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label htmlFor="providerId" className="block text-sm font-medium text-gray-700">Service Provider</label>
+                <label htmlFor="providerId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editRequest.serviceProvider')}</label>
                 <select
                   id="providerId"
                   name="providerId"
@@ -91,14 +93,14 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ request, providers,
                   className="mt-1 block w-full input"
                   required
                 >
-                  <option value="" disabled>Select a provider...</option>
+                  <option value="" disabled>{t('modals.common.selectProvider')}</option>
                   {providers.filter(p => p.specialty === formData.specialty).map(p => (
                     <option key={p.id} value={p.id}>{p.name} ({p.specialty})</option>
                   ))}
                 </select>
             </div>
             <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+                <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editRequest.status')}</label>
                 <select
                     id="status"
                     name="status"
@@ -110,10 +112,10 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ request, providers,
                 </select>
             </div>
              <div className="md:col-span-2">
-                <label htmlFor="cost" className="block text-sm font-medium text-gray-700">Cost</label>
+                <label htmlFor="cost" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editRequest.cost')}</label>
                 <div className="relative mt-1 rounded-md shadow-sm">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <span className="text-gray-500 sm:text-sm">$</span>
+                        <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
                     </div>
                     <input 
                         type="number" 
@@ -129,7 +131,7 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ request, providers,
                 </div>
             </div>
             <div className="md:col-span-2">
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Additional Notes</label>
+                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editRequest.additionalNotes')}</label>
                 <textarea 
                     id="notes" 
                     name="notes" 
@@ -137,21 +139,21 @@ const EditRequestModal: React.FC<EditRequestModalProps> = ({ request, providers,
                     onChange={handleChange} 
                     rows={3} 
                     className="mt-1 block w-full input" 
-                    placeholder="e.g., Please call upon arrival."
+                    placeholder={t('modals.editRequest.notesPlaceholder')}
                 ></textarea>
             </div>
         </div>
         
         <div className="flex justify-end pt-4 space-x-2">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
-            Cancel
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
+            {t('modals.common.cancel')}
           </button>
           <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">
-            Save Changes
+            {t('modals.common.saveChanges')}
           </button>
         </div>
       </form>
-       <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }`}</style>
+       <style>{`.input { appearance: none; background-color: #fff; border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; color: #111827; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; } .dark .input { background-color: #374151; border-color: #4B5563; color: #F9FAFB; }`}</style>
     </Modal>
   );
 };

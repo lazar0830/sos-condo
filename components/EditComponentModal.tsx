@@ -2,6 +2,7 @@
 
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Component, Building, ComponentImage, Unit } from '../types';
 import { ComponentType } from '../types';
 import { COMPONENT_TYPES } from '../constants';
@@ -30,6 +31,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buildings, units, componentCategories = {}, onClose, onSave, onDelete, preselectedBuildingId }) => {
+  const { t } = useTranslation();
   const isEditing = !!component;
   const [formData, setFormData] = useState({
     name: '',
@@ -203,7 +205,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.buildingId) {
-        alert('Please fill out all required fields.');
+        alert(t('modals.common.fillAllFields'));
         return;
     }
 
@@ -225,45 +227,45 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
 
   return (
     <>
-      <Modal isOpen={true} onClose={onClose} title={isEditing ? 'Edit Component' : 'Add New Component'}>
+      <Modal isOpen={true} onClose={onClose} title={isEditing ? t('modals.editComponent.titleEdit') : t('modals.editComponent.titleAdd')}>
         <form onSubmit={handleSubmit} className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                  <label htmlFor="buildingId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Property</label>
+                  <label htmlFor="buildingId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.property')}</label>
                   <select name="buildingId" id="buildingId" value={formData.buildingId} onChange={handleChange} className="mt-1 block w-full input" required>
-                      <option value="" disabled>Select a property...</option>
+                      <option value="" disabled>{t('modals.common.selectProperty')}</option>
                       {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
               </div>
               <div className="md:col-span-2 border-t dark:border-gray-700 pt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                  <div>
-                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.type')}</label>
                     <select name="type" id="type" value={formData.type} onChange={handleTypeChange} className="mt-1 block w-full input" required>
-                        <option value="" disabled>Select a type...</option>
-                        {COMPONENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        <option value="" disabled>{t('modals.editComponent.selectType')}</option>
+                        {COMPONENT_TYPES.map(cType => <option key={cType} value={cType}>{cType}</option>)}
                     </select>
                   </div>
                    <div>
-                    <label htmlFor="parentCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Category</label>
+                    <label htmlFor="parentCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.parentCategory')}</label>
                     <select name="parentCategory" id="parentCategory" value={formData.parentCategory} onChange={handleParentCategoryChange} className="mt-1 block w-full input" disabled={parentCategories.length === 0} required>
-                        <option value="">Select a category...</option>
+                        <option value="">{t('modals.editComponent.selectCategory')}</option>
                         {parentCategories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                    <div>
-                    <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sub Category</label>
+                    <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.subCategory')}</label>
                     <select name="subCategory" id="subCategory" value={formData.subCategory} onChange={handleSubCategoryChange} className="mt-1 block w-full input" disabled={subCategories.length === 0} required>
-                        <option value="">Select a category...</option>
+                        <option value="">{t('modals.editComponent.selectCategory')}</option>
                         {subCategories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
               </div>
 
                <div className="md:col-span-2">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Component Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.componentName')}</label>
                   {componentNames.length > 0 ? (
                     <select name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full input" required>
-                        <option value="">Select a component...</option>
+                        <option value="">{t('modals.editComponent.selectComponent')}</option>
                         {componentNames.map(name => <option key={name} value={name}>{name}</option>)}
                     </select>
                   ) : (
@@ -275,18 +277,18 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                         onChange={handleChange}
                         className="mt-1 block w-full input"
                         required
-                        placeholder={formData.subCategory ? "Enter component name" : "Select categories first"}
+                        placeholder={formData.subCategory ? t('modals.editComponent.enterComponentName') : t('modals.editComponent.selectCategoriesFirst')}
                         disabled={!formData.subCategory}
                     />
                   )}
               </div>
 
                <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location (Optional)</label>
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.locationOptional')}</label>
                   <input type="text" name="location" id="location" value={formData.location} onChange={handleChange} className="mt-1 block w-full input" placeholder="e.g., Rooftop, Unit 502, Boiler Room" />
               </div>
               <div>
-                  <label htmlFor="unitId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit (Optional)</label>
+                  <label htmlFor="unitId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.unitOptional')}</label>
                   <select
                       name="unitId"
                       id="unitId"
@@ -297,10 +299,10 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                   >
                       <option value="">
                           {!formData.buildingId 
-                              ? 'Select a property first' 
+                              ? t('modals.editComponent.selectPropertyFirst')
                               : buildingUnits.length > 0 
-                                  ? 'Select a unit...' 
-                                  : 'No units in this property'}
+                                  ? t('modals.editComponent.selectUnit')
+                                  : t('modals.editComponent.noUnitsInProperty')}
                       </option>
                       {buildingUnits.map(u => (
                           <option key={u.id} value={u.id}>{u.unitNumber}</option>
@@ -310,35 +312,35 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
 
               <div className="md:col-span-2 border-t dark:border-gray-700 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Brand (Optional)</label>
+                  <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.brandOptional')}</label>
                   <input type="text" name="brand" id="brand" value={formData.brand} onChange={handleChange} className="mt-1 block w-full input" />
                 </div>
                 <div>
-                  <label htmlFor="modelNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Model # (Optional)</label>
+                  <label htmlFor="modelNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.modelOptional')}</label>
                   <input type="text" name="modelNumber" id="modelNumber" value={formData.modelNumber} onChange={handleChange} className="mt-1 block w-full input" />
                 </div>
                 <div className="md:col-span-2">
-                  <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Serial # (Optional)</label>
+                  <label htmlFor="serialNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.serialOptional')}</label>
                   <input type="text" name="serialNumber" id="serialNumber" value={formData.serialNumber} onChange={handleChange} className="mt-1 block w-full input" />
                 </div>
                 <div>
-                    <label htmlFor="installationDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Installation Date (Optional)</label>
+                    <label htmlFor="installationDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.installationDateOptional')}</label>
                     <input type="date" name="installationDate" id="installationDate" value={formData.installationDate} onChange={handleChange} className="mt-1 block w-full input" />
                 </div>
                 <div>
-                    <label htmlFor="warrantyEndDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Warranty End Date (Optional)</label>
+                    <label htmlFor="warrantyEndDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.warrantyEndDateOptional')}</label>
                     <input type="date" name="warrantyEndDate" id="warrantyEndDate" value={formData.warrantyEndDate} onChange={handleChange} className="mt-1 block w-full input" />
                 </div>
               </div>
               <div className="md:col-span-2">
-                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes (Optional)</label>
+                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.notesOptional')}</label>
                   <textarea name="notes" id="notes" value={formData.notes} onChange={handleChange} rows={3} className="mt-1 block w-full input"></textarea>
               </div>
               <div className="md:col-span-2 border-t dark:border-gray-700 pt-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Images</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editComponent.images')}</label>
                 <div className="mt-2">
                     <label htmlFor="image-upload" className="cursor-pointer bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                        <span>Upload Images</span>
+                        <span>{t('modals.editComponent.uploadImages')}</span>
                         <input id="image-upload" name="image-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/gif" multiple onChange={handleImageChange} />
                     </label>
                 </div>
@@ -373,13 +375,13 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                   onClick={() => setIsConfirmingDelete(true)}
                   className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 dark:text-red-300 dark:bg-red-900/20 dark:hover:bg-red-900/40 border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
-                  Delete Component
+                  {t('modals.editComponent.deleteComponent')}
                 </button>
               )}
             </div>
             <div className="flex space-x-2">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">Save Component</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">{t('modals.common.cancel')}</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">{t('modals.editComponent.saveComponent')}</button>
             </div>
           </div>
         </form>
@@ -390,9 +392,9 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
           isOpen={isConfirmingDelete}
           onClose={() => setIsConfirmingDelete(false)}
           onConfirm={handleConfirmDelete}
-          title="Confirm Component Deletion"
-          message={`Are you sure you want to delete the component "${component.name}"? Any tasks linked to this component will be unassigned. This action cannot be undone.`}
-          confirmButtonText="Delete Component"
+          title={t('modals.editComponent.confirmDeletionTitle')}
+          message={t('modals.editComponent.confirmDeletionMessage', { name: component.name })}
+          confirmButtonText={t('modals.editComponent.deleteComponent')}
         />
       )}
     </>

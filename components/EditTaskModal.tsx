@@ -1,6 +1,7 @@
 
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { MaintenanceTask, Building, ServiceProvider, Component, Unit } from '../types';
 import { Recurrence, TaskStatus } from '../types';
 import { RECURRENCE_OPTIONS, TASK_STATUSES, SERVICE_PROVIDER_SPECIALTIES } from '../constants';
@@ -21,6 +22,7 @@ interface EditTaskModalProps {
 }
 
 const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, providers, components, units, preselectedBuildingId, preselectedComponentId, onClose, onSave, onDelete }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -133,7 +135,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.buildingId || !formData.specialty || !formData.cost) {
-        alert('Please fill out all required fields.');
+        alert(t('modals.common.fillAllFields'));
         return;
     }
     const selectedUnit = buildingUnits.find(u => u.id === formData.unitId);
@@ -177,50 +179,50 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
   };
 
   const confirmMessage = task?.recurrence !== Recurrence.OneTime
-    ? "This is a master recurring task. Deleting it will also remove all of its future and past scheduled occurrences. This action cannot be undone."
-    : "Are you sure you want to permanently delete this task?";
+    ? t('modals.editTask.confirmDeletionRecurring')
+    : t('modals.editTask.confirmDeletionOneTime');
 
 
   return (
     <>
-      <Modal isOpen={true} onClose={onClose} title={task ? 'Edit Maintenance Task' : 'Add New Maintenance Task'}>
+      <Modal isOpen={true} onClose={onClose} title={task ? t('modals.editTask.titleEdit') : t('modals.editTask.titleAdd')}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Task Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskName')}</label>
                   <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full input" required />
               </div>
               <div className="md:col-span-2">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (Optional)</label>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.descriptionOptional')}</label>
                   <textarea name="description" id="description" value={formData.description} onChange={handleChange} rows={3} className="mt-1 block w-full input"></textarea>
               </div>
               <div>
-                  <label htmlFor="buildingId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Property</label>
+                  <label htmlFor="buildingId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.property')}</label>
                   <select name="buildingId" id="buildingId" value={formData.buildingId} onChange={handleChange} className="mt-1 block w-full input" required>
-                      <option value="" disabled>Select a property...</option>
+                      <option value="" disabled>{t('modals.common.selectProperty')}</option>
                       {buildings.length > 0 ? (
                         buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)
                       ) : (
-                        <option value="" disabled>No properties available</option>
+                        <option value="" disabled>{t('modals.editTask.noPropertiesAvailable')}</option>
                       )}
                   </select>
               </div>
               <div>
-                  <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Specialty</label>
+                  <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.specialty')}</label>
                   <select name="specialty" id="specialty" value={formData.specialty} onChange={handleChange} className="mt-1 block w-full input" required disabled={!!formData.providerId}>
-                      <option value="" disabled>Select a specialty...</option>
+                      <option value="" disabled>{t('modals.editTask.selectSpecialty')}</option>
                       {allSpecialties.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
               </div>
               <div>
-                  <label htmlFor="providerId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Service Provider (Optional)</label>
+                  <label htmlFor="providerId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.serviceProviderOptional')}</label>
                   <select name="providerId" id="providerId" value={formData.providerId} onChange={handleChange} className="mt-1 block w-full input">
-                      <option value="">None</option>
+                      <option value="">{t('modals.common.none')}</option>
                       {providers.filter(p => p.specialty === formData.specialty).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
               </div>
               <div>
-                  <label htmlFor="unitId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit (Optional)</label>
+                  <label htmlFor="unitId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.unitOptional')}</label>
                   <select
                       name="unitId"
                       id="unitId"
@@ -231,10 +233,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                   >
                       <option value="">
                           {!formData.buildingId 
-                              ? 'Select a property first' 
+                              ? t('modals.editTask.selectPropertyFirst')
                               : buildingUnits.length > 0 
-                                  ? 'Select a unit...' 
-                                  : 'No units in this property'}
+                                  ? t('modals.editTask.selectUnit')
+                                  : t('modals.editTask.noUnitsInProperty')}
                       </option>
                       {buildingUnits.map(u => (
                           <option key={u.id} value={u.id}>{u.unitNumber}</option>
@@ -242,7 +244,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                   </select>
               </div>
                <div>
-                  <label htmlFor="componentId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Component (Optional)</label>
+                  <label htmlFor="componentId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.componentOptional')}</label>
                   <select
                       name="componentId"
                       id="componentId"
@@ -253,10 +255,10 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                   >
                       <option value="">
                           {!formData.buildingId 
-                              ? 'Select a property first' 
+                              ? t('modals.editTask.selectPropertyFirst')
                               : buildingComponents.length > 0 
-                                  ? 'Select a component...' 
-                                  : 'No components in this property'}
+                                  ? t('modals.editTask.selectComponent')
+                                  : t('modals.editTask.noComponentsInProperty')}
                       </option>
                       {buildingComponents.map(c => (
                           <option key={c.id} value={c.id}>{c.name}</option>
@@ -264,36 +266,36 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                   </select>
               </div>
                <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.status')}</label>
                   <select name="status" id="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full input">
                       {TASK_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
               </div>
               <div>
-                <label htmlFor="recurrence" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Recurrence</label>
+                <label htmlFor="recurrence" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.recurrence')}</label>
                 <select name="recurrence" id="recurrence" value={formData.recurrence} onChange={handleChange} className="mt-1 block w-full input">
                     {RECURRENCE_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               {formData.recurrence === Recurrence.OneTime ? (
                    <div>
-                      <label htmlFor="taskDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Task Date</label>
+                      <label htmlFor="taskDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskDate')}</label>
                       <input type="date" name="taskDate" id="taskDate" value={formData.taskDate} onChange={handleChange} className="mt-1 block w-full input" required/>
                   </div>
               ) : (
                   <>
                       <div>
-                          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Task First Date</label>
+                          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskFirstDate')}</label>
                           <input type="date" name="startDate" id="startDate" value={formData.startDate} onChange={handleChange} className="mt-1 block w-full input" required />
                       </div>
                       <div>
-                          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Task End Date</label>
+                          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.taskEndDate')}</label>
                           <input type="date" name="endDate" id="endDate" value={formData.endDate} onChange={handleChange} className="mt-1 block w-full input" required />
                       </div>
                   </>
               )}
                <div className="md:col-span-2">
-                  <label htmlFor="cost" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Estimated Cost</label>
+                  <label htmlFor="cost" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.estimatedCost')}</label>
                   <div className="mt-1">
                       <input type="number" name="cost" id="cost" value={formData.cost} onChange={handleChange} className="block w-full input" placeholder="0.00" step="0.01" min="0" required />
                   </div>
@@ -307,13 +309,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                   onClick={handleOpenConfirmDelete}
                   className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-transparent rounded-md shadow-sm hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
-                  Delete Task
+                  {t('modals.editTask.deleteTask')}
                 </button>
               )}
             </div>
             <div className="flex space-x-2">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">Cancel</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">Save Task</button>
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">{t('modals.common.cancel')}</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">{t('modals.editTask.saveTask')}</button>
             </div>
           </div>
         </form>
@@ -324,9 +326,9 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
           isOpen={isConfirmingDelete}
           onClose={() => setIsConfirmingDelete(false)}
           onConfirm={handleConfirmDelete}
-          title="Confirm Task Deletion"
+          title={t('modals.editTask.confirmDeletionTitle')}
           message={confirmMessage}
-          confirmButtonText="Delete Task"
+          confirmButtonText={t('modals.editTask.deleteTask')}
         />
       )}
     </>

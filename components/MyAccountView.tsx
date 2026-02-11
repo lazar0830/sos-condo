@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { User, ServiceProvider } from '../types';
 import { UserRole } from '../types';
 import { SERVICE_PROVIDER_SPECIALTIES } from '../constants';
@@ -21,6 +22,7 @@ interface MyAccountViewProps {
 }
 
 const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurrentUser, serviceProviderProfile, onSaveProvider }) => {
+  const { t } = useTranslation();
   // State for account details
   const [email, setEmail] = useState(currentUser.email);
   const [username, setUsername] = useState(currentUser.username);
@@ -66,7 +68,7 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
     e.preventDefault();
     if (providerData) {
       onSaveProvider(providerData);
-      setMessage({ type: 'success', text: 'Provider profile updated successfully.' });
+      setMessage({ type: 'success', text: t('myAccount.profileUpdatedSuccess') });
     }
   };
 
@@ -82,60 +84,60 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">My Account</h2>
-        <p className="text-lg text-gray-500 dark:text-gray-400">Manage your profile and account settings.</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400 mb-2">{t('myAccount.title')}</h2>
+        <p className="text-lg text-gray-500 dark:text-gray-400">{t('myAccount.subtitle')}</p>
       </div>
 
       {message && <MessageDisplay msg={message} />}
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Account Details</h3>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('myAccount.accountDetails')}</h3>
         <form onSubmit={handleAccountUpdate} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Login Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.loginEmail')}</label>
               <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 block w-full input" required />
             </div>
              <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Name</label>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.displayName')}</label>
               <input type="text" id="username" value={username} onChange={e => setUsername(e.target.value)} className="mt-1 block w-full input" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.role')}</label>
               <p className="mt-1 block w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-500 dark:text-gray-400">{currentUser.role}</p>
             </div>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="px-4 py-2 btn-primary">Save Changes</button>
+            <button type="submit" className="px-4 py-2 btn-primary">{t('myAccount.saveChanges')}</button>
           </div>
         </form>
       </div>
 
       {currentUser.role === UserRole.ServiceProvider && providerData && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Service Provider Profile</h3>
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('myAccount.serviceProviderProfile')}</h3>
            <form onSubmit={handleProviderSave} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Provider Name</label>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.providerName')}</label>
                     <input type="text" name="name" id="name" value={providerData.name} onChange={handleProviderChange} className="mt-1 block w-full input" required />
                   </div>
                   <div>
-                    <label htmlFor="providerEmail" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Email</label>
+                    <label htmlFor="providerEmail" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.contactEmail')}</label>
                     <input type="email" name="email" id="providerEmail" value={providerData.email} onChange={handleProviderChange} className="mt-1 block w-full input" required />
                   </div>
                   <div>
-                    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Specialty</label>
+                    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.specialty')}</label>
                     <select name="specialty" id="specialty" value={providerData.specialty} onChange={handleProviderChange} className="mt-1 block w-full input">
                       {SERVICE_PROVIDER_SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.phone')}</label>
                     <input type="tel" name="phone" id="phone" value={providerData.phone || ''} onChange={handleProviderChange} className="mt-1 block w-full input" />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Logo</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.companyLogo')}</label>
                     <div className="mt-1 flex items-center space-x-4">
                         {logoPreview ? (
                         <img src={logoPreview} alt="Logo Preview" className="h-20 w-20 object-cover rounded-md border border-gray-200 dark:border-gray-700" />
@@ -147,14 +149,14 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
                         </div>
                         )}
                         <label htmlFor="logo-upload" className="cursor-pointer bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                        <span>Change</span>
+                        <span>{t('myAccount.change')}</span>
                         <input id="logo-upload" name="logo-upload" type="file" className="sr-only" accept="image/*" onChange={handleLogoChange} />
                         </label>
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-end pt-4">
-                  <button type="submit" className="px-4 py-2 btn-primary">Save Profile</button>
+                  <button type="submit" className="px-4 py-2 btn-primary">{t('myAccount.saveProfile')}</button>
                 </div>
             </form>
         </div>

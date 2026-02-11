@@ -1,6 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Building } from '../types';
 import Modal from './Modal';
 
@@ -20,6 +21,7 @@ interface EditBuildingModalProps {
 }
 
 const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ building, onClose, onSave }) => {
+  const { t } = useTranslation();
   const isEditing = !!building;
   const [formData, setFormData] = useState<Omit<Building, 'id'> | Building>(() => {
     // FIX: Add createdBy to satisfy the Omit<Building, 'id'> type for new buildings.
@@ -61,18 +63,18 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ building, onClose
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} title={isEditing ? 'Edit Property' : 'Add New Property'}>
+    <Modal isOpen={true} onClose={onClose} title={isEditing ? t('modals.editBuilding.titleEdit') : t('modals.editBuilding.titleAdd')}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Property Name</label>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editBuilding.propertyName')}</label>
           <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full input" required />
         </div>
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+          <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editBuilding.address')}</label>
           <input type="text" name="address" id="address" value={formData.address} onChange={handleChange} className="mt-1 block w-full input" required />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Property Image</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editBuilding.propertyImage')}</label>
           <div className="mt-1 flex items-center space-x-4">
             {imagePreview ? (
               <img src={imagePreview} alt="Property Preview" className="h-20 w-20 object-cover rounded-md" />
@@ -82,17 +84,17 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ building, onClose
               </div>
             )}
             <label htmlFor="image-upload" className="cursor-pointer bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-              <span>Change</span>
+              <span>{t('modals.editBuilding.change')}</span>
               <input id="image-upload" name="image-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} />
             </label>
           </div>
         </div>
         <div className="flex justify-end pt-4 space-x-2">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
-            Cancel
+            {t('modals.common.cancel')}
           </button>
           <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">
-            {isEditing ? 'Save Changes' : 'Add Property'}
+            {isEditing ? t('modals.common.saveChanges') : t('modals.editBuilding.addProperty')}
           </button>
         </div>
       </form>

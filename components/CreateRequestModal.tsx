@@ -83,8 +83,8 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
                 <svg className="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">Service request successfully sent!</h3>
-                <p className="mt-1 text-gray-500">The modal will close shortly.</p>
+                <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Service request successfully sent!</h3>
+                <p className="mt-1 text-gray-500 dark:text-gray-400">The modal will close shortly.</p>
             </div>
         </Modal>
     );
@@ -94,7 +94,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
     <Modal isOpen={true} onClose={onClose} title={`Request for: ${task.name}`}>
       <div className="space-y-4">
         <div>
-            <label htmlFor="provider" className="block text-sm font-medium text-gray-700">Service Provider</label>
+            <label htmlFor="provider" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Service Provider</label>
             <select
               id="provider"
               value={providerId}
@@ -110,13 +110,13 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
         </div>
         {isForOverdueTask && (
             <div>
-                <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700">Scheduled Date</label>
+                <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Scheduled Date</label>
                 <input type="date" id="scheduledDate" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} className="mt-1 block w-full input" required />
                 <p className="mt-1 text-xs text-amber-600">This is for an overdue task. Please schedule promptly.</p>
             </div>
         )}
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Additional Notes</label>
+          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Additional Notes</label>
           <textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="mt-1 block w-full input" placeholder="e.g., Please call upon arrival."></textarea>
         </div>
         
@@ -136,15 +136,15 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
 
         {generatedEmail && (
             <div className="space-y-2 pt-2">
-                <label className="block text-sm font-medium text-gray-700">Generated Email Preview</label>
-                <div className="p-4 bg-gray-50 rounded-md border border-gray-200 max-h-48 overflow-y-auto">
-                    <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans">{generatedEmail}</pre>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Generated Email Preview</label>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 max-h-48 overflow-y-auto">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 font-sans">{generatedEmail}</pre>
                 </div>
             </div>
         )}
 
         <div className="flex justify-end pt-4 space-x-2">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">
             Cancel
           </button>
           <button type="button" onClick={handleSendRequest} disabled={!generatedEmail} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none disabled:bg-primary-300">
@@ -152,7 +152,32 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
           </button>
         </div>
       </div>
-      <style>{`.input { border-radius: 0.375rem; border: 1px solid #D1D5DB; padding: 0.5rem 0.75rem; width: 100%; appearance: none; background-color: #fff; } .input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }`}</style>
+      <style>{`
+        .input { 
+          border-radius: 0.375rem; 
+          border: 1px solid #D1D5DB; 
+          padding: 0.5rem 0.75rem; 
+          width: 100%; 
+          appearance: none; 
+          background-color: #fff;
+          color: #111827;
+        } 
+        .input:focus { 
+          outline: 2px solid transparent; 
+          outline-offset: 2px; 
+          border-color: #3b82f6; 
+          box-shadow: 0 0 0 1px #3b82f6; 
+        }
+        .dark .input {
+          background-color: #374151;
+          border-color: #4B5563;
+          color: #F3F4F6;
+        }
+        .dark .input:focus {
+          border-color: #60a5fa;
+          box-shadow: 0 0 0 1px #60a5fa;
+        }
+      `}</style>
     </Modal>
   );
 };

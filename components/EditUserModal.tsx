@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { User } from '../types';
 import { UserRole } from '../types';
 import Modal from './Modal';
@@ -12,6 +13,7 @@ interface EditUserModalProps {
 }
 
 const EditUserModal: React.FC<EditUserModalProps> = ({ user, role, onClose, onSave }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +34,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, role, onClose, onSa
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !username || (!isEditing && !password)) {
-        alert("Email, display name, and password are required for new users.");
+        alert(t('modals.editUser.requiredFieldsAlert'));
         return;
     }
     
@@ -58,10 +60,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, role, onClose, onSa
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} title={isEditing ? `Edit ${user.role}` : `Add New ${role}`}>
+    <Modal isOpen={true} onClose={onClose} title={isEditing ? t('modals.editUser.titleEdit', { role: user.role }) : t('modals.editUser.titleAdd', { role })}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Login Email</label>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUser.loginEmail')}</label>
           <input
             type="email"
             id="email"
@@ -73,7 +75,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, role, onClose, onSa
           />
         </div>
          <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Name</label>
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUser.displayName')}</label>
           <input
             type="text"
             id="username"
@@ -85,24 +87,24 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, role, onClose, onSa
         </div>
         {!isEditing && (
             <div>
-              <label htmlFor="password"className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+              <label htmlFor="password"className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editUser.password')}</label>
               <input
                 type="password"
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full input"
-                placeholder={isEditing ? 'Leave blank to keep current password' : ''}
+                placeholder={isEditing ? t('modals.editUser.passwordPlaceholder') : ''}
                 required={!isEditing}
               />
             </div>
         )}
         <div className="flex justify-end pt-4 space-x-2">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none dark:text-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600">
-            Cancel
+            {t('modals.common.cancel')}
           </button>
           <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">
-            Save User
+            {t('modals.editUser.saveUser')}
           </button>
         </div>
       </form>
