@@ -89,18 +89,16 @@ const EditProviderModal: React.FC<EditProviderModalProps> = ({ provider, onClose
           </div>
           <div>
             <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.specialty')}</label>
-            <input 
-                list="specialties" 
+            <select 
                 name="specialty" 
                 id="specialty" 
                 value={formData.specialty} 
                 onChange={handleChange} 
                 className="mt-1 block w-full input"
                 required
-            />
-            <datalist id="specialties">
-                {SERVICE_PROVIDER_SPECIALTIES.map(s => <option key={s} value={s} />)}
-            </datalist>
+            >
+                {SERVICE_PROVIDER_SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editProvider.phone')}</label>
