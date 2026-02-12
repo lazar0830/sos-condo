@@ -19,6 +19,23 @@ export const TASK_STATUSES = [
     TaskStatus.Completed,
 ];
 
+/** Maps TaskStatus/Recurrence display values to maintenanceTasks translation key suffixes */
+export const TASK_STATUS_TO_I18N_KEY: Record<string, string> = {
+  [TaskStatus.New]: 'statusNew',
+  [TaskStatus.Sent]: 'statusSent',
+  [TaskStatus.OnHold]: 'statusOnHold',
+  [TaskStatus.Completed]: 'statusCompleted',
+};
+export const RECURRENCE_TO_I18N_KEY: Record<string, string> = {
+  [Recurrence.OneTime]: 'recurrenceOneTime',
+  [Recurrence.Weekly]: 'recurrenceWeekly',
+  [Recurrence.BiWeekly]: 'recurrenceBiWeekly',
+  [Recurrence.Monthly]: 'recurrenceMonthly',
+  [Recurrence.Quarterly]: 'recurrenceQuarterly',
+  [Recurrence.SemiAnnually]: 'recurrenceSemiAnnually',
+  [Recurrence.Annually]: 'recurrenceAnnually',
+};
+
 export const SERVICE_REQUEST_STATUSES = [
     ServiceRequestStatus.Sent,
     ServiceRequestStatus.Accepted,

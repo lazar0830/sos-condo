@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, Component, Unit } from '../types';
 import { TaskStatus, Recurrence, ServiceRequestStatus } from '../types';
 import CreateRequestModal from './CreateRequestModal';
-import { TASK_STATUSES } from '../constants';
+import { TASK_STATUSES, TASK_STATUS_TO_I18N_KEY, RECURRENCE_TO_I18N_KEY } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 
 interface BuildingDetailViewProps {
@@ -279,8 +279,8 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
           <div onClick={() => onOpenTaskModal(task)} className="cursor-pointer flex-grow">
             <div className="flex items-center space-x-3 mb-2 flex-wrap gap-y-2">
               <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{task.name}</h4>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`maintenanceTasks.status.${task.status}`)}</span>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${recurrenceColorMap[task.recurrence]}`}>{t(`maintenanceTasks.recurrence.${task.recurrence}`)}</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`maintenanceTasks.${TASK_STATUS_TO_I18N_KEY[task.status] || 'statusNew'}`)}</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${recurrenceColorMap[task.recurrence]}`}>{t(`maintenanceTasks.${RECURRENCE_TO_I18N_KEY[task.recurrence] || 'recurrenceOneTime'}`)}</span>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm">{task.description}</p>
@@ -488,7 +488,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                     {TASK_STATUSES.map(s => (
                       <div key={s} className="flex items-center">
                         <input id={`status-${s}`} type="checkbox" checked={filters.selectedStatuses.includes(s)} onChange={() => handleMultiSelectChange('selectedStatuses', s)} className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
-                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{t(`maintenanceTasks.status.${s}`)}</label>
+                        <label htmlFor={`status-${s}`} className="ml-2 block text-sm text-gray-900 dark:text-gray-200">{t(`maintenanceTasks.${TASK_STATUS_TO_I18N_KEY[s] || 'statusNew'}`)}</label>
                       </div>
                     ))}
                   </div>
@@ -525,7 +525,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
         <div className="p-3 bg-primary-50/50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-500/30 mb-8">
             <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">{t('buildingDetail.activeFilters')}</span>
-                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{t(`maintenanceTasks.status.${s}`)}</FilterPill>)}
+                {filters.selectedStatuses.map(s => <FilterPill key={s} onRemove={() => removeFilter('selectedStatuses', s)}>{t(`maintenanceTasks.${TASK_STATUS_TO_I18N_KEY[s] || 'statusNew'}`)}</FilterPill>)}
                 {filters.selectedProviderIds.map(id => <FilterPill key={id} onRemove={() => removeFilter('selectedProviderIds', id)}>{getProviderName(id)}</FilterPill>)}
                 {filters.startDate && <FilterPill onRemove={() => removeFilter('startDate')}>{t('buildingDetail.from')} {filters.startDate}</FilterPill>}
                 {filters.endDate && <FilterPill onRemove={() => removeFilter('endDate')}>{t('buildingDetail.to')} {filters.endDate}</FilterPill>}
