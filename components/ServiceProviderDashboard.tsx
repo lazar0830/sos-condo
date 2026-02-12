@@ -4,6 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, MaintenanceTask, Building } from '../types';
 import { ServiceRequestStatus } from '../types';
+import { SERVICE_REQUEST_STATUS_TO_I18N_KEY } from '../constants';
 
 interface ServiceProviderDashboardProps {
   requests: ServiceRequest[];
@@ -25,7 +26,8 @@ const getSpecialtyColor = (specialty: string) => {
 };
 
 const ServiceProviderDashboard: React.FC<ServiceProviderDashboardProps> = ({ requests, tasks, buildings, onUpdateRequestStatus, onSelectRequest }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.startsWith('fr') ? 'fr-CA' : 'en-US';
   const getRequestDetails = (request: ServiceRequest) => {
     const task = tasks.find(t => t.id === request.taskId);
     const building = buildings.find(b => b.id === task?.buildingId);
@@ -96,14 +98,14 @@ const ServiceProviderDashboard: React.FC<ServiceProviderDashboardProps> = ({ req
                           <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{task?.name || 'N/A'}</h3>
                       </div>
                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[request.status]}`}>
-                          {request.status}
+                          {t(`serviceRequests.${SERVICE_REQUEST_STATUS_TO_I18N_KEY[request.status]}`)}
                         </span>
                   </div>
                   <div className="mt-2 space-y-3 text-sm">
                       <div>
                           <p className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceProviderDashboard.scheduledDate')}</p>
                           <p className="text-gray-800 dark:text-gray-100">{request.scheduledDate 
-                            ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+                            ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString(dateLocale, { weekday: 'long', month: 'long', day: 'numeric' })
                             : t('serviceProviderDashboard.notYetScheduled')
                           }</p>
                       </div>

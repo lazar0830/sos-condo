@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User, ServiceProvider } from '../types';
 import { UserRole } from '../types';
-import { SERVICE_PROVIDER_SPECIALTIES } from '../constants';
+import { SERVICE_PROVIDER_SPECIALTIES, SPECIALTY_TO_I18N_KEY } from '../constants';
 import { uploadProviderLogo, validateImageFile } from '../services/storageService';
 
 interface MyAccountViewProps {
@@ -140,7 +140,7 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
                   <div>
                     <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.specialty')}</label>
                     <select name="specialty" id="specialty" value={providerData.specialty} onChange={handleProviderChange} className="mt-1 block w-full input">
-                      {SERVICE_PROVIDER_SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                      {SERVICE_PROVIDER_SPECIALTIES.map(s => <option key={s} value={s}>{SPECIALTY_TO_I18N_KEY[s] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[s]}`) : s}</option>)}
                     </select>
                   </div>
                   <div>
