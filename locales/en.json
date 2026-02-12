@@ -669,7 +669,14 @@
       "address": "Address",
       "propertyImage": "Property Image",
       "change": "Change",
-      "addProperty": "Add Property"
+      "uploadImage": "Upload Image",
+      "removeImage": "Remove image",
+      "imageHint": "JPEG, PNG or WebP. Max 5MB.",
+      "uploading": "Uploading...",
+      "addProperty": "Add Property",
+      "imageTypeInvalid": "Please use JPEG, PNG or WebP format only.",
+      "imageSizeTooLarge": "Image is too large. Maximum size is 5MB.",
+      "imageUploadFailed": "Failed to upload image. Please try again."
     },
     "editComponent": {
       "titleEdit": "Edit Component",

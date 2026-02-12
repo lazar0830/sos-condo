@@ -4,15 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { User, ServiceProvider } from '../types';
 import { UserRole } from '../types';
 import { SERVICE_PROVIDER_SPECIALTIES } from '../constants';
-
-const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
-};
+import { uploadProviderLogo, validateImageFile } from '../services/storageService';
 
 interface MyAccountViewProps {
   currentUser: User;
@@ -30,7 +22,8 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
   // State for provider profile
   const [providerData, setProviderData] = useState<ServiceProvider | undefined>(serviceProviderProfile);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
+  const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   // General message state
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -38,6 +31,8 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
   useEffect(() => {
     setProviderData(serviceProviderProfile);
     setLogoPreview(serviceProviderProfile?.logoUrl || null);
+    setPendingLogoFile(null);
+    setLogoError(null);
     setEmail(currentUser.email);
     setUsername(currentUser.username);
   }, [serviceProviderProfile, currentUser]);
@@ -55,20 +50,36 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
     setProviderData(prev => ({ ...prev!, [name]: value }));
   };
 
-  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0] && providerData) {
-      const file = e.target.files[0];
-      const base64 = await fileToBase64(file);
-      setLogoPreview(base64);
-      setProviderData({ ...providerData, logoUrl: base64 });
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLogoError(null);
+    if (!e.target.files?.length || !providerData) return;
+    const file = e.target.files[0];
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setLogoError(validation.error || 'imageInvalid');
+      return;
     }
+    setPendingLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
   };
   
-  const handleProviderSave = (e: React.FormEvent) => {
+  const handleProviderSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (providerData) {
-      onSaveProvider(providerData);
+    if (!providerData) return;
+    setMessage(null);
+    setLogoError(null);
+    try {
+      let logoUrl = providerData.logoUrl || '';
+      if (pendingLogoFile && providerData.id) {
+        logoUrl = await uploadProviderLogo(pendingLogoFile, providerData.id);
+        setPendingLogoFile(null);
+      }
+      onSaveProvider({ ...providerData, logoUrl });
       setMessage({ type: 'success', text: t('myAccount.profileUpdatedSuccess') });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      setLogoError(['imageTypeInvalid', 'imageSizeTooLarge'].includes(msg) ? msg : 'imageUploadFailed');
+      setMessage({ type: 'error', text: t('modals.editBuilding.imageUploadFailed') });
     }
   };
 
@@ -150,9 +161,10 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
                         )}
                         <label htmlFor="logo-upload" className="cursor-pointer bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <span>{t('myAccount.change')}</span>
-                        <input id="logo-upload" name="logo-upload" type="file" className="sr-only" accept="image/*" onChange={handleLogoChange} />
+                        <input id="logo-upload" name="logo-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp, image/gif" onChange={handleLogoChange} />
                         </label>
                     </div>
+                    {logoError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{t(`modals.editBuilding.${logoError}`)}</p>}
                   </div>
                 </div>
                 <div className="flex justify-end pt-4">

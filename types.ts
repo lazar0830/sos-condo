@@ -81,7 +81,7 @@ export interface Unit {
 
 export interface ComponentImage {
   id: string;
-  url: string; // base64 data URL
+  url: string; // Firebase Storage URL or legacy base64 data URL
   caption?: string;
   uploadedAt: string;
 }

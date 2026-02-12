@@ -669,7 +669,14 @@
       "address": "Adresse",
       "propertyImage": "Image de la propriété",
       "change": "Modifier",
-      "addProperty": "Ajouter la propriété"
+      "uploadImage": "Téléverser une image",
+      "removeImage": "Supprimer l'image",
+      "imageHint": "JPEG, PNG ou WebP. Max 5 Mo.",
+      "uploading": "Téléversement...",
+      "addProperty": "Ajouter la propriété",
+      "imageTypeInvalid": "Veuillez utiliser uniquement le format JPEG, PNG ou WebP.",
+      "imageSizeTooLarge": "L'image est trop volumineuse. Taille maximale : 5 Mo.",
+      "imageUploadFailed": "Échec du téléversement de l'image. Veuillez réessayer."
     },
     "editComponent": {
       "titleEdit": "Modifier le composant",

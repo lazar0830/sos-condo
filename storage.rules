@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /buildings/{buildingId}/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+    match /units/{unitId}/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+    match /components/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    match /requests/{requestId}/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+    match /contingency_docs/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+    match /providers/{providerId}/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

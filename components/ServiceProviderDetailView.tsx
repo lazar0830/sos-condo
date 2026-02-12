@@ -1,18 +1,10 @@
 
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ServiceProvider, ServiceRequest, MaintenanceTask, Building, User } from '../types';
 import { ServiceRequestStatus, UserRole } from '../types';
-
-const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
-};
+import { uploadProviderLogo } from '../services/storageService';
 
 interface ServiceProviderDetailViewProps {
   provider: ServiceProvider;
@@ -46,6 +38,8 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
   currentUser,
 }) => {
   const { t } = useTranslation();
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
     
   const getRequestDetails = (request: ServiceRequest) => {
     const task = tasks.find(t => t.id === request.taskId);
@@ -54,10 +48,19 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-        const file = e.target.files[0];
-        const base64 = await fileToBase64(file);
-        onSaveProvider({ ...provider, logoUrl: base64 });
+    if (!e.target.files?.length) return;
+    const file = e.target.files[0];
+    setLogoUploading(true);
+    setLogoError(null);
+    try {
+      const url = await uploadProviderLogo(file, provider.id);
+      onSaveProvider({ ...provider, logoUrl: url });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      setLogoError(['imageTypeInvalid', 'imageSizeTooLarge'].includes(msg) ? msg : 'imageUploadFailed');
+    } finally {
+      setLogoUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -82,7 +85,8 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row items-start space-x-0 sm:space-x-6">
-                <div className="relative group flex-shrink-0">
+                <div className="flex-shrink-0">
+                    <div className="relative group">
                     <label htmlFor="logo-upload" className="cursor-pointer">
                         {provider.logoUrl ? (
                             <img src={provider.logoUrl} alt={`${provider.name} logo`} className="w-32 h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700" />
@@ -100,7 +104,10 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                             </svg>
                         </div>
                     </label>
-                    <input id="logo-upload" type="file" className="sr-only" accept="image/*" onChange={handleLogoUpload} />
+                    <input id="logo-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp, image/gif" onChange={handleLogoUpload} disabled={logoUploading} />
+                    {logoUploading && <span className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg text-white text-sm">{t('modals.editBuilding.uploading')}</span>}
+                    </div>
+                    {logoError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{t(`modals.editBuilding.${logoError}`)}</p>}
                 </div>
                 <div className="flex-grow mt-4 sm:mt-0">
                     <div className="flex justify-between items-start">

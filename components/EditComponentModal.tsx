@@ -7,6 +7,7 @@ import type { Component, Building, ComponentImage, Unit } from '../types';
 import { ComponentType } from '../types';
 import { COMPONENT_TYPES } from '../constants';
 import type { ComponentCategoriesData } from '../services/firestoreService';
+import { validateImageFile, uploadComponentImage } from '../services/storageService';
 import Modal from './Modal';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -20,15 +21,6 @@ interface EditComponentModalProps {
   onDelete: (componentId: string) => void;
   preselectedBuildingId?: string | null;
 }
-
-const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
-};
 
 const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buildings, units, componentCategories = {}, onClose, onSave, onDelete, preselectedBuildingId }) => {
   const { t } = useTranslation();
@@ -50,6 +42,9 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
     unitId: '',
     unitNumber: '',
   });
+  const [pendingImageFiles, setPendingImageFiles] = useState<{ id: string; file: File }[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const parentCategories = useMemo(() => {
@@ -80,6 +75,8 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
 
 
   useEffect(() => {
+    setPendingImageFiles([]);
+    setImageError(null);
     if (component) {
       setFormData({
         name: component.name,
@@ -173,48 +170,69 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
     }));
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-        const files = Array.from(e.target.files);
-        const imagePromises = files.map(async (file) => {
-            const base64 = await fileToBase64(file as File);
-            const newImage: ComponentImage = {
-                id: crypto.randomUUID(),
-                url: base64,
-                uploadedAt: new Date().toISOString(),
-            };
-            return newImage;
-        });
-
-        const newImages = await Promise.all(imagePromises);
-        setFormData(prev => ({
-            ...prev,
-            images: [...prev.images, ...newImages]
-        }));
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError(null);
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files) as File[];
+    const newItems: { id: string; file: File; preview: ComponentImage }[] = [];
+    for (const file of files) {
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        setImageError(validation.error || 'imageInvalid');
+        return;
+      }
+      const id = crypto.randomUUID();
+      newItems.push({
+        id,
+        file,
+        preview: { id, url: URL.createObjectURL(file as Blob), uploadedAt: new Date().toISOString() },
+      });
     }
+    setPendingImageFiles(prev => [...prev, ...newItems.map(i => ({ id: i.id, file: i.file }))]);
+    setFormData(prev => ({ ...prev, images: [...prev.images, ...newItems.map(i => i.preview)] }));
   };
 
   const handleRemoveImage = (imageId: string) => {
-    setFormData(prev => ({
-        ...prev,
-        images: prev.images.filter(img => img.id !== imageId)
-    }));
+    setPendingImageFiles(prev => prev.filter(p => p.id !== imageId));
+    setFormData(prev => ({ ...prev, images: prev.images.filter(img => img.id !== imageId) }));
+    setImageError(null);
   };
 
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.buildingId) {
         alert(t('modals.common.fillAllFields'));
         return;
     }
-
-    if (component) {
-      onSave({ ...component, ...formData });
-    } else {
-      onSave(formData as Omit<Component, 'id'>);
+    setIsSubmitting(true);
+    setImageError(null);
+    try {
+      let images = formData.images;
+      if (pendingImageFiles.length > 0) {
+        const uploadedUrls = await Promise.all(
+          pendingImageFiles.map(async ({ id, file }) => {
+            const url = await uploadComponentImage(file, component?.id);
+            return { id, url };
+          })
+        );
+        images = formData.images.map(img => {
+          const uploaded = uploadedUrls.find(u => u.id === img.id);
+          return uploaded ? { ...img, url: uploaded.url } : img;
+        });
+      }
+      const dataToSave = { ...formData, images };
+      if (component) {
+        onSave({ ...component, ...dataToSave });
+      } else {
+        onSave(dataToSave as Omit<Component, 'id'>);
+      }
+      onClose();
+    } catch (err) {
+      setImageError('imageUploadFailed');
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
   
   const handleConfirmDelete = () => {
@@ -341,7 +359,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                 <div className="mt-2">
                     <label htmlFor="image-upload" className="cursor-pointer bg-white dark:bg-gray-700 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <span>{t('modals.editComponent.uploadImages')}</span>
-                        <input id="image-upload" name="image-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/gif" multiple onChange={handleImageChange} />
+                        <input id="image-upload" name="image-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp, image/gif" multiple onChange={handleImageChange} />
                     </label>
                 </div>
                 {formData.images.length > 0 && (
@@ -365,6 +383,9 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
                         ))}
                     </div>
                 )}
+                {imageError && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">{t(`modals.editBuilding.${imageError}`)}</p>
+                )}
               </div>
           </div>
           <div className="flex justify-between items-center pt-4 border-t dark:border-gray-700 mt-4">
@@ -381,7 +402,7 @@ const EditComponentModal: React.FC<EditComponentModalProps> = ({ component, buil
             </div>
             <div className="flex space-x-2">
               <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none">{t('modals.common.cancel')}</button>
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none">{t('modals.editComponent.saveComponent')}</button>
+              <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">{isSubmitting ? t('modals.editBuilding.uploading') : t('modals.editComponent.saveComponent')}</button>
             </div>
           </div>
         </form>

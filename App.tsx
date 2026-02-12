@@ -6,6 +6,7 @@ import { initGemini } from './services/geminiService';
 import { useAppData } from './hooks/useAppData';
 import * as fs from './services/firestoreService';
 import * as authService from './services/authService';
+import { uploadUnitImage, uploadComponentImage, uploadRequestDocument, uploadContingencyDocument } from './services/storageService';
 import { initialBuildings, initialTasks, initialServiceRequests, initialComponents, initialUnits, initialContingencyDocuments, initialExpenses, initialNotifications } from './data/initialData';
 
 import SideNav from './components/SideNav';
@@ -40,15 +41,6 @@ import NotificationsView from './components/NotificationsView';
 
 export type View = 'dashboard' | 'financials' | 'properties' | 'tasks' | 'requests' | 'providers' | 'propertyManagers' | 'account' | 'management' | 'components' | 'tools' | 'contingencyFund' | 'notifications';
 export type Theme = 'light' | 'dark';
-
-const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
-};
 
 const App: React.FC = () => {
   const [geminiReady, setGeminiReady] = useState(false);
@@ -204,16 +196,20 @@ const App: React.FC = () => {
   };
 
   const handleAddUnitImages = async (unitId: string, files: FileList) => {
-    const imagePromises = Array.from(files).map(async file => {
-      const base64 = await fileToBase64(file);
-      return { id: crypto.randomUUID(), url: base64, uploadedAt: new Date().toISOString() };
-    });
-    const newImages = await Promise.all(imagePromises);
-    const unit = units.find(u => u.id === unitId);
-    if (!unit) return;
-    const updated = { ...unit, images: [...unit.images, ...newImages] };
-    await fs.setUnit(updated);
-    setNotification({ type: 'success', message: `${newImages.length} image(s) added.` });
+    try {
+      const imagePromises = Array.from(files).map(async file => {
+        const url = await uploadUnitImage(file, unitId);
+        return { id: crypto.randomUUID(), url, uploadedAt: new Date().toISOString() };
+      });
+      const newImages = await Promise.all(imagePromises);
+      const unit = units.find(u => u.id === unitId);
+      if (!unit) return;
+      const updated = { ...unit, images: [...(unit.images || []), ...newImages] };
+      await fs.setUnit(updated);
+      setNotification({ type: 'success', message: `${newImages.length} image(s) added.` });
+    } catch (err) {
+      setNotification({ type: 'error', message: err instanceof Error ? err.message : 'Failed to upload image(s).' });
+    }
   };
 
   const handleDeleteUnitImage = async (unitId: string, imageId: string) => {
@@ -318,16 +314,20 @@ const App: React.FC = () => {
   };
 
   const handleAddComponentImage = async (componentId: string, files: FileList) => {
-    const imagePromises = Array.from(files).map(async file => {
-      const base64 = await fileToBase64(file);
-      return { id: crypto.randomUUID(), url: base64, uploadedAt: new Date().toISOString() };
-    });
-    const newImages = await Promise.all(imagePromises);
-    const component = components.find(c => c.id === componentId);
-    if (!component) return;
-    const updated = { ...component, images: [...component.images, ...newImages] };
-    await fs.setComponent(updated);
-    setNotification({ type: 'success', message: `${newImages.length} image(s) added.` });
+    try {
+      const imagePromises = Array.from(files).map(async file => {
+        const url = await uploadComponentImage(file, componentId);
+        return { id: crypto.randomUUID(), url, uploadedAt: new Date().toISOString() };
+      });
+      const newImages = await Promise.all(imagePromises);
+      const component = components.find(c => c.id === componentId);
+      if (!component) return;
+      const updated = { ...component, images: [...(component.images || []), ...newImages] };
+      await fs.setComponent(updated);
+      setNotification({ type: 'success', message: `${newImages.length} image(s) added.` });
+    } catch (err) {
+      setNotification({ type: 'error', message: err instanceof Error ? err.message : 'Failed to upload image(s).' });
+    }
   };
 
   const handleDeleteComponentImage = async (componentId: string, imageId: string) => {
@@ -498,13 +498,17 @@ const App: React.FC = () => {
 
   const handleAddDocument = async (requestId: string, file: File) => {
     if (!currentUser) return;
-    const base64 = await fileToBase64(file);
-    const newDocument: Document = { id: crypto.randomUUID(), name: file.name, url: base64, uploadedAt: new Date().toISOString(), uploadedBy: currentUser.username };
-    const req = serviceRequests.find(r => r.id === requestId);
-    if (!req) return;
-    const updated = { ...req, documents: [...req.documents, newDocument] };
-    await fs.setRequest(updated);
-    setNotification({ type: 'success', message: 'Document uploaded.' });
+    try {
+      const url = await uploadRequestDocument(file, requestId);
+      const newDocument: Document = { id: crypto.randomUUID(), name: file.name, url, uploadedAt: new Date().toISOString(), uploadedBy: currentUser.username };
+      const req = serviceRequests.find(r => r.id === requestId);
+      if (!req) return;
+      const updated = { ...req, documents: [...(req.documents || []), newDocument] };
+      await fs.setRequest(updated);
+      setNotification({ type: 'success', message: 'Document uploaded.' });
+    } catch (err) {
+      setNotification({ type: 'error', message: err instanceof Error ? err.message : 'Failed to upload document.' });
+    }
   };
 
   const handleDeleteDocument = async (requestId: string, documentId: string) => {
@@ -517,10 +521,14 @@ const App: React.FC = () => {
 
   const handleAddContingencyDocument = async (file: File) => {
     if (!currentUser) return;
-    const base64 = await fileToBase64(file);
-    const newDocument: Document = { id: crypto.randomUUID(), name: file.name, url: base64, uploadedAt: new Date().toISOString(), uploadedBy: currentUser.username };
-    await fs.setContingencyDocument(newDocument);
-    setNotification({ type: 'success', message: 'Document uploaded successfully.' });
+    try {
+      const url = await uploadContingencyDocument(file);
+      const newDocument: Document = { id: crypto.randomUUID(), name: file.name, url, uploadedAt: new Date().toISOString(), uploadedBy: currentUser.username };
+      await fs.setContingencyDocument(newDocument);
+      setNotification({ type: 'success', message: 'Document uploaded successfully.' });
+    } catch (err) {
+      setNotification({ type: 'error', message: err instanceof Error ? err.message : 'Failed to upload document.' });
+    }
   };
 
   const handleDeleteContingencyDocument = async (documentId: string) => {
