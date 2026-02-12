@@ -56,6 +56,19 @@ export const SERVICE_PROVIDER_SPECIALTIES = [
     'Building Inspector',
 ];
 
+/** Maps specialty values to modals.editTask translation key suffixes */
+export const SPECIALTY_TO_I18N_KEY: Record<string, string> = {
+  'Plumbing': 'specialtyPlumbing',
+  'Electrical': 'specialtyElectrical',
+  'HVAC': 'specialtyHVAC',
+  'Landscaping': 'specialtyLandscaping',
+  'Cleaning': 'specialtyCleaning',
+  'General Maintenance': 'specialtyGeneralMaintenance',
+  'Painting': 'specialtyPainting',
+  'Roofing': 'specialtyRoofing',
+  'Building Inspector': 'specialtyBuildingInspector',
+};
+
 export const COMPONENT_TYPES = [
   ComponentType.Building,
   ComponentType.Site,
