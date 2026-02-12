@@ -89,7 +89,7 @@ export const onServiceRequestCreated = functions.firestore
 
       const providerData = providerDoc.data();
       const providerEmail = providerData?.email;
-      const providerName = providerData?.name || 'Service Provider';
+      // const providerName = providerData?.name || 'Service Provider';
 
       if (!providerEmail) {
         console.error(`No email found for provider: ${providerId}`);
@@ -135,8 +135,10 @@ export const onServiceRequestCreated = functions.firestore
               <p style="margin: 5px 0 0 0;">Service Request Notification</p>
             </div>
             <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
-              <p>Dear ${providerName},</p>
               <div style="white-space: pre-wrap; line-height: 1.6;">${body.replace(/\n/g, '<br>')}</div>
+            </div>
+            <div style="padding: 15px; background-color:rgb(15, 146, 102); color:rgb(255, 255, 255); text-align: center; font-size: 12px;">
+              <p style="margin: 0;"><a style="color: white; text-decoration: none;" href="https://app.soscondo.ca/">Click here to Login and Accept or Decline the Service Request</a></p>
             </div>
             <div style="padding: 15px; background-color: #1f2937; color: #9ca3af; text-align: center; font-size: 12px;">
               <p style="margin: 0;">This is an automated message from S.O.S. Condo Property Management System.</p>
@@ -146,6 +148,7 @@ export const onServiceRequestCreated = functions.firestore
         `,
       };
 
+      console.log('Update email tempalte')
       console.log(`Sending email to: ${providerEmail}`);
       
       const info = await transporter.sendMail(mailOptions);
@@ -250,8 +253,11 @@ export const sendServiceRequestEmail = functions.https.onCall(async (data: SendE
             <p style="margin: 5px 0 0 0;">Service Request Notification</p>
           </div>
           <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
-            <p>Dear ${providerData?.name || 'Service Provider'},</p>
             <div style="white-space: pre-wrap; line-height: 1.6;">${body.replace(/\n/g, '<br>')}</div>
+          </div>
+          
+          <div style="padding: 15px; background-color:rgb(15, 146, 102); color:rgb(255, 255, 255); text-align: center; font-size: 12px;">
+            <p style="margin: 0;"><a style="color: white; text-decoration: none;" href="https://app.soscondo.ca/">Click here to Login and Accept or Decline the Service Request</a></p>
           </div>
           <div style="padding: 15px; background-color: #1f2937; color: #9ca3af; text-align: center; font-size: 12px;">
             <p style="margin: 0;">This is an automated message from S.O.S. Condo Property Management System.</p>
