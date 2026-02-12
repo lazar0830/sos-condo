@@ -191,7 +191,7 @@ const SideNav: React.FC<SideNavProps> = ({
                         {unreadCount > 0 && <span className="absolute top-0 right-0 block h-2.5 w-2.5 transform -translate-y-1/2 translate-x-1/2 rounded-full text-white shadow-solid bg-red-500 border-2 border-white dark:border-gray-800"></span>}
                     </button>
                     {popoverOpen && (
-                        <div className="origin-top-right absolute right-0 bottom-full mb-2 w-80 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700">
+                        <div className="origin-top-left absolute left-0 bottom-full mb-2 w-80 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700">
                             <div className="p-2">
                                 <div className="flex justify-between items-center px-2 py-1">
                                     <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-100">{t('common.notifications')}</h4>
