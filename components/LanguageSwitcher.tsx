@@ -17,7 +17,7 @@ const LanguageSwitcher: React.FC = () => {
       aria-label="Switch language"
       title="Switch language / Changer la langue"
     >
-      {currentLang === 'en' ? 'FR' : 'EN'}
+      {currentLang.startsWith('fr') ? 'FR' : 'EN'}
     </button>
   );
 };

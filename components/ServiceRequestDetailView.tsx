@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, MaintenanceTask, Building, ServiceProvider, User, Comment, StatusChange } from '../types';
 import { ServiceRequestStatus, UserRole } from '../types';
-import { SERVICE_REQUEST_STATUSES } from '../constants';
+import { SERVICE_REQUEST_STATUSES, SERVICE_REQUEST_STATUS_TO_I18N_KEY } from '../constants';
 
 interface ServiceRequestDetailViewProps {
   request: ServiceRequest;
@@ -152,10 +152,10 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
                         <select 
                             value={request.status} 
                             onChange={(e) => onUpdateRequestStatus(request.id, e.target.value as ServiceRequestStatus)}
-                            className={`w-full mt-1 p-2 rounded-md text-xs font-medium border-transparent focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-transparent dark:border-transparent ${statusColorMap[request.status]}`}
+                            className="w-full mt-1 block rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:border-primary-400 dark:focus:ring-primary-400 outline-none"
                         >
                             {SERVICE_REQUEST_STATUSES.map(status => (
-                                <option key={status} value={status}>{status}</option>
+                                <option key={status} value={status}>{t(`serviceRequests.${SERVICE_REQUEST_STATUS_TO_I18N_KEY[status]}`)}</option>
                             ))}
                         </select>
                     </div>
@@ -249,7 +249,7 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
                                         </div>
                                     </div>
                                     <div className="flex-1 text-sm text-gray-600 dark:text-gray-300">
-                                        <strong>{statusChange.changedBy}</strong> {t('serviceRequestDetail.changedStatusTo')} <span className={`font-semibold px-1.5 py-0.5 rounded-md ${statusColorMap[statusChange.status]}`}>{statusChange.status}</span>
+                                        <strong>{statusChange.changedBy}</strong> {t('serviceRequestDetail.changedStatusTo')} <span className={`font-semibold px-1.5 py-0.5 rounded-md ${statusColorMap[statusChange.status]}`}>{t(`serviceRequests.${SERVICE_REQUEST_STATUS_TO_I18N_KEY[statusChange.status]}`)}</span>
                                         <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{new Date(statusChange.changedAt).toLocaleString()}</span>
                                     </div>
                                 </div>

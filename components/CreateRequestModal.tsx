@@ -26,7 +26,7 @@ const getTwoDaysFromNow = () => {
 };
 
 const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task, providers, onClose, onAddServiceRequest, isForOverdueTask = false }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [providerId, setProviderId] = useState(task.providerId || '');
   const [notes, setNotes] = useState('');
   const [generatedEmail, setGeneratedEmail] = useState('');
@@ -42,7 +42,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
       return;
     }
     setIsLoading(true);
-    const emailContent = await generateServiceRequestEmail(building, task, selectedProvider.name, notes, scheduledDate);
+    const emailContent = await generateServiceRequestEmail(building, task, selectedProvider.name, notes, scheduledDate, i18n.language);
     setGeneratedEmail(emailContent);
     setIsLoading(false);
   };

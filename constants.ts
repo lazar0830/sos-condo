@@ -44,6 +44,15 @@ export const SERVICE_REQUEST_STATUSES = [
     ServiceRequestStatus.Completed,
 ];
 
+/** Maps ServiceRequestStatus to serviceRequests translation key suffixes */
+export const SERVICE_REQUEST_STATUS_TO_I18N_KEY: Record<ServiceRequestStatus, string> = {
+  [ServiceRequestStatus.Sent]: 'statusSent',
+  [ServiceRequestStatus.Accepted]: 'statusAccepted',
+  [ServiceRequestStatus.Refused]: 'statusRefused',
+  [ServiceRequestStatus.InProgress]: 'statusInProgress',
+  [ServiceRequestStatus.Completed]: 'statusCompleted',
+};
+
 export const SERVICE_PROVIDER_SPECIALTIES = [
     'Plumbing',
     'Electrical',

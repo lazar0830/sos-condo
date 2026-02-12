@@ -8,7 +8,7 @@ export const gemini: { instance: GoogleGenAI | null } = {
 
 // Function to initialize the client.
 export const initGemini = (): boolean => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (apiKey) {
     gemini.instance = new GoogleGenAI({ apiKey });
     return true;
@@ -24,6 +24,7 @@ export async function generateServiceRequestEmail(
   serviceProviderName: string,
   notes: string,
   scheduledDate?: string,
+  language?: string,
 ): Promise<string> {
   // This check is a safeguard. App.tsx should prevent this function from being called
   // if the API key is missing by rendering the SecretsSetupGuide component.
@@ -33,8 +34,19 @@ export async function generateServiceRequestEmail(
     return errorMessage;
   }
 
+  const isFrench = language?.toLowerCase().startsWith('fr');
+  const languageInstruction = isFrench
+    ? 'Generate the entire email (subject line and body) in French.'
+    : 'Generate the entire email (subject line and body) in English.';
+
+  const signOff = isFrench
+    ? 'L\'équipe de gestion immobilière'
+    : 'The Property Management Team';
+
   const prompt = `
     Generate a professional service request email for a property management company.
+
+    **Language:** ${languageInstruction}
 
     **Instructions:**
     - The tone should be polite, clear, and professional.
@@ -47,7 +59,7 @@ export async function generateServiceRequestEmail(
     ${scheduledDate ? '- State the scheduled date for the service.' : ''}
     - Include the additional notes provided.
     - End with a call to action, asking them to confirm receipt and schedule the work.
-    - Sign off as "The Property Management Team".
+    - Sign off as "${signOff}".
 
     **Details to use:**
     - Service Provider Name: ${serviceProviderName}
@@ -57,7 +69,7 @@ export async function generateServiceRequestEmail(
     - Task Description: ${task.description}
     ${task.unitNumber ? `- Unit: ${task.unitNumber}` : ''}
     ${task.componentName ? `- Component: ${task.componentName}` : ''}
-    ${scheduledDate ? `- Scheduled Date: ${new Date(scheduledDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}` : ''}
+    ${scheduledDate ? `- Scheduled Date: ${new Date(scheduledDate).toLocaleDateString(isFrench ? 'fr-CA' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}` : ''}
     - Additional Notes: ${notes || 'N/A'}
 
     Generate only the email content (Subject line and body). Do not add any extra explanations or text before or after the email.
