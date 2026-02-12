@@ -57,6 +57,9 @@
     "createServiceRequest": "Create Service Request",
     "noTasksScheduled": "No tasks scheduled in the next 30 days.",
     "noOverdueRequests": "No overdue or upcoming service requests.",
+    "confirmServiceRequestDeletion": "Confirm Service Request Deletion",
+    "confirmServiceRequestDeletionMessage": "Are you sure you want to delete the service request for \"{{name}}\"? This action cannot be undone.",
+    "deleteServiceRequest": "Delete",
     "previous": "Previous",
     "next": "Next",
     "confirmTaskDeletion": "Confirm Task Deletion",
@@ -234,7 +237,11 @@
     "statusAccepted": "Accepted",
     "statusRefused": "Refused",
     "statusInProgress": "In Progress",
-    "statusCompleted": "Completed"
+    "statusCompleted": "Completed",
+    "confirmDeletion": "Confirm Service Request Deletion",
+    "confirmDeletionMessage": "Are you sure you want to delete the service request for \"{{name}}\"? This action cannot be undone.",
+    "deleteRequest": "Delete",
+    "actions": "Actions"
   },
   "appManagement": {
     "title": "App Management",

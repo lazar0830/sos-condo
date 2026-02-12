@@ -16,6 +16,7 @@ interface DashboardViewProps {
   onEditTask: (task: MaintenanceTask) => void;
   onSelectRequest: (requestId: string) => void;
   onDeleteTask: (taskId: string) => void;
+  onDeleteServiceRequest: (requestId: string) => void;
   onAddServiceRequest: (request: Omit<ServiceRequest, 'id' | 'comments' | 'documents' | 'statusHistory'>) => void;
   onSelectBuilding: (buildingId: string) => void;
   onAddBuilding: () => void;
@@ -109,11 +110,12 @@ const statusToKey: Record<string, string> = {
   Accepted: 'statusAccepted', Refused: 'statusRefused', InProgress: 'statusInProgress',
 };
 
-const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, components, tasks, providers, serviceRequests, expenses, onEditTask, onSelectRequest, onDeleteTask, onAddServiceRequest, onSelectBuilding, onAddBuilding }) => {
+const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, components, tasks, providers, serviceRequests, expenses, onEditTask, onSelectRequest, onDeleteTask, onDeleteServiceRequest, onAddServiceRequest, onSelectBuilding, onAddBuilding }) => {
   const { t } = useTranslation();
   const [tasksPage, setTasksPage] = useState(1);
   const [requestsPage, setRequestsPage] = useState(1);
   const [deletingTask, setDeletingTask] = useState<MaintenanceTask | null>(null);
+  const [deletingRequest, setDeletingRequest] = useState<ServiceRequest | null>(null);
   const [taskForRequest, setTaskForRequest] = useState<MaintenanceTask | null>(null);
   const [contingencyGraphBuildingFilter, setContingencyGraphBuildingFilter] = useState<string>('all');
   const ITEMS_PER_PAGE = 5;
@@ -559,24 +561,32 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                 return (
                   <div 
                     key={sr.id}
-                    onClick={() => onSelectRequest(sr.id)}
-                    className={`p-4 rounded-md border cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors ${isRequestOverdue ? 'border-red-200 dark:border-red-700/50 bg-red-50/50 dark:bg-red-900/20' : sr.isUrgent ? 'border-amber-200 dark:border-amber-700/50 bg-amber-50/50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/20'}`}
+                    className={`rounded-md border transition-colors ${isRequestOverdue ? 'border-red-200 dark:border-red-700/50 bg-red-50/50 dark:bg-red-900/20' : sr.isUrgent ? 'border-amber-200 dark:border-amber-700/50 bg-amber-50/50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/20 hover:border-gray-300 dark:hover:border-gray-600'}`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold text-gray-800 dark:text-gray-100">{getTaskName(sr.taskId)}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.to')} {getProviderName(sr.providerId)}</p>
+                    <div onClick={() => onSelectRequest(sr.id)} className="p-4 cursor-pointer">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-gray-800 dark:text-gray-100">{getTaskName(sr.taskId)}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard.to')} {getProviderName(sr.providerId)}</p>
+                        </div>
+                         <div className="flex items-center space-x-2 flex-shrink-0">
+                              {isRequestOverdue ? (
+                                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('dashboard.overdue')}</span>
+                              ) : sr.isUrgent && (
+                                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{t('dashboard.urgent')}</span>
+                              )}
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[sr.status]}`}>{t(`dashboard.${statusToKey[sr.status]}`)}</span>
+                         </div>
                       </div>
-                       <div className="flex items-center space-x-2 flex-shrink-0">
-                            {isRequestOverdue ? (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('dashboard.overdue')}</span>
-                            ) : sr.isUrgent && (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{t('dashboard.urgent')}</span>
-                            )}
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[sr.status]}`}>{t(`dashboard.${statusToKey[sr.status]}`)}</span>
-                       </div>
+                      <p className={`text-sm mt-2 ${isRequestOverdue ? 'text-red-700 dark:text-red-300 font-bold' : sr.isUrgent ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>{t('dashboard.scheduled')} <strong>{new Date(sr.scheduledDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>
                     </div>
-                    <p className={`text-sm mt-2 ${isRequestOverdue ? 'text-red-700 dark:text-red-300 font-bold' : sr.isUrgent ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>{t('dashboard.scheduled')} <strong>{new Date(sr.scheduledDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>
+                    <div className="flex items-center justify-end p-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/20">
+                      <button onClick={(e) => { e.stopPropagation(); setDeletingRequest(sr); }} className="p-1.5 text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 rounded-full transition-colors" aria-label={`Delete ${getTaskName(sr.taskId)}`}>
+                        <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 )
             }) : <p className="text-gray-500 dark:text-gray-400 text-center py-4">{t('dashboard.noOverdueRequests')}</p>}
@@ -607,6 +617,20 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
           title={t('dashboard.confirmTaskDeletion')}
           message={t('dashboard.confirmTaskDeletionMessage', { name: deletingTask.name })}
           confirmButtonText={t('dashboard.deleteTask')}
+        />
+      )}
+
+      {deletingRequest && (
+        <ConfirmationModal
+          isOpen={!!deletingRequest}
+          onClose={() => setDeletingRequest(null)}
+          onConfirm={() => {
+            onDeleteServiceRequest(deletingRequest.id);
+            setDeletingRequest(null);
+          }}
+          title={t('dashboard.confirmServiceRequestDeletion')}
+          message={t('dashboard.confirmServiceRequestDeletionMessage', { name: getTaskName(deletingRequest.taskId) })}
+          confirmButtonText={t('dashboard.deleteServiceRequest')}
         />
       )}
     </div>

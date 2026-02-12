@@ -57,6 +57,9 @@
     "createServiceRequest": "Créer une demande de service",
     "noTasksScheduled": "Aucune tâche planifiée dans les 30 prochains jours.",
     "noOverdueRequests": "Aucune demande de service en retard ou à venir.",
+    "confirmServiceRequestDeletion": "Confirmer la suppression de la demande de service",
+    "confirmServiceRequestDeletionMessage": "Êtes-vous sûr de vouloir supprimer la demande de service pour « {{name}} » ? Cette action est irréversible.",
+    "deleteServiceRequest": "Supprimer",
     "previous": "Précédent",
     "next": "Suivant",
     "confirmTaskDeletion": "Confirmer la suppression de la tâche",
@@ -234,7 +237,11 @@
     "statusAccepted": "Accepté",
     "statusRefused": "Refusé",
     "statusInProgress": "En cours",
-    "statusCompleted": "Terminé"
+    "statusCompleted": "Terminé",
+    "confirmDeletion": "Confirmer la suppression de la demande de service",
+    "confirmDeletionMessage": "Êtes-vous sûr de vouloir supprimer la demande de service pour « {{name}} » ? Cette action est irréversible.",
+    "deleteRequest": "Supprimer",
+    "actions": "Actions"
   },
   "appManagement": {
     "title": "Gestion de l'app",

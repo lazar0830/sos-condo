@@ -402,6 +402,12 @@ const App: React.FC = () => {
     setNotification({ type: 'success', message: `${requestIds.length} orphaned service request(s) deleted successfully!` });
   };
 
+  const handleDeleteServiceRequest = async (requestId: string) => {
+    await fs.deleteRequest(requestId);
+    if (selectedRequestId === requestId) setSelectedRequestId(null);
+    setNotification({ type: 'success', message: 'Service request deleted.' });
+  };
+
   const handleSaveUser = async (userData: Omit<User, 'id'> | User, password?: string): Promise<boolean> => {
     if (!currentUser) return false;
     const isNew = !('id' in userData);
@@ -752,6 +758,7 @@ const App: React.FC = () => {
           onEditTask={handleOpenTaskModal} 
           onSelectRequest={handleSelectRequest} 
           onDeleteTask={handleDeleteTask} 
+          onDeleteServiceRequest={handleDeleteServiceRequest}
           onAddServiceRequest={handleAddServiceRequest} 
           onSelectBuilding={handleSelectBuilding} 
           onAddBuilding={() => handleOpenBuildingModal(null)} 
@@ -834,7 +841,7 @@ const App: React.FC = () => {
           const provider = visibleProviders.find(p => p.id === selectedRequest.providerId);
           return <ServiceRequestDetailView request={selectedRequest} task={task} building={building} provider={provider} currentUser={currentUser} onBack={() => setSelectedRequestId(null)} onUpdateRequestStatus={handleUpdateServiceRequestStatus} onAddComment={handleAddComment} onEditRequest={handleOpenRequestModal} onAddDocument={handleAddDocument} onDeleteDocument={handleDeleteDocument} />;
         }
-        return <ServiceRequestsView requests={visibleServiceRequests} tasks={visibleTasks} buildings={visibleBuildings} providers={visibleProviders} onSelectRequest={handleSelectRequest} />;
+        return <ServiceRequestsView requests={visibleServiceRequests} tasks={visibleTasks} buildings={visibleBuildings} providers={visibleProviders} onSelectRequest={handleSelectRequest} onDeleteServiceRequest={handleDeleteServiceRequest} />;
       case 'propertyManagers':
         if (currentUser.role !== UserRole.SuperAdmin) return <div>Access Denied</div>;
         return <PropertyManagersView

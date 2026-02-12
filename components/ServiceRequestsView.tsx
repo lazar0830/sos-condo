@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, MaintenanceTask, Building, ServiceProvider } from '../types';
 import { ServiceRequestStatus } from '../types';
 import { SERVICE_REQUEST_STATUSES } from '../constants';
+import ConfirmationModal from './ConfirmationModal';
 
 interface ServiceRequestsViewProps {
   requests: ServiceRequest[];
@@ -10,6 +11,7 @@ interface ServiceRequestsViewProps {
   buildings: Building[];
   providers: ServiceProvider[];
   onSelectRequest: (requestId: string) => void;
+  onDeleteServiceRequest: (requestId: string) => void;
 }
 
 const specialtyColors = ['bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300','bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300','bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300','bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/50 dark:text-fuchsia-300','bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300','bg-lime-100 text-lime-800 dark:bg-lime-900/50 dark:text-lime-300','bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300','bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300','bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300','bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300','bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-300','bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300'];
@@ -52,9 +54,10 @@ const FilterPill: React.FC<{ onRemove: () => void, children: React.ReactNode }> 
   );
 };
 
-const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tasks, buildings, providers, onSelectRequest }) => {
+const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tasks, buildings, providers, onSelectRequest, onDeleteServiceRequest }) => {
   const { t } = useTranslation();
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [deletingRequest, setDeletingRequest] = useState<ServiceRequest | null>(null);
   const [filters, setFilters] = useState<Filters>({
     selectedBuildingIds: [],
     selectedProviderIds: [],
@@ -233,6 +236,7 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.provider')}</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.dateSent')}</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('serviceRequests.status')}</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">{t('serviceRequests.actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -263,11 +267,22 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
                           {t(`serviceRequests.${statusToKey[request.status]}`)}
                         </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeletingRequest(request); }}
+                        className="p-1.5 text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 rounded-full transition-colors"
+                        aria-label={t('serviceRequests.deleteRequest')}
+                      >
+                        <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </td>
                   </tr>
                 );
-              }) : (
+              }              ) : (
                 <tr>
-                    <td colSpan={6} className="text-center py-10">
+                    <td colSpan={7} className="text-center py-10">
                         <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('serviceRequests.noRequestsFound')}</h4>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">{hasActiveFilters ? t('serviceRequests.noRequestsFilterHint') : t('serviceRequests.noRequestsEmptyHint')}</p>
                     </td>
@@ -277,6 +292,20 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
           </table>
         </div>
       </div>
+
+      {deletingRequest && (
+        <ConfirmationModal
+          isOpen={!!deletingRequest}
+          onClose={() => setDeletingRequest(null)}
+          onConfirm={() => {
+            onDeleteServiceRequest(deletingRequest.id);
+            setDeletingRequest(null);
+          }}
+          title={t('serviceRequests.confirmDeletion')}
+          message={t('serviceRequests.confirmDeletionMessage', { name: tasks.find(t => t.id === deletingRequest.taskId)?.name || 'N/A' })}
+          confirmButtonText={t('serviceRequests.deleteRequest')}
+        />
+      )}
     </div>
   );
 };
