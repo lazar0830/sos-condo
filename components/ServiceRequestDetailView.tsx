@@ -139,6 +139,12 @@ const ServiceRequestDetailView: React.FC<ServiceRequestDetailViewProps> = ({
                             <p className="text-gray-800 dark:text-gray-100">{request.componentName}</p>
                         </div>
                     )}
+                    {(request.taskDescription || task?.description) && (
+                        <div>
+                            <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.description')}</label>
+                            <p className="text-gray-800 dark:text-gray-100 whitespace-pre-wrap mt-1">{(request.taskDescription ?? task?.description) || ''}</p>
+                        </div>
+                    )}
                     <div>
                         <label className="font-semibold text-gray-600 dark:text-gray-300">{t('serviceRequestDetail.scheduledDate')}</label>
                         <p className="text-gray-800 dark:text-gray-100">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : t('serviceRequestDetail.notSet')}</p>

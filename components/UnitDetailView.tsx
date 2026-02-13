@@ -176,7 +176,7 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
                                 <div className="flex justify-between items-start cursor-pointer" onClick={() => onOpenTaskModal(task, building.id)}>
                                     <div>
                                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{task.name}</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{task.description}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{task.description}</p>
                                     </div>
                                     <div className="text-right flex-shrink-0 ml-4">
                                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">

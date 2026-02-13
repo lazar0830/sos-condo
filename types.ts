@@ -171,6 +171,7 @@ export interface ServiceRequest {
   providerId: string;
   specialty: string;
   notes: string;
+  taskDescription?: string;
   generatedEmail: string;
   sentAt: string;
   status: ServiceRequestStatus;

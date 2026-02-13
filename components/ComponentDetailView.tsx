@@ -259,7 +259,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${recurrenceColorMap[task.recurrence]}`}>{task.recurrence}</span>
                                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
                                             </div>
-                                            <p className="text-gray-600 dark:text-gray-300 text-sm">{task.description}</p>
+                                            <p className="text-gray-600 dark:text-gray-300 text-sm whitespace-pre-wrap">{task.description}</p>
                                             <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-4 flex-wrap">
                                                 {provider && <span>{t('componentDetail.provider')} <strong>{provider.name}</strong></span>}
                                                 {task.cost != null && <span>{t('componentDetail.cost')} <strong>${task.cost.toFixed(2)}</strong></span>}
