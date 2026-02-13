@@ -6,13 +6,14 @@ import ConfirmationModal from './ConfirmationModal';
 
 interface ServiceProvidersViewProps {
   providers: ServiceProvider[];
+  users: User[];
   onAddProvider: () => void;
   onSelectProvider: (id: string) => void;
   onDeleteProvider: (id: string) => void;
   currentUser: User;
 }
 
-const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, onAddProvider, onSelectProvider, onDeleteProvider, currentUser }) => {
+const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, users, onAddProvider, onSelectProvider, onDeleteProvider, currentUser }) => {
   const { t } = useTranslation();
   const [deletingProvider, setDeletingProvider] = useState<ServiceProvider | null>(null);
 
@@ -73,11 +74,14 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
                           {provider.phone}
                         </p>
                       )}
+                      <p className="flex items-center text-gray-500 dark:text-gray-400 mt-1">
+                        <span className="text-xs">{t('serviceProviders.addedBy')}: {provider.createdBy ? users.find(u => u.id === provider.createdBy)?.username ?? '—' : '—'}</span>
+                      </p>
                     </div>
                 </div>
               </div>
               <div className="p-2 bg-gray-50 dark:bg-gray-700/50 border-t dark:border-gray-700 text-right">
-                 {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || provider.createdBy === currentUser.id) && (
+                 {(currentUser.role === UserRole.SuperAdmin || provider.createdBy === currentUser.id) && (
                     <button 
                         onClick={(e) => { e.stopPropagation(); handleOpenConfirmDelete(provider); }} 
                         className="px-3 py-1 text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900"

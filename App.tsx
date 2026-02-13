@@ -379,6 +379,13 @@ const App: React.FC = () => {
   };
 
   const handleDeleteProvider = async (providerId: string) => {
+    const provider = providers.find(p => p.id === providerId);
+    if (provider && currentUser && (currentUser.role === UserRole.Admin || currentUser.role === UserRole.PropertyManager)) {
+      if (provider.createdBy !== currentUser.id) {
+        setNotification({ type: 'error', message: 'You can only delete service providers you created.' });
+        return;
+      }
+    }
     // Delete all service requests associated with this provider first
     const relatedRequests = serviceRequests.filter(sr => sr.providerId === providerId);
     for (const request of relatedRequests) {

@@ -5,6 +5,7 @@ import ConfirmationModal from './ConfirmationModal';
 
 interface PropertyManagersViewProps {
   managers: User[];
+  users: User[];
   onAddManager: () => void;
   onEditManager: (user: User) => void;
   onDeleteManager: (userId: string) => void;
@@ -12,6 +13,7 @@ interface PropertyManagersViewProps {
 
 const PropertyManagersView: React.FC<PropertyManagersViewProps> = ({
   managers,
+  users,
   onAddManager,
   onEditManager,
   onDeleteManager,
@@ -42,6 +44,7 @@ const PropertyManagersView: React.FC<PropertyManagersViewProps> = ({
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('propertyManagers.displayName')}</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('propertyManagers.loginEmail')}</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('propertyManagers.role')}</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('propertyManagers.addedBy')}</th>
                 <th scope="col" className="relative px-6 py-3"><span className="sr-only">{t('propertyManagers.actions')}</span></th>
               </tr>
             </thead>
@@ -51,6 +54,7 @@ const PropertyManagersView: React.FC<PropertyManagersViewProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{user.username}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{t('propertyManagers.rolePropertyManager')}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.createdBy ? users.find(u => u.id === user.createdBy)?.username ?? '—' : '—'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                     <button onClick={() => onEditManager(user)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('propertyManagers.edit')}</button>
                     <button onClick={() => setDeletingUser(user)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">{t('propertyManagers.delete')}</button>
@@ -58,7 +62,7 @@ const PropertyManagersView: React.FC<PropertyManagersViewProps> = ({
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={4} className="text-center py-10">
+                  <td colSpan={5} className="text-center py-10">
                     <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('propertyManagers.noManagersFound')}</h4>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">{t('propertyManagers.addManagerHint')}</p>
                   </td>
