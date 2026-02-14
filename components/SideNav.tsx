@@ -91,7 +91,7 @@ const SideNav: React.FC<SideNavProps> = ({
     { id: 'tools', name: t('nav.tools') },
   ];
   const propertyManagersItem: { id: View, name: string } = { id: 'propertyManagers', name: t('nav.propertyManagers') };
-  const managerNavItems = currentUser.role === UserRole.SuperAdmin
+  const managerNavItems = [UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role)
     ? [...baseManagerNavItems.slice(0, 7), propertyManagersItem, ...baseManagerNavItems.slice(7)]
     : baseManagerNavItems;
   

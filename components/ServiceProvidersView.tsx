@@ -6,14 +6,14 @@ import ConfirmationModal from './ConfirmationModal';
 
 interface ServiceProvidersViewProps {
   providers: ServiceProvider[];
-  users: User[];
+  users?: User[];
   onAddProvider: () => void;
   onSelectProvider: (id: string) => void;
   onDeleteProvider: (id: string) => void;
   currentUser: User;
 }
 
-const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, users, onAddProvider, onSelectProvider, onDeleteProvider, currentUser }) => {
+const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, users = [], onAddProvider, onSelectProvider, onDeleteProvider, currentUser }) => {
   const { t } = useTranslation();
   const [deletingProvider, setDeletingProvider] = useState<ServiceProvider | null>(null);
 
@@ -75,7 +75,7 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
                         </p>
                       )}
                       <p className="flex items-center text-gray-500 dark:text-gray-400 mt-1">
-                        <span className="text-xs">{t('serviceProviders.addedBy')}: {provider.createdBy ? users.find(u => u.id === provider.createdBy)?.username ?? '—' : '—'}</span>
+                        <span className="text-xs">{t('serviceProviders.addedBy')}: {provider.createdBy ? (users?.find(u => u.id === provider.createdBy)?.username ?? '—') : '—'}</span>
                       </p>
                     </div>
                 </div>

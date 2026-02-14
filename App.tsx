@@ -448,6 +448,10 @@ const App: React.FC = () => {
     if (userId === currentUser?.id) { setNotification({ type: 'error', message: "You cannot delete your own account."}); return; }
     const userToDelete = users.find(u => u.id === userId);
     if (userToDelete?.role === UserRole.SuperAdmin) { setNotification({ type: 'error', message: "The Super Admin account cannot be deleted."}); return; }
+    if (userToDelete?.role === UserRole.PropertyManager && currentUser.role === UserRole.Admin && userToDelete.createdBy !== currentUser.id) {
+      setNotification({ type: 'error', message: 'You can only delete property managers you created.' });
+      return;
+    }
     await fs.deleteUser(userId);
     setNotification({ type: 'success', message: 'User profile deleted.' });
   };
@@ -850,9 +854,14 @@ const App: React.FC = () => {
         }
         return <ServiceRequestsView requests={visibleServiceRequests} tasks={visibleTasks} buildings={visibleBuildings} providers={visibleProviders} onSelectRequest={handleSelectRequest} onDeleteServiceRequest={handleDeleteServiceRequest} />;
       case 'propertyManagers':
-        if (currentUser.role !== UserRole.SuperAdmin) return <div>Access Denied</div>;
+        if (![UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role)) return <div>Access Denied</div>;
+        const visibleManagers = currentUser.role === UserRole.SuperAdmin
+          ? users.filter(u => u.role === UserRole.PropertyManager)
+          : users.filter(u => u.role === UserRole.PropertyManager && u.createdBy === currentUser.id);
         return <PropertyManagersView
-            managers={users.filter(u => u.role === UserRole.PropertyManager)}
+            managers={visibleManagers}
+            users={users}
+            currentUser={currentUser}
             onAddManager={() => handleOpenUserModal(null, UserRole.PropertyManager)}
             onEditManager={(user) => handleOpenUserModal(user, UserRole.PropertyManager)}
             onDeleteManager={handleDeleteUser}
@@ -873,6 +882,7 @@ const App: React.FC = () => {
         ) : (
             <ServiceProvidersView 
                 providers={visibleProviders} 
+                users={users}
                 onSelectProvider={handleSelectProvider}
                 onAddProvider={() => handleOpenProviderUserModal(null)} 
                 onDeleteProvider={handleDeleteProvider} 
