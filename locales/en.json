@@ -262,6 +262,7 @@
     "contactPerson": "Contact Person",
     "addedBy": "Added by",
     "edit": "Edit",
+    "changePassword": "Change Password",
     "delete": "Delete",
     "noAdminsFound": "No Admins Found",
     "noPropertyManagersFound": "No Property Managers Found",
@@ -338,6 +339,7 @@
     "addedBy": "Added by",
     "actions": "Actions",
     "edit": "Edit",
+    "changePassword": "Change Password",
     "delete": "Delete",
     "noManagersFound": "No Property Managers Found",
     "addManagerHint": "Click \"Add Property Manager\" to create one.",
@@ -362,7 +364,8 @@
     "companyLogo": "Company Logo",
     "change": "Change",
     "saveProfile": "Save Profile",
-    "profileUpdatedSuccess": "Provider profile updated successfully."
+    "profileUpdatedSuccess": "Provider profile updated successfully.",
+    "changePassword": "Change Password"
   },
   "buildingDetail": {
     "backToProperties": "Back to Properties",
@@ -435,6 +438,7 @@
   "providerDetail": {
     "backToAllProviders": "Back to All Providers",
     "edit": "Edit",
+    "changePassword": "Change Password",
     "contact": "Contact:",
     "assignedServiceRequests": "Assigned Service Requests",
     "property": "Property",
@@ -448,6 +452,7 @@
     "noServiceRequestsHint": "This provider has no assigned requests."
   },
   "serviceProviderDetail": {
+    "changePassword": "Change Password",
     "backToAllProviders": "Back to All Providers",
     "edit": "Edit",
     "contact": "Contact",
@@ -815,6 +820,19 @@
       "contactPerson": "Contact Person",
       "saveProvider": "Save Provider",
       "allFieldsRequired": "All fields are required."
+    },
+    "changePassword": {
+      "title": "Change Password for {{name}}",
+      "description": "Enter a new password for {{email}}.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "passwordHint": "Password must be at least 6 characters long.",
+      "requiredFieldsAlert": "Please fill out all fields.",
+      "passwordTooShort": "Password must be at least 6 characters long.",
+      "passwordsDoNotMatch": "Passwords do not match.",
+      "changePassword": "Change Password",
+      "changing": "Changing...",
+      "errorChangingPassword": "Failed to change password. Please try again."
     }
   }
 }

@@ -262,6 +262,7 @@
     "contactPerson": "Personne contact",
     "addedBy": "Ajouté par",
     "edit": "Modifier",
+    "changePassword": "Changer le mot de passe",
     "delete": "Supprimer",
     "noAdminsFound": "Aucun administrateur trouvé",
     "noPropertyManagersFound": "Aucun gestionnaire trouvé",
@@ -338,6 +339,7 @@
     "addedBy": "Ajouté par",
     "actions": "Actions",
     "edit": "Modifier",
+    "changePassword": "Changer le mot de passe",
     "delete": "Supprimer",
     "noManagersFound": "Aucun gestionnaire trouvé",
     "addManagerHint": "Cliquez sur « Ajouter un gestionnaire » pour en créer un.",
@@ -362,7 +364,8 @@
     "companyLogo": "Logo de l'entreprise",
     "change": "Modifier",
     "saveProfile": "Enregistrer le profil",
-    "profileUpdatedSuccess": "Profil du fournisseur mis à jour avec succès."
+    "profileUpdatedSuccess": "Profil du fournisseur mis à jour avec succès.",
+    "changePassword": "Changer le mot de passe"
   },
   "buildingDetail": {
     "backToProperties": "Retour aux propriétés",
@@ -450,6 +453,7 @@
   "serviceProviderDetail": {
     "backToAllProviders": "Retour à tous les fournisseurs",
     "edit": "Modifier",
+    "changePassword": "Changer le mot de passe",
     "contact": "Contact",
     "assignedServiceRequests": "Demandes de service assignées",
     "tableProperty": "Propriété",
@@ -815,6 +819,19 @@
       "contactPerson": "Personne-ressource",
       "saveProvider": "Enregistrer le fournisseur",
       "allFieldsRequired": "Tous les champs sont requis."
+    },
+    "changePassword": {
+      "title": "Changer le mot de passe pour {{name}}",
+      "description": "Entrez un nouveau mot de passe pour {{email}}.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "passwordHint": "Le mot de passe doit contenir au moins 6 caractères.",
+      "requiredFieldsAlert": "Veuillez remplir tous les champs.",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+      "changePassword": "Changer le mot de passe",
+      "changing": "Changement en cours...",
+      "errorChangingPassword": "Échec du changement de mot de passe. Veuillez réessayer."
     }
   }
 }

@@ -16,6 +16,7 @@ interface ServiceProviderDetailViewProps {
   onSelectRequest: (requestId: string) => void;
   onSaveProvider: (provider: ServiceProvider) => void;
   currentUser: User;
+  onChangePassword?: (provider: ServiceProvider) => void;
 }
 
 const statusColorMap: { [key in ServiceRequestStatus]: string } = {
@@ -36,6 +37,7 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
   onSelectRequest,
   onSaveProvider,
   currentUser,
+  onChangePassword,
 }) => {
   const { t } = useTranslation();
   const [logoUploading, setLogoUploading] = useState(false);
@@ -115,18 +117,33 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                             <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300 mb-2">{provider.specialty}</span>
                             <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400">{provider.name}</h2>
                         </div>
-                        {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || provider.createdBy === currentUser.id) && (
-                          <button
-                              onClick={() => onEditProvider(provider)}
-                              className="flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
-                          >
-                              <svg className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                  <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                  <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
-                              </svg>
-                              {t('serviceProviderDetail.edit')}
-                          </button>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || provider.createdBy === currentUser.id) && (
+                            <>
+                              {provider.userId && onChangePassword && (currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
+                                <button
+                                    onClick={() => onChangePassword(provider)}
+                                    className="flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-gray-600"
+                                >
+                                    <svg className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+                                    </svg>
+                                    {t('serviceProviderDetail.changePassword')}
+                                </button>
+                              )}
+                              <button
+                                  onClick={() => onEditProvider(provider)}
+                                  className="flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+                              >
+                                  <svg className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                      <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                      <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+                                  </svg>
+                                  {t('serviceProviderDetail.edit')}
+                              </button>
+                            </>
+                          )}
+                        </div>
                     </div>
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-700 dark:text-gray-300">
                         <div className="flex items-center">

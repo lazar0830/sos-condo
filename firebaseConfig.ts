@@ -32,7 +32,7 @@ if (isFirebaseConfigured()) {
   db = getFirestore(app);
   auth = getAuth(app);
   storage = getStorage(app);
-  functions = getFunctions(app);
+  functions = getFunctions(app, 'us-central1');
 }
 
 export { app, db, auth, storage, functions };

@@ -6,6 +6,8 @@ import { initGemini } from './services/geminiService';
 import { useAppData } from './hooks/useAppData';
 import * as fs from './services/firestoreService';
 import * as authService from './services/authService';
+import { functions } from './firebaseConfig';
+import { httpsCallable } from 'firebase/functions';
 import { uploadUnitImage, uploadComponentImage, uploadRequestDocument, uploadContingencyDocument } from './services/storageService';
 import { initialBuildings, initialTasks, initialServiceRequests, initialComponents, initialUnits, initialContingencyDocuments, initialExpenses, initialNotifications } from './data/initialData';
 
@@ -28,6 +30,7 @@ import EditRequestModal from './components/EditRequestModal';
 import EditBuildingModal from './components/EditBuildingModal';
 import EditTaskModal from './components/EditTaskModal';
 import EditUserModal from './components/EditUserModal';
+import ChangePasswordModal from './components/ChangePasswordModal';
 import Notification from './components/Notification';
 import LoginPage from './components/LoginPage';
 import ComponentsView from './components/ComponentsView';
@@ -113,6 +116,8 @@ const App: React.FC = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [userModalRole, setUserModalRole] = useState<UserRole.Admin | UserRole.PropertyManager>(UserRole.PropertyManager);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordChangeUser, setPasswordChangeUser] = useState<User | null>(null);
   const [isProviderUserModalOpen, setIsProviderUserModalOpen] = useState(false);
   const [isComponentModalOpen, setIsComponentModalOpen] = useState(false);
   const [editingComponent, setEditingComponent] = useState<Component | null>(null);
@@ -620,7 +625,44 @@ const App: React.FC = () => {
   };
   const handleCloseUserModal = () => { 
     setIsUserModalOpen(false); 
-    setEditingUser(null); 
+    setEditingUser(null);
+  };
+
+  const handleChangePassword = async (userId: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    if (!functions || !currentUser) {
+      return { success: false, error: 'Not configured or not signed in.' };
+    }
+    try {
+      const changePasswordFn = httpsCallable<
+        { userId: string; newPassword: string },
+        { success: boolean }
+      >(functions, 'changeUserPassword');
+      await changePasswordFn({ userId, newPassword });
+      setNotification({ type: 'success', message: 'Password changed successfully.' });
+      setIsPasswordModalOpen(false);
+      setPasswordChangeUser(null);
+      return { success: true };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to change password.';
+      return { success: false, error: msg };
+    }
+  };
+
+  const handleClosePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+    setPasswordChangeUser(null);
+  };
+
+  /** Opens the change-password modal for the current user (My Account page). */
+  const handleOpenChangePasswordForCurrentUser = () => {
+    if (!currentUser?.id) return;
+    setPasswordChangeUser({
+      ...currentUser,
+      id: currentUser.id,
+      email: currentUser.email ?? '',
+      username: currentUser.username ?? currentUser.email ?? '',
+    });
+    setIsPasswordModalOpen(true);
   };
   const handleOpenProviderUserModal = (provider: ServiceProvider | null) => { setEditingProvider(provider); setIsProviderUserModalOpen(true); };
   const handleCloseProviderUserModal = () => { setIsProviderUserModalOpen(false); setEditingProvider(null); };
@@ -865,6 +907,7 @@ const App: React.FC = () => {
             onAddManager={() => handleOpenUserModal(null, UserRole.PropertyManager)}
             onEditManager={(user) => handleOpenUserModal(user, UserRole.PropertyManager)}
             onDeleteManager={handleDeleteUser}
+            onChangePassword={(user) => { setPasswordChangeUser(user); setIsPasswordModalOpen(true); }}
         />;
       case 'providers':
         return selectedProvider ? (
@@ -897,7 +940,7 @@ const App: React.FC = () => {
            onDeleteOrphanedRequests={handleDeleteOrphanedRequests}
          />;
       case 'account':
-        return <MyAccountView currentUser={currentUser} onUpdateCurrentUser={handleUpdateCurrentUser} onSaveProvider={handleSaveProviderProfile} serviceProviderProfile={providers.find(p => p.userId === currentUser.id)} />;
+        return <MyAccountView currentUser={currentUser} onUpdateCurrentUser={handleUpdateCurrentUser} onSaveProvider={handleSaveProviderProfile} serviceProviderProfile={providers.find(p => p.userId === currentUser.id)} onChangePassword={handleOpenChangePasswordForCurrentUser} />;
       case 'management':
         if (![UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role)) {
             return <div>Access Denied</div>;
@@ -922,7 +965,8 @@ const App: React.FC = () => {
             onAddProvider={() => handleOpenProviderUserModal(null)} 
             onEditProvider={handleOpenProviderUserModal} 
             onDeleteProvider={handleDeleteProvider} 
-            onResetData={handleResetData} 
+            onResetData={handleResetData}
+            onChangePassword={(user) => { setPasswordChangeUser(user); setIsPasswordModalOpen(true); }}
         />;
       default:
         return null;
@@ -949,7 +993,7 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (view === 'account') {
-        return <MyAccountView currentUser={currentUser} onUpdateCurrentUser={handleUpdateCurrentUser} onSaveProvider={handleSaveProviderProfile} serviceProviderProfile={providerProfile} />;
+        return <MyAccountView currentUser={currentUser} onUpdateCurrentUser={handleUpdateCurrentUser} onSaveProvider={handleSaveProviderProfile} serviceProviderProfile={providerProfile} onChangePassword={handleOpenChangePasswordForCurrentUser} />;
     }
     if (currentUser.role === UserRole.ServiceProvider) {
         return renderProviderContent();
@@ -1056,6 +1100,13 @@ const App: React.FC = () => {
           buildingId={unitModalBuildingId}
           onClose={handleCloseUnitModal}
           onSave={handleSaveUnit}
+        />
+      )}
+      {isPasswordModalOpen && passwordChangeUser && (
+        <ChangePasswordModal
+          user={passwordChangeUser}
+          onClose={handleClosePasswordModal}
+          onChangePassword={handleChangePassword}
         />
       )}
     </div>

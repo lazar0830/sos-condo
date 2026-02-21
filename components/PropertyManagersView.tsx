@@ -11,6 +11,7 @@ interface PropertyManagersViewProps {
   onAddManager: () => void;
   onEditManager: (user: User) => void;
   onDeleteManager: (userId: string) => void;
+  onChangePassword: (user: User) => void;
 }
 
 const PropertyManagersView: React.FC<PropertyManagersViewProps> = ({
@@ -20,6 +21,7 @@ const PropertyManagersView: React.FC<PropertyManagersViewProps> = ({
   onAddManager,
   onEditManager,
   onDeleteManager,
+  onChangePassword,
 }) => {
   const { t } = useTranslation();
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
@@ -60,6 +62,9 @@ const PropertyManagersView: React.FC<PropertyManagersViewProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.createdBy ? (users?.find(u => u.id === user.createdBy)?.username ?? '—') : '—'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                     <button onClick={() => onEditManager(user)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('propertyManagers.edit')}</button>
+                    {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
+                      <button onClick={() => onChangePassword(user)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">{t('propertyManagers.changePassword')}</button>
+                    )}
                     {(currentUser.role === UserRole.SuperAdmin || user.createdBy === currentUser.id) && (
                       <button onClick={() => setDeletingUser(user)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">{t('propertyManagers.delete')}</button>
                     )}

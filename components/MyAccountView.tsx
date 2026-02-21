@@ -11,13 +11,14 @@ interface MyAccountViewProps {
   onUpdateCurrentUser: (data: { email?: string; username?: string; }) => Promise<{ success: boolean, message: string }>;
   serviceProviderProfile?: ServiceProvider;
   onSaveProvider: (provider: ServiceProvider) => void;
+  onChangePassword: () => void;
 }
 
-const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurrentUser, serviceProviderProfile, onSaveProvider }) => {
+const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurrentUser, serviceProviderProfile, onSaveProvider, onChangePassword }) => {
   const { t } = useTranslation();
-  // State for account details
-  const [email, setEmail] = useState(currentUser.email);
-  const [username, setUsername] = useState(currentUser.username);
+  // State for account details (use fallbacks so we never have null - avoids .length errors in production)
+  const [email, setEmail] = useState(currentUser?.email ?? '');
+  const [username, setUsername] = useState(currentUser?.username ?? '');
   
   // State for provider profile
   const [providerData, setProviderData] = useState<ServiceProvider | undefined>(serviceProviderProfile);
@@ -33,8 +34,8 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
     setLogoPreview(serviceProviderProfile?.logoUrl || null);
     setPendingLogoFile(null);
     setLogoError(null);
-    setEmail(currentUser.email);
-    setUsername(currentUser.username);
+    setEmail(currentUser?.email ?? '');
+    setUsername(currentUser?.username ?? '');
   }, [serviceProviderProfile, currentUser]);
 
   const handleAccountUpdate = async (e: React.FormEvent) => {
@@ -107,24 +108,31 @@ const MyAccountView: React.FC<MyAccountViewProps> = ({ currentUser, onUpdateCurr
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.loginEmail')}</label>
-              <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 block w-full input" required />
+              <input type="email" id="email" value={email ?? ''} onChange={e => setEmail(e.target.value)} className="mt-1 block w-full input" required />
             </div>
              <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.displayName')}</label>
-              <input type="text" id="username" value={username} onChange={e => setUsername(e.target.value)} className="mt-1 block w-full input" required />
+              <input type="text" id="username" value={username ?? ''} onChange={e => setUsername(e.target.value)} className="mt-1 block w-full input" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('myAccount.role')}</label>
-              <p className="mt-1 block w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-500 dark:text-gray-400">{currentUser.role}</p>
+              <p className="mt-1 block w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-500 dark:text-gray-400">{currentUser?.role ?? ''}</p>
             </div>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end items-center gap-3">
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChangePassword(); }}
+              className="px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-blue-300 dark:hover:bg-gray-600"
+            >
+              {t('myAccount.changePassword')}
+            </button>
             <button type="submit" className="px-4 py-2 btn-primary">{t('myAccount.saveChanges')}</button>
           </div>
         </form>
       </div>
 
-      {currentUser.role === UserRole.ServiceProvider && providerData && (
+      {currentUser?.role === UserRole.ServiceProvider && providerData && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('myAccount.serviceProviderProfile')}</h3>
            <form onSubmit={handleProviderSave} className="space-y-4">
