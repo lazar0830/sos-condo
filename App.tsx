@@ -6,6 +6,7 @@ import { initGemini } from './services/geminiService';
 import { useAppData } from './hooks/useAppData';
 import * as fs from './services/firestoreService';
 import * as authService from './services/authService';
+import i18n from './i18n';
 import { functions } from './firebaseConfig';
 import { httpsCallable } from 'firebase/functions';
 import { uploadUnitImage, uploadComponentImage, uploadRequestDocument, uploadContingencyDocument } from './services/storageService';
@@ -63,6 +64,9 @@ const App: React.FC = () => {
       } else {
         const profile = await fs.getUserById(fbUser.uid);
         setCurrentUser(profile || null);
+        if (profile?.language) {
+          i18n.changeLanguage(profile.language);
+        }
       }
       setAuthChecked(true);
     });
@@ -137,6 +141,12 @@ const App: React.FC = () => {
 
   const handleThemeChange = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
+  const handleLanguageChange = async (lang: string) => {
+    if (!currentUser) return;
+    await fs.updateUser(currentUser.id, { language: lang });
+    setCurrentUser(prev => prev ? { ...prev, language: lang } : null);
   };
 
   const handleResetData = () => {
@@ -938,6 +948,14 @@ const App: React.FC = () => {
            tasks={tasks}
            providers={providers}
            onDeleteOrphanedRequests={handleDeleteOrphanedRequests}
+           currentUser={currentUser}
+           onSendTaskReminderNow={async () => {
+             if (!functions) return null;
+             const fn = httpsCallable<{ language?: string }, { success: boolean; emailsSent?: number; tasksFound?: number; error?: string }>(functions, 'sendTaskReminderEmailsNow');
+             const lang = i18n.language?.toLowerCase().substring(0, 2) || 'en';
+             const res = await fn({ language: lang });
+             return res.data;
+           }}
          />;
       case 'account':
         return <MyAccountView currentUser={currentUser} onUpdateCurrentUser={handleUpdateCurrentUser} onSaveProvider={handleSaveProviderProfile} serviceProviderProfile={providers.find(p => p.userId === currentUser.id)} onChangePassword={handleOpenChangePasswordForCurrentUser} />;
@@ -967,6 +985,17 @@ const App: React.FC = () => {
             onDeleteProvider={handleDeleteProvider} 
             onResetData={handleResetData}
             onChangePassword={(user) => { setPasswordChangeUser(user); setIsPasswordModalOpen(true); }}
+            onChangeProviderPassword={(provider) => {
+              if (!provider.userId) return;
+              const providerUser = users.find(u => u.id === provider.userId) ?? {
+                id: provider.userId,
+                email: provider.email ?? '',
+                username: provider.name ?? provider.contactPerson ?? '',
+                role: UserRole.ServiceProvider,
+              } as User;
+              setPasswordChangeUser(providerUser);
+              setIsPasswordModalOpen(true);
+            }}
         />;
       default:
         return null;
@@ -1012,6 +1041,7 @@ const App: React.FC = () => {
         onCloseMobileNav={() => setIsMobileNavOpen(false)}
         theme={theme}
         onThemeChange={handleThemeChange}
+        onLanguageChange={handleLanguageChange}
         notifications={visibleNotifications}
         onMarkAsRead={handleMarkNotificationRead}
         onMarkAllAsRead={handleMarkAllNotificationsRead}

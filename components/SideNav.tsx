@@ -14,6 +14,7 @@ interface SideNavProps {
   onCloseMobileNav: () => void;
   theme: Theme;
   onThemeChange: () => void;
+  onLanguageChange?: (lang: string) => void | Promise<void>;
   notifications: Notification[];
   onMarkAsRead: (id: string) => void;
   onMarkAllAsRead: () => void;
@@ -59,7 +60,8 @@ const ICONS: Record<View, React.ReactNode> = {
 
 const SideNav: React.FC<SideNavProps> = ({ 
   currentView, onNavigate, currentUser, onLogout, 
-  isMobileNavOpen, onCloseMobileNav, theme, onThemeChange,
+  isMobileNavOpen, onCloseMobileNav, theme,   onThemeChange,
+  onLanguageChange,
   notifications, onMarkAsRead, onMarkAllAsRead, onNotificationClick 
 }) => {
   const { t } = useTranslation();
@@ -167,7 +169,7 @@ const SideNav: React.FC<SideNavProps> = ({
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div className="space-y-2">
             <div className="flex items-center justify-between p-2 gap-2">
-              <LanguageSwitcher />
+              <LanguageSwitcher currentUserId={currentUser?.id} onLanguageChange={onLanguageChange} />
                 <div className="flex-1 flex justify-center items-center bg-gray-100 dark:bg-gray-700 rounded-full p-1">
                   <button
                     onClick={onThemeChange}

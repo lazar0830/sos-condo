@@ -317,7 +317,14 @@
     "deleteOrphanedRequests": "Delete {{count}} Request(s)",
     "cleaning": "Cleaning...",
     "cleanupSuccess": "Successfully deleted {{count}} orphaned service request(s).",
-    "cleanupError": "An error occurred while cleaning up. Please try again."
+    "cleanupError": "An error occurred while cleaning up. Please try again.",
+    "taskReminder": "30-day task reminder",
+    "taskReminderDescription": "Property Managers receive a daily email listing tasks due in the next 30 days that need a Service Request. Use this button to run that job now (for testing).",
+    "sendReminderNow": "Send reminder emails now",
+    "reminderSending": "Sending...",
+    "reminderSuccess": "Done. {{emailsSent}} email(s) sent to Property Managers ({{tasksFound}} tasks).",
+    "reminderNoTasks": "No tasks need Service Requests in the next 30 days.",
+    "reminderError": "Error: {{message}}"
   },
   "serviceProviders": {
     "title": "Service Providers",
@@ -774,6 +781,7 @@
       "generatedEmailPreview": "Generated Email Preview",
       "sendRequest": "Send Request",
       "successMessage": "Service request successfully sent!",
+      "sentTo": "Email sent to: {{name}} ({{email}})",
       "closingMessage": "The modal will close shortly.",
       "selectProviderAlert": "Please select a service provider.",
       "generateEmailAlert": "Please generate the email content first.",

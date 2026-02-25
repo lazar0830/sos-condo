@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeUserPassword = exports.createUser = exports.sendServiceRequestEmail = exports.sendTaskReminderEmails = exports.onServiceRequestUpdated = exports.onServiceRequestCreated = void 0;
+exports.changeUserPassword = exports.createUser = exports.sendServiceRequestEmail = exports.sendTaskReminderEmailsNow = exports.sendTaskReminderEmails = exports.onServiceRequestUpdated = exports.onServiceRequestCreated = exports.SUPPORTED_EMAIL_LANGS = void 0;
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
@@ -32,6 +32,114 @@ const createTransporter = () => {
         },
     });
 };
+// ============================================
+// Email copy by language (dynamic: add new keys to EMAIL_STRINGS to support more languages)
+// ============================================
+const DEFAULT_EMAIL_LANG = 'en';
+const EMAIL_STRINGS = {
+    en: {
+        requestHeaderSubtitle: 'Service Request',
+        requestLoginPrompt: 'Please log in to accept or decline the service request. Thank you.',
+        requestFooter: 'This is an automated message from S.O.S. Condo. Please do not reply directly to this email.',
+        statusUpdateSubject: 'S.O.S. Condo - Service Request Status Updated: {{newStatus}}',
+        statusUpdateHeader: 'Service Request Status Update',
+        statusUpdateDear: 'Dear {{name}},',
+        statusUpdateIntro: 'The status of a service request has been updated.',
+        statusUpdateRequestDetails: 'Request Details:',
+        statusUpdateTask: 'Task:',
+        statusUpdateProperty: 'Property:',
+        statusUpdateAddress: 'Address:',
+        statusUpdateServiceProvider: 'Service Provider:',
+        statusUpdateScheduledDate: 'Scheduled Date:',
+        statusUpdateEstimatedCost: 'Estimated Cost:',
+        statusUpdateStatusChange: 'Status Change:',
+        statusUpdatePreviousStatus: 'Previous Status:',
+        statusUpdateNewStatus: 'New Status:',
+        statusUpdateChangedBy: 'Changed By:',
+        statusUpdateChangedAt: 'Changed At:',
+        statusUpdateLoginPrompt: 'Please log in to view the full details of this service request.',
+        statusUpdateRegards: 'Best regards, S.O.S. Condo System',
+        statusUpdateFooter: 'This is an automated message from S.O.S. Condo. Please do not reply directly to this email.',
+        reminderSubject: 'S.O.S. Condo - {{count}} Task Needs Service Request',
+        reminderSubjectPlural: 'S.O.S. Condo - {{count}} Tasks Need Service Requests',
+        reminderHeader: 'Task Reminder - Service Requests Needed',
+        reminderDear: 'Dear {{name}},',
+        reminderIntroOne: 'You have 1 task that is due in the next 30 days and needs a Service Request to be created.',
+        reminderIntroMany: 'You have {{count}} tasks that are due in the next 30 days and need Service Requests to be created.',
+        reminderTasksRequiring: 'Tasks Requiring Service Requests:',
+        reminderProperty: 'Property:',
+        reminderDueDate: 'Due Date:',
+        reminderDays: 'day',
+        reminderDaysPlural: 'days',
+        reminderLoginPrompt: 'Please log in to create Service Requests for these tasks.',
+        reminderRegards: 'Best regards, S.O.S. Condo System',
+        reminderFooter: 'This is an automated message from S.O.S. Condo. Please do not reply directly to this email.',
+    },
+    fr: {
+        requestHeaderSubtitle: 'Demande de service',
+        requestLoginPrompt: 'Veuillez vous connecter pour accepter ou refuser la demande de service. Merci.',
+        requestFooter: 'Ceci est un message automatique de S.O.S. Condo. Veuillez ne pas répondre directement à ce courriel.',
+        statusUpdateSubject: 'S.O.S. Condo - Mise à jour du statut de la demande : {{newStatus}}',
+        statusUpdateHeader: 'Mise à jour du statut de la demande de service',
+        statusUpdateDear: 'Bonjour {{name}},',
+        statusUpdateIntro: 'Le statut d\'une demande de service a été mis à jour.',
+        statusUpdateRequestDetails: 'Détails de la demande :',
+        statusUpdateTask: 'Tâche :',
+        statusUpdateProperty: 'Propriété :',
+        statusUpdateAddress: 'Adresse :',
+        statusUpdateServiceProvider: 'Fournisseur :',
+        statusUpdateScheduledDate: 'Date prévue :',
+        statusUpdateEstimatedCost: 'Coût estimé :',
+        statusUpdateStatusChange: 'Changement de statut :',
+        statusUpdatePreviousStatus: 'Ancien statut :',
+        statusUpdateNewStatus: 'Nouveau statut :',
+        statusUpdateChangedBy: 'Modifié par :',
+        statusUpdateChangedAt: 'Modifié le :',
+        statusUpdateLoginPrompt: 'Veuillez vous connecter pour voir les détails de cette demande.',
+        statusUpdateRegards: 'Cordialement, S.O.S. Condo',
+        statusUpdateFooter: 'Ceci est un message automatique de S.O.S. Condo. Veuillez ne pas répondre directement à ce courriel.',
+        reminderSubject: 'S.O.S. Condo - {{count}} tâche requiert une demande de service',
+        reminderSubjectPlural: 'S.O.S. Condo - {{count}} tâches requièrent des demandes de service',
+        reminderHeader: 'Rappel – Demandes de service à créer',
+        reminderDear: 'Bonjour {{name}},',
+        reminderIntroOne: 'Vous avez 1 tâche à réaliser dans les 30 prochains jours pour laquelle une demande de service doit être créée.',
+        reminderIntroMany: 'Vous avez {{count}} tâches à réaliser dans les 30 prochains jours pour lesquelles des demandes de service doivent être créées.',
+        reminderTasksRequiring: 'Tâches nécessitant une demande de service :',
+        reminderProperty: 'Propriété :',
+        reminderDueDate: 'Date d\'échéance :',
+        reminderDays: 'jour',
+        reminderDaysPlural: 'jours',
+        reminderLoginPrompt: 'Veuillez vous connecter pour créer les demandes de service.',
+        reminderRegards: 'Cordialement, S.O.S. Condo',
+        reminderFooter: 'Ceci est un message automatique de S.O.S. Condo. Veuillez ne pas répondre directement à ce courriel.',
+    },
+};
+/** Supported email language codes (derived from EMAIL_STRINGS). Add new language = add new key to EMAIL_STRINGS above. */
+exports.SUPPORTED_EMAIL_LANGS = Object.keys(EMAIL_STRINGS);
+/** Optional: map language code to Intl locale for date/number formatting. Add entries when you add languages. */
+const EMAIL_LANG_TO_LOCALE = {
+    en: 'en-US',
+    fr: 'fr-CA',
+};
+/** Resolves requested language to a supported code; falls back to DEFAULT_EMAIL_LANG if unknown. */
+function getEmailLang(lang) {
+    const l = (lang || '').toLowerCase().substring(0, 2);
+    if (l && l in EMAIL_STRINGS)
+        return l;
+    return DEFAULT_EMAIL_LANG;
+}
+/** Returns Intl locale for the given language (e.g. for toLocaleString). */
+function getEmailLocale(lang) {
+    var _a;
+    const code = getEmailLang(lang);
+    return (_a = EMAIL_LANG_TO_LOCALE[code]) !== null && _a !== void 0 ? _a : 'en-US';
+}
+/** Returns email strings for the given language (always returns a valid entry). */
+function getEmailStrings(lang) {
+    var _a;
+    const key = getEmailLang(lang);
+    return (_a = EMAIL_STRINGS[key]) !== null && _a !== void 0 ? _a : EMAIL_STRINGS[DEFAULT_EMAIL_LANG];
+}
 // ============================================
 // Send Service Request Email
 // ============================================
@@ -81,9 +189,11 @@ exports.onServiceRequestCreated = functions.firestore
             return null;
         }
         const config = getEmailConfig();
+        const reqLang = requestData.language;
+        const s = getEmailStrings(reqLang);
         // Parse the generated email to extract subject and body
         const emailContent = requestData.generatedEmail;
-        let subject = 'S.O.S. Condo - Demande de service - Service Request';
+        let subject = `S.O.S. Condo - ${s.requestHeaderSubtitle}`;
         let body = emailContent;
         // Try to extract subject from the email content if it starts with "Subject:"
         const subjectMatch = emailContent.match(/^Subject:\s*(.+?)(\n|$)/i);
@@ -91,7 +201,7 @@ exports.onServiceRequestCreated = functions.firestore
             subject = subjectMatch[1].trim();
             body = emailContent.substring(subjectMatch[0].length).trim();
         }
-        // Send the email
+        // Send the email (language from request)
         const mailOptions = {
             from: config.from,
             to: providerEmail,
@@ -101,23 +211,21 @@ exports.onServiceRequestCreated = functions.firestore
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
               <h1 style="margin: 0;">S.O.S. Condo</h1>
-              <p style="margin: 5px 0 0 0;">Demande de service - Service Request</p>
+              <p style="margin: 5px 0 0 0;">${s.requestHeaderSubtitle}</p>
             </div>
             <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
               <div style="white-space: pre-wrap; line-height: 1.6;">${body.replace(/\n/g, '<br>')}</div>
             </div>
             <div style="padding: 24px 20px; text-align: center; background-color: #ffffff;">
-              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">Veuillez vous connecter pour accepter ou refuser la demande de service. Merci.<br>Please Login to Accept or Decline the Service Request. Thank you.</p>
+              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">${s.requestLoginPrompt}</p>
               <a href="https://app.soscondo.ca/" style="display: inline-block; background-color: #0f9266; color: white; text-decoration: none; padding: 14px 28px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 2px solid #0a6b4a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Login</a>
             </div>
             <div style="padding: 15px; background-color: #1f2937; color: #9ca3af; text-align: center; font-size: 12px;">
-              <p style="margin: 0;">Ceci est un message automatique de S.O.S Condo. Veuillez ne pas répondre directement à ce courriel.</p>
-              <p style="margin: 5px 0 0 0;">This is an automated message from S.O.S. Condo. Please do not reply directly to this email.</p>
+              <p style="margin: 0;">${s.requestFooter}</p>
             </div>
           </div>
         `,
         };
-        console.log('Update email tempalte');
         console.log(`Sending email to: ${providerEmail}`);
         const info = await transporter.sendMail(mailOptions);
         console.log(`Email sent successfully. Message ID: ${info.messageId}`);
@@ -148,17 +256,17 @@ exports.onServiceRequestUpdated = functions.firestore
     .document('requests/{requestId}')
     .onUpdate(async (change, context) => {
     var _a;
+    const requestId = context.params.requestId;
+    console.log(`[onServiceRequestUpdated] TRIGGERED for request ${requestId}`);
     const beforeData = change.before.data();
     const afterData = change.after.data();
-    const requestId = context.params.requestId;
-    // Check if status changed
     const beforeStatus = beforeData.status;
     const afterStatus = afterData.status;
     if (beforeStatus === afterStatus) {
-        console.log(`Service request ${requestId} updated but status unchanged. Skipping email.`);
+        console.log(`[onServiceRequestUpdated] Request ${requestId} updated but status unchanged (${afterStatus}). Skipping email.`);
         return null;
     }
-    console.log(`Service request ${requestId} status changed from ${beforeStatus} to ${afterStatus}`);
+    console.log(`[onServiceRequestUpdated] Request ${requestId} status changed ${beforeStatus} -> ${afterStatus}. Sending email to Property Manager.`);
     const db = admin.firestore();
     try {
         // Get the task associated with this request
@@ -237,7 +345,7 @@ exports.onServiceRequestUpdated = functions.firestore
                 changedBy = lastStatusChange.changedBy;
             }
         }
-        // Create email content
+        // Create email content (language from Property Manager's profile; fallback to en so email always sends)
         const statusLabels = {
             'Sent': 'Sent',
             'Accepted': 'Accepted',
@@ -247,91 +355,81 @@ exports.onServiceRequestUpdated = functions.firestore
         };
         const newStatusLabel = statusLabels[afterStatus] || afterStatus;
         const oldStatusLabel = statusLabels[beforeStatus] || beforeStatus;
-        const subject = `S.O.S. Condo - Service Request Status Updated: ${newStatusLabel}`;
+        let s;
+        let changedAtStr;
+        try {
+            s = getEmailStrings(managerData === null || managerData === void 0 ? void 0 : managerData.language);
+            changedAtStr = new Date().toLocaleString(getEmailLocale(managerData === null || managerData === void 0 ? void 0 : managerData.language));
+        }
+        catch (langErr) {
+            console.warn('Language fallback for status email:', langErr);
+            s = getEmailStrings('en');
+            changedAtStr = new Date().toLocaleString('en-US');
+        }
+        const subject = s.statusUpdateSubject.replace('{{newStatus}}', newStatusLabel);
+        const dear = s.statusUpdateDear.replace(/\{\{name\}\}/g, managerName);
         const textBody = `
-        Service Request Status Update
+${s.statusUpdateHeader}
 
-        Dear ${managerName},
+${dear}
 
-        The status of a service request has been updated.
+${s.statusUpdateIntro}
 
-        Request Details:
-        - Task: ${taskName}
-        - Property: ${buildingName}
-        - Address: ${buildingAddress}
-        - Service Provider: ${providerName}
-        - Scheduled Date: ${scheduledDate}
-        - Estimated Cost: ${estimatedCost}
+${s.statusUpdateRequestDetails}
+- ${s.statusUpdateTask} ${taskName}
+- ${s.statusUpdateProperty} ${buildingName}
+- ${s.statusUpdateAddress} ${buildingAddress}
+- ${s.statusUpdateServiceProvider} ${providerName}
+- ${s.statusUpdateScheduledDate} ${scheduledDate}
+- ${s.statusUpdateEstimatedCost} ${estimatedCost}
 
-        Status Change:
-        - Previous Status: ${oldStatusLabel}
-        - New Status: ${newStatusLabel}
-        - Changed By: ${changedBy}
-        - Changed At: ${new Date().toLocaleString()}
+${s.statusUpdateStatusChange}
+- ${s.statusUpdatePreviousStatus} ${oldStatusLabel}
+- ${s.statusUpdateNewStatus} ${newStatusLabel}
+- ${s.statusUpdateChangedBy} ${changedBy}
+- ${s.statusUpdateChangedAt} ${changedAtStr}
 
-        Please log in to view the full details of this service request.
+${s.statusUpdateLoginPrompt}
 
-        Best regards,
-        S.O.S. Condo System
+${s.statusUpdateRegards}
       `.trim();
         const htmlBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
             <h1 style="margin: 0;">S.O.S. Condo</h1>
-            <p style="margin: 5px 0 0 0;">Service Request Status Update</p>
+            <p style="margin: 5px 0 0 0;">${s.statusUpdateHeader}</p>
           </div>
           <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
-            <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #374151;">Dear ${managerName},</p>
-            <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151;">The status of a service request has been updated.</p>
+            <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #374151;">${dear}</p>
+            <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151;">${s.statusUpdateIntro}</p>
             
             <div style="background-color: #ffffff; padding: 16px; border-radius: 6px; margin-bottom: 16px; border: 1px solid #e5e7eb;">
-              <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #111827;">Request Details:</h3>
+              <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #111827;">${s.statusUpdateRequestDetails}</h3>
               <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 6px 0; font-weight: 600; color: #374151; width: 140px;">Task:</td>
-                  <td style="padding: 6px 0; color: #6b7280;">${taskName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; font-weight: 600; color: #374151;">Property:</td>
-                  <td style="padding: 6px 0; color: #6b7280;">${buildingName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; font-weight: 600; color: #374151;">Address:</td>
-                  <td style="padding: 6px 0; color: #6b7280;">${buildingAddress}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; font-weight: 600; color: #374151;">Service Provider:</td>
-                  <td style="padding: 6px 0; color: #6b7280;">${providerName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; font-weight: 600; color: #374151;">Scheduled Date:</td>
-                  <td style="padding: 6px 0; color: #6b7280;">${scheduledDate}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; font-weight: 600; color: #374151;">Estimated Cost:</td>
-                  <td style="padding: 6px 0; color: #6b7280;">${estimatedCost}</td>
-                </tr>
+                <tr><td style="padding: 6px 0; font-weight: 600; color: #374151; width: 140px;">${s.statusUpdateTask}</td><td style="padding: 6px 0; color: #6b7280;">${taskName}</td></tr>
+                <tr><td style="padding: 6px 0; font-weight: 600; color: #374151;">${s.statusUpdateProperty}</td><td style="padding: 6px 0; color: #6b7280;">${buildingName}</td></tr>
+                <tr><td style="padding: 6px 0; font-weight: 600; color: #374151;">${s.statusUpdateAddress}</td><td style="padding: 6px 0; color: #6b7280;">${buildingAddress}</td></tr>
+                <tr><td style="padding: 6px 0; font-weight: 600; color: #374151;">${s.statusUpdateServiceProvider}</td><td style="padding: 6px 0; color: #6b7280;">${providerName}</td></tr>
+                <tr><td style="padding: 6px 0; font-weight: 600; color: #374151;">${s.statusUpdateScheduledDate}</td><td style="padding: 6px 0; color: #6b7280;">${scheduledDate}</td></tr>
+                <tr><td style="padding: 6px 0; font-weight: 600; color: #374151;">${s.statusUpdateEstimatedCost}</td><td style="padding: 6px 0; color: #6b7280;">${estimatedCost}</td></tr>
               </table>
             </div>
-
             <div style="background-color: #eff6ff; padding: 16px; border-radius: 6px; border-left: 4px solid #2563eb; margin-bottom: 16px;">
-              <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #111827;">Status Change:</h3>
+              <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #111827;">${s.statusUpdateStatusChange}</h3>
               <p style="margin: 4px 0; font-size: 14px; color: #374151;">
-                <strong>Previous Status:</strong> <span style="color: #6b7280;">${oldStatusLabel}</span><br>
-                <strong>New Status:</strong> <span style="color: #2563eb; font-weight: 600;">${newStatusLabel}</span><br>
-                <strong>Changed By:</strong> <span style="color: #6b7280;">${changedBy}</span><br>
-                <strong>Changed At:</strong> <span style="color: #6b7280;">${new Date().toLocaleString()}</span>
+                <strong>${s.statusUpdatePreviousStatus}</strong> <span style="color: #6b7280;">${oldStatusLabel}</span><br>
+                <strong>${s.statusUpdateNewStatus}</strong> <span style="color: #2563eb; font-weight: 600;">${newStatusLabel}</span><br>
+                <strong>${s.statusUpdateChangedBy}</strong> <span style="color: #6b7280;">${changedBy}</span><br>
+                <strong>${s.statusUpdateChangedAt}</strong> <span style="color: #6b7280;">${changedAtStr}</span>
               </p>
             </div>
           </div>
-          
           <div style="padding: 24px 20px; text-align: center; background-color: #ffffff;">
-            <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">Please log in to view the full details of this service request.</p>
+            <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">${s.statusUpdateLoginPrompt}</p>
             <a href="https://app.soscondo.ca/" style="display: inline-block; background-color: #0f9266; color: white; text-decoration: none; padding: 14px 28px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 2px solid #0a6b4a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Login</a>
           </div>
           <div style="padding: 15px; background-color: #1f2937; color: #9ca3af; text-align: center; font-size: 12px;">
-            <p style="margin: 0;">Ceci est un message automatique de S.O.S Condo. Veuillez ne pas répondre directement à ce courriel.</p>
-            <p style="margin: 5px 0 0 0;">This is an automated message from S.O.S. Condo. Please do not reply directly to this email.</p>
+            <p style="margin: 0;">${s.statusUpdateFooter}</p>
           </div>
         </div>
       `;
@@ -355,13 +453,11 @@ exports.onServiceRequestUpdated = functions.firestore
 // ============================================
 // Scheduled Task Reminder Email to Property Managers
 // ============================================
-// This function runs daily and sends Property Managers an email
-// listing tasks that are due in the next 30 days and need Service Requests
-exports.sendTaskReminderEmails = functions.pubsub
-    .schedule('every day 09:00')
-    .timeZone('America/Montreal')
-    .onRun(async (context) => {
-    console.log('Running scheduled task reminder email job');
+// Shared logic: finds tasks due in 30 days without a Service Request,
+// groups by Property Manager, sends one email per manager.
+// callerLanguage: when set (e.g. from "Send reminders now" button), used as fallback when a manager has no language saved.
+async function runTaskReminderJob(callerLanguage) {
+    console.log('Running task reminder email job');
     const db = admin.firestore();
     const today = new Date();
     const thirtyDaysFromNow = new Date();
@@ -455,11 +551,20 @@ exports.sendTaskReminderEmails = functions.pubsub
                 const dateB = b.task.taskDate || b.task.startDate || '';
                 return dateA.localeCompare(dateB);
             });
-            // Create email content
-            const subject = `S.O.S. Condo - ${taskList.length} Task${taskList.length > 1 ? 's' : ''} Need Service Request${taskList.length > 1 ? 's' : ''}`;
+            // Email in Property Manager's preferred language, or caller's app language if PM has none saved
+            const lang = manager.language || callerLanguage;
+            const s = getEmailStrings(lang);
+            const count = taskList.length;
+            const subject = count > 1
+                ? s.reminderSubjectPlural.replace('{{count}}', String(count))
+                : s.reminderSubject.replace('{{count}}', '1');
+            const dear = s.reminderDear.replace(/\{\{name\}\}/g, managerName);
+            const intro = count > 1 ? s.reminderIntroMany.replace(/\{\{count\}\}/g, String(count)) : s.reminderIntroOne;
+            const dateLocale = getEmailLocale(lang);
+            const dayLabel = (d) => d !== 1 ? s.reminderDaysPlural : s.reminderDays;
             const taskListHtml = taskList.map(({ task, building }) => {
                 const taskDate = task.taskDate || task.startDate || 'Not specified';
-                const formattedDate = new Date(taskDate + 'T12:00:00Z').toLocaleDateString();
+                const formattedDate = new Date(taskDate + 'T12:00:00Z').toLocaleDateString(dateLocale);
                 const daysUntilDue = Math.ceil((new Date(taskDate + 'T12:00:00Z').getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                 return `
             <tr style="border-bottom: 1px solid #e5e7eb;">
@@ -467,8 +572,8 @@ exports.sendTaskReminderEmails = functions.pubsub
                 <strong style="color: #111827; font-size: 14px;">${task.name || 'Unnamed Task'}</strong>
                 <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 13px;">${task.description || 'No description'}</p>
                 <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                  <span style="display: inline-block; margin-right: 12px;"><strong>Property:</strong> ${building.name || 'Unknown'}</span>
-                  <span style="display: inline-block; margin-right: 12px;"><strong>Due Date:</strong> ${formattedDate} (${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''})</span>
+                  <span style="display: inline-block; margin-right: 12px;"><strong>${s.reminderProperty}</strong> ${building.name || 'Unknown'}</span>
+                  <span style="display: inline-block; margin-right: 12px;"><strong>${s.reminderDueDate}</strong> ${formattedDate} (${daysUntilDue} ${dayLabel(daysUntilDue)})</span>
                   ${task.specialty ? `<span style="display: inline-block;"><strong>Specialty:</strong> ${task.specialty}</span>` : ''}
                 </div>
               </td>
@@ -476,51 +581,45 @@ exports.sendTaskReminderEmails = functions.pubsub
           `;
             }).join('');
             const textBody = `
-Task Reminder - Service Requests Needed
+${s.reminderHeader}
 
-Dear ${managerName},
+${dear}
 
-You have ${taskList.length} task${taskList.length > 1 ? 's' : ''} that ${taskList.length > 1 ? 'are' : 'is'} due in the next 30 days and ${taskList.length > 1 ? 'need' : 'needs'} a Service Request to be created.
+${intro}
 
 ${taskList.map(({ task, building }) => {
                 const taskDate = task.taskDate || task.startDate || 'Not specified';
-                const formattedDate = new Date(taskDate + 'T12:00:00Z').toLocaleDateString();
+                const formattedDate = new Date(taskDate + 'T12:00:00Z').toLocaleDateString(dateLocale);
                 const daysUntilDue = Math.ceil((new Date(taskDate + 'T12:00:00Z').getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                return `- ${task.name || 'Unnamed Task'} (${building.name || 'Unknown'}) - Due: ${formattedDate} (${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''})`;
+                return `- ${task.name || 'Unnamed Task'} (${building.name || 'Unknown'}) - ${s.reminderDueDate} ${formattedDate} (${daysUntilDue} ${dayLabel(daysUntilDue)})`;
             }).join('\n')}
 
-Please log in to create Service Requests for these tasks.
+${s.reminderLoginPrompt}
 
-Best regards,
-S.O.S. Condo System
+${s.reminderRegards}
         `.trim();
             const htmlBody = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
               <h1 style="margin: 0;">S.O.S. Condo</h1>
-              <p style="margin: 5px 0 0 0;">Task Reminder - Service Requests Needed</p>
+              <p style="margin: 5px 0 0 0;">${s.reminderHeader}</p>
             </div>
             <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
-              <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #374151;">Dear ${managerName},</p>
-              <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #374151;">
-                You have <strong>${taskList.length} task${taskList.length > 1 ? 's' : ''}</strong> that ${taskList.length > 1 ? 'are' : 'is'} due in the next 30 days and ${taskList.length > 1 ? 'need' : 'needs'} a Service Request to be created.
-              </p>
-              
+              <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #374151;">${dear}</p>
+              <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #374151;">${intro}</p>
               <div style="background-color: #ffffff; padding: 16px; border-radius: 6px; margin-bottom: 16px; border: 1px solid #e5e7eb;">
-                <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #111827;">Tasks Requiring Service Requests:</h3>
+                <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #111827;">${s.reminderTasksRequiring}</h3>
                 <table style="width: 100%; border-collapse: collapse;">
                   ${taskListHtml}
                 </table>
               </div>
             </div>
-            
             <div style="padding: 24px 20px; text-align: center; background-color: #ffffff;">
-              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">Please log in to create Service Requests for these tasks.</p>
-              <a href="https://app.soscondo.ca/" style="display: inline-block; background-color: #0f9266; color: white; text-decoration: none; padding: 14px 28px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 2px solid #0a6b4a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Login to Create Service Requests</a>
+              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">${s.reminderLoginPrompt}</p>
+              <a href="https://app.soscondo.ca/" style="display: inline-block; background-color: #0f9266; color: white; text-decoration: none; padding: 14px 28px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 2px solid #0a6b4a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Login</a>
             </div>
             <div style="padding: 15px; background-color: #1f2937; color: #9ca3af; text-align: center; font-size: 12px;">
-              <p style="margin: 0;">Ceci est un message automatique de S.O.S Condo. Veuillez ne pas répondre directement à ce courriel.</p>
-              <p style="margin: 5px 0 0 0;">This is an automated message from S.O.S. Condo. Please do not reply directly to this email.</p>
+              <p style="margin: 0;">${s.reminderFooter}</p>
             </div>
           </div>
         `;
@@ -547,6 +646,30 @@ S.O.S. Condo System
         console.error('Error in task reminder job:', error);
         return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
+}
+// Scheduled: runs daily at 9:00 AM America/Montreal
+exports.sendTaskReminderEmails = functions.pubsub
+    .schedule('every day 09:00')
+    .timeZone('America/Montreal')
+    .onRun(async () => runTaskReminderJob());
+// Callable: trigger the same job now (for testing). Super Admin only. Pass language so emails use caller's app language when recipient has none saved.
+exports.sendTaskReminderEmailsNow = functions.https.onCall(async (data, context) => {
+    var _a;
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'Must be logged in.');
+    }
+    const db = admin.firestore();
+    const callerDoc = await db.collection('users').doc(context.auth.uid).get();
+    if (!callerDoc.exists) {
+        throw new functions.https.HttpsError('permission-denied', 'User not found.');
+    }
+    const role = (_a = callerDoc.data()) === null || _a === void 0 ? void 0 : _a.role;
+    if (role !== 'Super Admin') {
+        throw new functions.https.HttpsError('permission-denied', 'Only Super Admin can run this.');
+    }
+    const callerLang = (data === null || data === void 0 ? void 0 : data.language) ? String(data.language).toLowerCase().substring(0, 2) : undefined;
+    const result = await runTaskReminderJob(callerLang);
+    return result !== null && result !== void 0 ? result : { success: false, error: 'No result' };
 });
 exports.sendServiceRequestEmail = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
@@ -582,9 +705,10 @@ exports.sendServiceRequestEmail = functions.https.onCall(async (data, context) =
         throw new functions.https.HttpsError('failed-precondition', 'Email service not configured.');
     }
     const config = getEmailConfig();
+    const s = getEmailStrings(requestData.language);
     // Parse the generated email
     const emailContent = requestData.generatedEmail;
-    let subject = 'New Service Request from S.O.S. Condo';
+    let subject = `S.O.S. Condo - ${s.requestHeaderSubtitle}`;
     let body = emailContent;
     const subjectMatch = emailContent.match(/^Subject:\s*(.+?)(\n|$)/i);
     if (subjectMatch) {
@@ -601,18 +725,17 @@ exports.sendServiceRequestEmail = functions.https.onCall(async (data, context) =
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
             <h1 style="margin: 0;">S.O.S. Condo</h1>
-            <p style="margin: 5px 0 0 0;">Service Request Notification</p>
+            <p style="margin: 5px 0 0 0;">${s.requestHeaderSubtitle}</p>
           </div>
           <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
             <div style="white-space: pre-wrap; line-height: 1.6;">${body.replace(/\n/g, '<br>')}</div>
           </div>
-          
           <div style="padding: 24px 20px; text-align: center; background-color: #ffffff;">
-            <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">Veuillez vous connecter pour accepter ou refuser la demande de service. Merci.<br>Please Login to Accept or Decline the Service Request. Thank you.</p>
+            <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #374151; text-align: center;">${s.requestLoginPrompt}</p>
             <a href="https://app.soscondo.ca/" style="display: inline-block; background-color: #0f9266; color: white; text-decoration: none; padding: 14px 28px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 2px solid #0a6b4a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Login</a>
           </div>
           <div style="padding: 15px; background-color: #1f2937; color: #9ca3af; text-align: center; font-size: 12px;">
-            <p style="margin: 0;">This is an automated message from S.O.S. Condo Property Management System.</p>
+            <p style="margin: 0;">${s.requestFooter}</p>
           </div>
         </div>
       `,
@@ -690,16 +813,6 @@ exports.changeUserPassword = functions.https.onCall(async (data, context) => {
     }
     const callerUid = context.auth.uid;
     const db = admin.firestore();
-    // Verify caller is Super Admin or Admin
-    const callerDoc = await db.collection('users').doc(callerUid).get();
-    if (!callerDoc.exists) {
-        throw new functions.https.HttpsError('permission-denied', 'User profile not found.');
-    }
-    const callerRole = (_a = callerDoc.data()) === null || _a === void 0 ? void 0 : _a.role;
-    const canChangePasswords = callerRole === 'Super Admin' || callerRole === 'Admin';
-    if (!canChangePasswords) {
-        throw new functions.https.HttpsError('permission-denied', 'Only Super Admin or Admin can change passwords.');
-    }
     const { userId, newPassword } = data;
     if (!userId || !newPassword) {
         throw new functions.https.HttpsError('invalid-argument', 'User ID and new password are required.');
@@ -708,17 +821,34 @@ exports.changeUserPassword = functions.https.onCall(async (data, context) => {
     if (newPassword.length < 6) {
         throw new functions.https.HttpsError('invalid-argument', 'Password must be at least 6 characters long.');
     }
-    // Verify the target user exists
-    const targetUserDoc = await db.collection('users').doc(userId).get();
-    if (!targetUserDoc.exists) {
-        throw new functions.https.HttpsError('not-found', 'User not found.');
+    const isChangingOwnPassword = userId === callerUid;
+    if (!isChangingOwnPassword) {
+        // Changing another user's password: caller must be Super Admin or Admin
+        const callerDoc = await db.collection('users').doc(callerUid).get();
+        if (!callerDoc.exists) {
+            throw new functions.https.HttpsError('permission-denied', 'User profile not found.');
+        }
+        const callerRole = (_a = callerDoc.data()) === null || _a === void 0 ? void 0 : _a.role;
+        const canChangeOthers = callerRole === 'Super Admin' || callerRole === 'Admin';
+        if (!canChangeOthers) {
+            throw new functions.https.HttpsError('permission-denied', 'Only Super Admin or Admin can change other users\' passwords.');
+        }
+        const targetUserDoc = await db.collection('users').doc(userId).get();
+        if (!targetUserDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'User not found.');
+        }
+        const targetUserRole = (_b = targetUserDoc.data()) === null || _b === void 0 ? void 0 : _b.role;
+        if (callerRole === 'Admin') {
+            if (targetUserRole === 'Super Admin' || targetUserRole === 'Admin') {
+                throw new functions.https.HttpsError('permission-denied', 'Admins cannot change passwords for Super Admins or other Admins.');
+            }
+        }
     }
-    const targetUserRole = (_b = targetUserDoc.data()) === null || _b === void 0 ? void 0 : _b.role;
-    // Super Admin can change any password
-    // Admin can change Property Manager and Service Provider passwords (not other Admins or Super Admin)
-    if (callerRole === 'Admin') {
-        if (targetUserRole === 'Super Admin' || targetUserRole === 'Admin') {
-            throw new functions.https.HttpsError('permission-denied', 'Admins cannot change passwords for Super Admins or other Admins.');
+    else {
+        // Changing own password: verify caller has a user document
+        const callerDoc = await db.collection('users').doc(callerUid).get();
+        if (!callerDoc.exists) {
+            throw new functions.https.HttpsError('permission-denied', 'User profile not found.');
         }
     }
     try {

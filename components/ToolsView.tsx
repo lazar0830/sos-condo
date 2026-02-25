@@ -2,7 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { generateTurnoverChecklist } from '../services/geminiService';
-import type { ServiceRequest, MaintenanceTask, ServiceProvider } from '../types';
+import type { ServiceRequest, MaintenanceTask, ServiceProvider, User } from '../types';
+import { UserRole } from '../types';
 
 const ACTIVITY_OPTIONS: { value: string; key: string }[] = [
   { value: 'New Tenant Move-in', key: 'activityNewTenantMoveIn' },
@@ -17,9 +18,11 @@ interface ToolsViewProps {
   tasks?: MaintenanceTask[];
   providers?: ServiceProvider[];
   onDeleteOrphanedRequests?: (requestIds: string[]) => Promise<void>;
+  currentUser?: User | null;
+  onSendTaskReminderNow?: () => Promise<{ success: boolean; emailsSent?: number; tasksFound?: number; error?: string } | null>;
 }
 
-const ToolsView: React.FC<ToolsViewProps> = ({ serviceRequests = [], tasks = [], providers = [], onDeleteOrphanedRequests }) => {
+const ToolsView: React.FC<ToolsViewProps> = ({ serviceRequests = [], tasks = [], providers = [], onDeleteOrphanedRequests, currentUser, onSendTaskReminderNow }) => {
   const { t } = useTranslation();
   const [unitNumber, setUnitNumber] = useState('');
   const [propertyType, setPropertyType] = useState('');
@@ -31,6 +34,24 @@ const ToolsView: React.FC<ToolsViewProps> = ({ serviceRequests = [], tasks = [],
   // Cleanup utility state
   const [isCleanupLoading, setIsCleanupLoading] = useState(false);
   const [cleanupResult, setCleanupResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Task reminder (30-day) test
+  const [reminderLoading, setReminderLoading] = useState(false);
+  const [reminderResult, setReminderResult] = useState<{ success: boolean; emailsSent?: number; tasksFound?: number; error?: string } | null>(null);
+  const canRunReminder = currentUser && currentUser.role === UserRole.SuperAdmin && onSendTaskReminderNow;
+  const handleSendReminderNow = async () => {
+    if (!onSendTaskReminderNow) return;
+    setReminderLoading(true);
+    setReminderResult(null);
+    try {
+      const result = await onSendTaskReminderNow();
+      setReminderResult(result ?? { success: false, error: 'No result' });
+    } catch (err) {
+      setReminderResult({ success: false, error: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setReminderLoading(false);
+    }
+  };
 
   // Find orphaned service requests
   const orphanedRequests = useMemo(() => {
@@ -275,6 +296,46 @@ const ToolsView: React.FC<ToolsViewProps> = ({ serviceRequests = [], tasks = [],
           </div>
         )}
       </div>
+
+      {/* 30-day task reminder (test) - Admin / Super Admin only */}
+      {canRunReminder && (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3 mb-1">
+            <svg className="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('tools.taskReminder')}</h3>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">{t('tools.taskReminderDescription')}</p>
+          <button
+            type="button"
+            onClick={handleSendReminderNow}
+            disabled={reminderLoading}
+            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+          >
+            {reminderLoading ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{t('tools.reminderSending')}</span>
+              </>
+            ) : (
+              t('tools.sendReminderNow')
+            )}
+          </button>
+          {reminderResult && (
+            <div className={`mt-4 p-3 rounded-md ${reminderResult.success ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 text-red-700 dark:text-red-300'}`}>
+              {reminderResult.success
+                ? (reminderResult.tasksFound === 0
+                  ? t('tools.reminderNoTasks')
+                  : t('tools.reminderSuccess', { emailsSent: reminderResult.emailsSent ?? 0, tasksFound: reminderResult.tasksFound ?? 0 }))
+                : t('tools.reminderError', { message: reminderResult.error ?? '' })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

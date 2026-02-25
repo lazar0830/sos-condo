@@ -317,7 +317,14 @@
     "deleteOrphanedRequests": "Supprimer {{count}} demande(s)",
     "cleaning": "Nettoyage...",
     "cleanupSuccess": "{{count}} demande(s) de service orpheline(s) supprimée(s) avec succès.",
-    "cleanupError": "Une erreur s'est produite lors du nettoyage. Veuillez réessayer."
+    "cleanupError": "Une erreur s'est produite lors du nettoyage. Veuillez réessayer.",
+    "taskReminder": "Rappel des tâches (30 jours)",
+    "taskReminderDescription": "Les gestionnaires reçoivent un courriel quotidien listant les tâches à faire dans les 30 prochains jours qui nécessitent une demande de service. Utilisez ce bouton pour lancer l'envoi maintenant (test).",
+    "sendReminderNow": "Envoyer les rappels maintenant",
+    "reminderSending": "Envoi en cours...",
+    "reminderSuccess": "Terminé. {{emailsSent}} courriel(s) envoyé(s) aux gestionnaires ({{tasksFound}} tâches).",
+    "reminderNoTasks": "Aucune tâche ne nécessite de demande de service dans les 30 prochains jours.",
+    "reminderError": "Erreur : {{message}}"
   },
   "serviceProviders": {
     "title": "Fournisseurs de services",
@@ -773,6 +780,7 @@
       "generatedEmailPreview": "Aperçu du courriel généré",
       "sendRequest": "Envoyer la demande",
       "successMessage": "Demande de service envoyée avec succès !",
+      "sentTo": "Courriel envoyé à : {{name}} ({{email}})",
       "closingMessage": "Cette fenêtre se fermera bientôt.",
       "selectProviderAlert": "Veuillez sélectionner un fournisseur de services.",
       "generateEmailAlert": "Veuillez d'abord générer le contenu du courriel.",

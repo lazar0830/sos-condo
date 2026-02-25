@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
   deleteDoc,
   onSnapshot,
   Unsubscribe,
@@ -65,6 +66,13 @@ export async function setUser(user: User): Promise<void> {
   if (!db) return;
   const { id, ...data } = user;
   await setDoc(doc(db, COLLECTIONS.users, id), stripUndefined(data));
+}
+
+export async function updateUser(id: string, data: Partial<Omit<User, 'id'>>): Promise<void> {
+  if (!db) return;
+  const clean = stripUndefined(data as Record<string, unknown>);
+  if (Object.keys(clean).length === 0) return;
+  await updateDoc(doc(db, COLLECTIONS.users, id), clean);
 }
 
 export async function deleteUser(id: string): Promise<void> {

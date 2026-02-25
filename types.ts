@@ -56,6 +56,7 @@ export interface User {
   role: UserRole;
   password?: string;
   createdBy?: string; // ID of the user who created this user
+  language?: string; // e.g. 'en' or 'fr' - used for emails and UI preference
 }
 
 export interface Building {
@@ -189,6 +190,8 @@ export interface ServiceRequest {
   emailSentAt?: string;
   emailMessageId?: string;
   emailError?: string;
+  /** Language when request was created (e.g. 'en', 'fr') - used for email template */
+  language?: string;
 }
 
 export interface Expense {

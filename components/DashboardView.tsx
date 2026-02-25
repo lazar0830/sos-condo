@@ -105,9 +105,15 @@ const getSpecialtyColor = (specialty: string) => {
 };
 
 
+// Map status values (as stored in Firestore) to i18n keys. One entry per unique value (TaskStatus and ServiceRequestStatus share some values).
 const statusToKey: Record<string, string> = {
-  New: 'statusNew', Sent: 'statusSent', OnHold: 'statusOnHold', Completed: 'statusCompleted',
-  Accepted: 'statusAccepted', Refused: 'statusRefused', InProgress: 'statusInProgress',
+  [TaskStatus.New]: 'statusNew',
+  [TaskStatus.Sent]: 'statusSent',
+  [TaskStatus.OnHold]: 'statusOnHold',
+  [TaskStatus.Completed]: 'statusCompleted',
+  [ServiceRequestStatus.Accepted]: 'statusAccepted',
+  [ServiceRequestStatus.Refused]: 'statusRefused',
+  [ServiceRequestStatus.InProgress]: 'statusInProgress',
 };
 
 const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, components, tasks, providers, serviceRequests, expenses, onEditTask, onSelectRequest, onDeleteTask, onDeleteServiceRequest, onAddServiceRequest, onSelectBuilding, onAddBuilding }) => {
@@ -531,7 +537,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('dashboard.overdue')}</span>
                          )}
                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
-                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`dashboard.${statusToKey[task.status]}`)}</span>
+                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`dashboard.${statusToKey[task.status] ?? 'statusNew'}`)}</span>
                       </div>
                     </div>
                     <p className={`text-sm mt-2 ${isOverdue ? 'text-red-700 dark:text-red-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>{t('dashboard.due')} <strong>{new Date(task.taskDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>
@@ -575,7 +581,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                               ) : sr.isUrgent && (
                                   <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{t('dashboard.urgent')}</span>
                               )}
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[sr.status]}`}>{t(`dashboard.${statusToKey[sr.status]}`)}</span>
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[sr.status]}`}>{t(`dashboard.${statusToKey[sr.status] ?? 'statusSent'}`)}</span>
                          </div>
                       </div>
                       <p className={`text-sm mt-2 ${isRequestOverdue ? 'text-red-700 dark:text-red-300 font-bold' : sr.isUrgent ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>{t('dashboard.scheduled')} <strong>{new Date(sr.scheduledDate! + 'T12:00:00Z').toLocaleDateString()}</strong></p>

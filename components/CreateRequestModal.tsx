@@ -72,6 +72,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
         isUrgent: isForOverdueTask,
         status: ServiceRequestStatus.Sent,
         componentName: task.componentName,
+        language: i18n.language?.substring(0, 2) || 'en',
     });
     setIsSent(true);
     setTimeout(() => {
@@ -80,6 +81,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
   };
 
   if (isSent) {
+    const selectedProvider = providers.find(p => p.id === providerId);
     return (
         <Modal isOpen={true} onClose={onClose} title={t('modals.createRequest.titleSent')}>
             <div className="text-center py-8">
@@ -87,6 +89,11 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">{t('modals.createRequest.successMessage')}</h3>
+                {selectedProvider?.email && (
+                  <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                    {t('modals.createRequest.sentTo', { name: selectedProvider.name, email: selectedProvider.email })}
+                  </p>
+                )}
                 <p className="mt-1 text-gray-500 dark:text-gray-400">{t('modals.createRequest.closingMessage')}</p>
             </div>
         </Modal>

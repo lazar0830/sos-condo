@@ -5,6 +5,9 @@ import fr from './locales/fr.json';
 
 const LANG_KEY = 'sos-condo-lang';
 
+/** Supported UI/email languages. Add a new language by: 1) adding here, 2) adding locales/XX.json and resources below, 3) adding email strings in functions. */
+export const SUPPORTED_LANGUAGES: readonly string[] = ['en', 'fr'];
+
 export const getStoredLanguage = (): string => {
   try {
     return localStorage.getItem(LANG_KEY) || 'en';
