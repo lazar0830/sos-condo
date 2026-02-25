@@ -74,6 +74,16 @@ const EMAIL_STRINGS = {
         reminderLoginPrompt: 'Please log in to create Service Requests for these tasks.',
         reminderRegards: 'Best regards, S.O.S. Condo System',
         reminderFooter: 'This is an automated message from S.O.S. Condo. Please do not reply directly to this email.',
+        welcomeSubject: 'Welcome to S.O.S. Condo - Your Service Provider Account',
+        welcomeHeader: 'Welcome to S.O.S. Condo',
+        welcomeIntro: 'Your service provider account has been created. Use the credentials below to log in.',
+        welcomeUsernameLabel: 'Username:',
+        welcomePasswordLabel: 'Password:',
+        welcomeLoginButton: 'Login',
+        welcomeFooter: 'This is an automated message from S.O.S. Condo. Please do not reply directly to this email.',
+        welcomePMSubject: 'Welcome to S.O.S. Condo - Your Property Manager Account',
+        welcomePMHeader: 'Welcome to S.O.S. Condo',
+        welcomePMIntro: 'Your property manager account has been created. Use the credentials below to log in.',
     },
     fr: {
         requestHeaderSubtitle: 'Demande de service',
@@ -112,6 +122,16 @@ const EMAIL_STRINGS = {
         reminderLoginPrompt: 'Veuillez vous connecter pour créer les demandes de service.',
         reminderRegards: 'Cordialement, S.O.S. Condo',
         reminderFooter: 'Ceci est un message automatique de S.O.S. Condo. Veuillez ne pas répondre directement à ce courriel.',
+        welcomeSubject: 'Bienvenue sur S.O.S. Condo - Votre compte fournisseur de services',
+        welcomeHeader: 'Bienvenue sur S.O.S. Condo',
+        welcomeIntro: 'Votre compte fournisseur de services a été créé. Utilisez les identifiants ci-dessous pour vous connecter.',
+        welcomeUsernameLabel: 'Nom d\'utilisateur :',
+        welcomePasswordLabel: 'Mot de passe :',
+        welcomeLoginButton: 'Connexion',
+        welcomeFooter: 'Ceci est un message automatique de S.O.S. Condo. Veuillez ne pas répondre directement à ce courriel.',
+        welcomePMSubject: 'Bienvenue sur S.O.S. Condo - Votre compte gestionnaire',
+        welcomePMHeader: 'Bienvenue sur S.O.S. Condo',
+        welcomePMIntro: 'Votre compte gestionnaire de biens a été créé. Utilisez les identifiants ci-dessous pour vous connecter.',
     },
 };
 /** Supported email language codes (derived from EMAIL_STRINGS). Add new language = add new key to EMAIL_STRINGS above. */
@@ -804,6 +824,52 @@ exports.createUser = functions.https.onCall(async (data, context) => {
         createdBy,
     };
     await db.collection('users').doc(userRecord.uid).set(userProfile);
+    // Send welcome email when new user is a Service Provider or Property Manager
+    if (role === 'Service Provider' || role === 'Property Manager') {
+        const transporter = createTransporter();
+        if (transporter) {
+            const config = getEmailConfig();
+            const s = getEmailStrings(data.language);
+            const subject = role === 'Property Manager' ? s.welcomePMSubject : s.welcomeSubject;
+            const intro = role === 'Property Manager' ? s.welcomePMIntro : s.welcomeIntro;
+            const header = role === 'Property Manager' ? s.welcomePMHeader : s.welcomeHeader;
+            const htmlBody = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin: 0;">S.O.S. Condo</h1>
+            <p style="margin: 5px 0 0 0;">${header}</p>
+          </div>
+          <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+            <p style="margin: 0 0 16px 0; font-size: 16px; line-height: 1.6; color: #374151;">${intro}</p>
+            <div style="background-color: #ffffff; padding: 16px; border-radius: 6px; margin: 16px 0; border: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #111827;"><strong>${s.welcomeUsernameLabel}</strong> ${username}</p>
+              <p style="margin: 0; font-size: 14px; color: #111827;"><strong>${s.welcomePasswordLabel}</strong> ${password}</p>
+            </div>
+          </div>
+          <div style="padding: 24px 20px; text-align: center; background-color: #ffffff;">
+            <a href="https://app.soscondo.ca/" style="display: inline-block; background-color: #0f9266; color: white; text-decoration: none; padding: 14px 28px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 2px solid #0a6b4a; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${s.welcomeLoginButton}</a>
+          </div>
+          <div style="padding: 15px; background-color: #1f2937; color: #9ca3af; text-align: center; font-size: 12px;">
+            <p style="margin: 0;">${s.welcomeFooter}</p>
+          </div>
+        </div>
+      `;
+            try {
+                await transporter.sendMail({
+                    from: config.from,
+                    to: email,
+                    subject,
+                    html: htmlBody,
+                    text: `${intro}\n\n${s.welcomeUsernameLabel} ${username}\n${s.welcomePasswordLabel} ${password}\n\n${s.welcomeLoginButton}: https://app.soscondo.ca/`,
+                });
+                console.log(`Welcome email sent to new ${role}: ${email}`);
+            }
+            catch (mailErr) {
+                console.error('Failed to send welcome email (user was created):', mailErr);
+                // Do not fail the createUser call; the account was created successfully
+            }
+        }
+    }
     return { uid: userRecord.uid };
 });
 exports.changeUserPassword = functions.https.onCall(async (data, context) => {

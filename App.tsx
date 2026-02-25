@@ -440,7 +440,8 @@ const App: React.FC = () => {
         password,
         (userData as Omit<User, 'id'>).username,
         role,
-        currentUser.id
+        currentUser.id,
+        { language: i18n.language?.toLowerCase().substring(0, 2) }
       );
       if (result.error) {
         setNotification({ type: 'error', message: result.error });
@@ -488,7 +489,8 @@ const App: React.FC = () => {
         password,
         data.userData.username,
         'Service Provider',
-        currentUser.id
+        currentUser.id,
+        { language: i18n.language?.toLowerCase().substring(0, 2) }
       );
       if (result.error) {
         setNotification({ type: 'error', message: result.error });

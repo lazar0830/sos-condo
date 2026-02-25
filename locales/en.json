@@ -810,6 +810,7 @@
       "password": "Password",
       "passwordPlaceholder": "Leave blank to keep current password",
       "saveUser": "Save User",
+      "savingUser": "Saving...",
       "requiredFieldsAlert": "Email, display name, and password are required for new users."
     },
     "editServiceProviderUser": {
@@ -827,6 +828,7 @@
       "phone": "Phone",
       "contactPerson": "Contact Person",
       "saveProvider": "Save Provider",
+      "savingProvider": "Saving...",
       "allFieldsRequired": "All fields are required."
     },
     "changePassword": {

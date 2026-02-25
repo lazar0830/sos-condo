@@ -809,6 +809,7 @@
       "password": "Mot de passe",
       "passwordPlaceholder": "Laisser vide pour conserver le mot de passe actuel",
       "saveUser": "Enregistrer l'utilisateur",
+      "savingUser": "Enregistrement...",
       "requiredFieldsAlert": "Le courriel, le nom affiché et le mot de passe sont requis pour les nouveaux utilisateurs."
     },
     "editServiceProviderUser": {
@@ -826,6 +827,7 @@
       "phone": "Téléphone",
       "contactPerson": "Personne-ressource",
       "saveProvider": "Enregistrer le fournisseur",
+      "savingProvider": "Enregistrement...",
       "allFieldsRequired": "Tous les champs sont requis."
     },
     "changePassword": {
