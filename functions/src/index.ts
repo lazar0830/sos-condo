@@ -79,6 +79,12 @@ interface EmailStringsEntry {
   statusUpdateLoginPrompt: string;
   statusUpdateRegards: string;
   statusUpdateFooter: string;
+  /** Status labels for email (same order as ServiceRequestStatus in app). */
+  statusLabelSent: string;
+  statusLabelAccepted: string;
+  statusLabelRefused: string;
+  statusLabelInProgress: string;
+  statusLabelCompleted: string;
   reminderSubject: string;
   reminderSubjectPlural: string;
   reminderHeader: string;
@@ -131,6 +137,11 @@ const EMAIL_STRINGS: Record<string, EmailStringsEntry> = {
     statusUpdateLoginPrompt: 'Please log in to view the full details of this service request.',
     statusUpdateRegards: 'Best regards, S.O.S. Condo System',
     statusUpdateFooter: 'This is an automated message from S.O.S. Condo. Please do not reply directly to this email.',
+    statusLabelSent: 'Sent',
+    statusLabelAccepted: 'Accepted',
+    statusLabelRefused: 'Refused',
+    statusLabelInProgress: 'In Progress',
+    statusLabelCompleted: 'Completed',
     reminderSubject: 'S.O.S. Condo - {{count}} Task Needs Service Request',
     reminderSubjectPlural: 'S.O.S. Condo - {{count}} Tasks Need Service Requests',
     reminderHeader: 'Task Reminder - Service Requests Needed',
@@ -179,6 +190,11 @@ const EMAIL_STRINGS: Record<string, EmailStringsEntry> = {
     statusUpdateLoginPrompt: 'Veuillez vous connecter pour voir les détails de cette demande.',
     statusUpdateRegards: 'Cordialement, S.O.S. Condo',
     statusUpdateFooter: 'Ceci est un message automatique de S.O.S. Condo. Veuillez ne pas répondre directement à ce courriel.',
+    statusLabelSent: 'Envoyé',
+    statusLabelAccepted: 'Accepté',
+    statusLabelRefused: 'Refusé',
+    statusLabelInProgress: 'En cours',
+    statusLabelCompleted: 'Terminé',
     reminderSubject: 'S.O.S. Condo - {{count}} tâche requiert une demande de service',
     reminderSubjectPlural: 'S.O.S. Condo - {{count}} tâches requièrent des demandes de service',
     reminderHeader: 'Rappel – Demandes de service à créer',
@@ -232,6 +248,18 @@ function getEmailLocale(lang: string | undefined): string {
 function getEmailStrings(lang: string | undefined): EmailStringsEntry {
   const key = getEmailLang(lang);
   return EMAIL_STRINGS[key] ?? EMAIL_STRINGS[DEFAULT_EMAIL_LANG];
+}
+
+/** Returns the localized status label for the status-update email. Status values: Sent, Accepted, Refused, In Progress, Completed. */
+function getStatusLabelForEmail(s: EmailStringsEntry, status: string): string {
+  switch (status) {
+    case 'Sent': return s.statusLabelSent;
+    case 'Accepted': return s.statusLabelAccepted;
+    case 'Refused': return s.statusLabelRefused;
+    case 'In Progress': return s.statusLabelInProgress;
+    case 'Completed': return s.statusLabelCompleted;
+    default: return status;
+  }
 }
 
 // ============================================
@@ -476,15 +504,6 @@ export const onServiceRequestUpdated = functions.firestore
       }
 
       // Create email content (language from Property Manager's profile; fallback to en so email always sends)
-      const statusLabels: { [key: string]: string } = {
-        'Sent': 'Sent',
-        'Accepted': 'Accepted',
-        'Refused': 'Refused',
-        'In Progress': 'In Progress',
-        'Completed': 'Completed',
-      };
-      const newStatusLabel = statusLabels[afterStatus] || afterStatus;
-      const oldStatusLabel = statusLabels[beforeStatus] || beforeStatus;
       let s: EmailStringsEntry;
       let changedAtStr: string;
       try {
@@ -495,6 +514,8 @@ export const onServiceRequestUpdated = functions.firestore
         s = getEmailStrings('en');
         changedAtStr = new Date().toLocaleString('en-US');
       }
+      const newStatusLabel = getStatusLabelForEmail(s, afterStatus);
+      const oldStatusLabel = getStatusLabelForEmail(s, beforeStatus);
 
       const subject = s.statusUpdateSubject.replace('{{newStatus}}', newStatusLabel);
       const dear = s.statusUpdateDear.replace(/\{\{name\}\}/g, managerName);

@@ -60,6 +60,11 @@ const EMAIL_STRINGS = {
         statusUpdateLoginPrompt: 'Please log in to view the full details of this service request.',
         statusUpdateRegards: 'Best regards, S.O.S. Condo System',
         statusUpdateFooter: 'This is an automated message from S.O.S. Condo. Please do not reply directly to this email.',
+        statusLabelSent: 'Sent',
+        statusLabelAccepted: 'Accepted',
+        statusLabelRefused: 'Refused',
+        statusLabelInProgress: 'In Progress',
+        statusLabelCompleted: 'Completed',
         reminderSubject: 'S.O.S. Condo - {{count}} Task Needs Service Request',
         reminderSubjectPlural: 'S.O.S. Condo - {{count}} Tasks Need Service Requests',
         reminderHeader: 'Task Reminder - Service Requests Needed',
@@ -108,6 +113,11 @@ const EMAIL_STRINGS = {
         statusUpdateLoginPrompt: 'Veuillez vous connecter pour voir les détails de cette demande.',
         statusUpdateRegards: 'Cordialement, S.O.S. Condo',
         statusUpdateFooter: 'Ceci est un message automatique de S.O.S. Condo. Veuillez ne pas répondre directement à ce courriel.',
+        statusLabelSent: 'Envoyé',
+        statusLabelAccepted: 'Accepté',
+        statusLabelRefused: 'Refusé',
+        statusLabelInProgress: 'En cours',
+        statusLabelCompleted: 'Terminé',
         reminderSubject: 'S.O.S. Condo - {{count}} tâche requiert une demande de service',
         reminderSubjectPlural: 'S.O.S. Condo - {{count}} tâches requièrent des demandes de service',
         reminderHeader: 'Rappel – Demandes de service à créer',
@@ -159,6 +169,17 @@ function getEmailStrings(lang) {
     var _a;
     const key = getEmailLang(lang);
     return (_a = EMAIL_STRINGS[key]) !== null && _a !== void 0 ? _a : EMAIL_STRINGS[DEFAULT_EMAIL_LANG];
+}
+/** Returns the localized status label for the status-update email. Status values: Sent, Accepted, Refused, In Progress, Completed. */
+function getStatusLabelForEmail(s, status) {
+    switch (status) {
+        case 'Sent': return s.statusLabelSent;
+        case 'Accepted': return s.statusLabelAccepted;
+        case 'Refused': return s.statusLabelRefused;
+        case 'In Progress': return s.statusLabelInProgress;
+        case 'Completed': return s.statusLabelCompleted;
+        default: return status;
+    }
 }
 // ============================================
 // Send Service Request Email
@@ -366,15 +387,6 @@ exports.onServiceRequestUpdated = functions.firestore
             }
         }
         // Create email content (language from Property Manager's profile; fallback to en so email always sends)
-        const statusLabels = {
-            'Sent': 'Sent',
-            'Accepted': 'Accepted',
-            'Refused': 'Refused',
-            'In Progress': 'In Progress',
-            'Completed': 'Completed',
-        };
-        const newStatusLabel = statusLabels[afterStatus] || afterStatus;
-        const oldStatusLabel = statusLabels[beforeStatus] || beforeStatus;
         let s;
         let changedAtStr;
         try {
@@ -386,6 +398,8 @@ exports.onServiceRequestUpdated = functions.firestore
             s = getEmailStrings('en');
             changedAtStr = new Date().toLocaleString('en-US');
         }
+        const newStatusLabel = getStatusLabelForEmail(s, afterStatus);
+        const oldStatusLabel = getStatusLabelForEmail(s, beforeStatus);
         const subject = s.statusUpdateSubject.replace('{{newStatus}}', newStatusLabel);
         const dear = s.statusUpdateDear.replace(/\{\{name\}\}/g, managerName);
         const textBody = `
