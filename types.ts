@@ -57,6 +57,8 @@ export interface User {
   password?: string;
   createdBy?: string; // ID of the user who created this user
   language?: string; // e.g. 'en' or 'fr' - used for emails and UI preference
+  phone?: string;
+  address?: string;
 }
 
 export interface Building {

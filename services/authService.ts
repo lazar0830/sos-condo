@@ -73,12 +73,12 @@ export async function createUserForAdmin(
   username: string,
   role: 'Admin' | 'Property Manager' | 'Service Provider',
   createdBy: string,
-  options?: { language?: string }
+  options?: { language?: string; phone?: string; address?: string }
 ): Promise<{ uid?: string; error?: string }> {
   if (!functions || !auth?.currentUser) return { error: 'Not configured or not signed in.' };
   try {
     const createUserFn = httpsCallable<
-      { email: string; password: string; username: string; role: string; createdBy: string; language?: string },
+      { email: string; password: string; username: string; role: string; createdBy: string; language?: string; phone?: string; address?: string },
       { uid: string }
     >(functions, 'createUser');
     const result = await createUserFn({
@@ -88,6 +88,9 @@ export async function createUserForAdmin(
       role,
       createdBy,
       ...(options?.language && { language: options.language }),
+      // Always send phone/address so backend can persist for Property Manager (empty string if not set)
+      phone: options?.phone ?? '',
+      address: options?.address ?? '',
     });
     return { uid: result.data.uid };
   } catch (err: unknown) {

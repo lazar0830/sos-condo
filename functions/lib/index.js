@@ -795,9 +795,12 @@ exports.createUser = functions.https.onCall(async (data, context) => {
     // Admin: Property Manager, Service Provider
     // Property Manager: Service Provider only
     const { email, password, username, role, createdBy } = data;
+    const phone = typeof data.phone === 'string' ? data.phone.trim() : '';
+    const address = typeof data.address === 'string' ? data.address.trim() : '';
     if (!email || !password || !username || !role || !createdBy) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing required fields.');
     }
+    functions.logger.info('[createUser] role=' + role + ' phone=' + (phone || '(empty)') + ' address=' + (address || '(empty)'));
     if (role === 'Admin' && callerRole !== 'Super Admin') {
         throw new functions.https.HttpsError('permission-denied', 'Only Super Admin can create Admins.');
     }
@@ -823,7 +826,12 @@ exports.createUser = functions.https.onCall(async (data, context) => {
         role,
         createdBy,
     };
+    if (phone !== '')
+        userProfile.phone = phone;
+    if (address !== '')
+        userProfile.address = address;
     await db.collection('users').doc(userRecord.uid).set(userProfile);
+    functions.logger.info('[createUser] wrote userProfile keys: ' + Object.keys(userProfile).join(', '));
     // Send welcome email when new user is a Service Provider or Property Manager
     if (role === 'Service Provider' || role === 'Property Manager') {
         const transporter = createTransporter();

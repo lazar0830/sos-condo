@@ -807,6 +807,8 @@
       "titleAdd": "Add New {{role}}",
       "loginEmail": "Login Email",
       "displayName": "Display Name",
+      "phoneNumber": "Phone Number",
+      "address": "Address",
       "password": "Password",
       "passwordPlaceholder": "Leave blank to keep current password",
       "saveUser": "Save User",
@@ -827,6 +829,8 @@
       "specialty": "Specialty",
       "phone": "Phone",
       "contactPerson": "Contact Person",
+      "website": "Website",
+      "address": "Address",
       "saveProvider": "Save Provider",
       "savingProvider": "Saving...",
       "allFieldsRequired": "All fields are required."

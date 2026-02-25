@@ -435,13 +435,19 @@ const App: React.FC = () => {
     const isNew = !('id' in userData);
     if (isNew && password) {
       const role = (userData as Omit<User, 'id'>).role as 'Admin' | 'Property Manager';
+      const payload = userData as Omit<User, 'id'>;
       const result = await authService.createUserForAdmin(
-        (userData as Omit<User, 'id'>).email,
+        payload.email,
         password,
-        (userData as Omit<User, 'id'>).username,
+        payload.username,
         role,
         currentUser.id,
-        { language: i18n.language?.toLowerCase().substring(0, 2) }
+        {
+          language: i18n.language?.toLowerCase().substring(0, 2),
+          // Pass phone/address for Property Manager so they are saved on create
+          phone: payload.phone ?? '',
+          address: payload.address ?? '',
+        }
       );
       if (result.error) {
         setNotification({ type: 'error', message: result.error });

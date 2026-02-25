@@ -24,6 +24,8 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
     specialty: SERVICE_PROVIDER_SPECIALTIES[0],
     phone: '',
     contactPerson: '',
+    website: '',
+    address: '',
   });
   const [userData, setUserData] = useState({
     email: '',
@@ -39,6 +41,8 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
         specialty: provider.specialty,
         phone: provider.phone || '',
         contactPerson: provider.contactPerson || '',
+        website: provider.website || '',
+        address: provider.address || '',
       });
       const user = users.find(u => u.id === provider.userId);
       setUserData({
@@ -48,7 +52,7 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
       });
     } else {
       setProviderData({
-        name: '', email: '', specialty: SERVICE_PROVIDER_SPECIALTIES[0], phone: '', contactPerson: ''
+        name: '', email: '', specialty: SERVICE_PROVIDER_SPECIALTIES[0], phone: '', contactPerson: '', website: '', address: ''
       });
       setUserData({ email: '', username: '', password: '' });
     }
@@ -139,6 +143,14 @@ const EditServiceProviderUserModal: React.FC<EditServiceProviderUserModalProps> 
                 <div className="md:col-span-2">
                     <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.contactPerson')}</label>
                     <input type="text" name="contactPerson" id="contactPerson" value={providerData.contactPerson} onChange={handleProviderChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
+                </div>
+                <div>
+                    <label htmlFor="website" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.website')}</label>
+                    <input type="url" name="website" id="website" value={providerData.website} onChange={handleProviderChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" placeholder="https://" />
+                </div>
+                <div>
+                    <label htmlFor="providerAddress" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editServiceProviderUser.address')}</label>
+                    <input type="text" name="address" id="providerAddress" value={providerData.address} onChange={handleProviderChange} className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed" />
                 </div>
             </div>
         </fieldset>

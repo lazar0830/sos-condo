@@ -806,6 +806,8 @@
       "titleAdd": "Ajouter {{role}}",
       "loginEmail": "Courriel de connexion",
       "displayName": "Nom affiché",
+      "phoneNumber": "Numéro de téléphone",
+      "address": "Adresse",
       "password": "Mot de passe",
       "passwordPlaceholder": "Laisser vide pour conserver le mot de passe actuel",
       "saveUser": "Enregistrer l'utilisateur",
@@ -826,6 +828,8 @@
       "specialty": "Spécialité",
       "phone": "Téléphone",
       "contactPerson": "Personne-ressource",
+      "website": "Site web",
+      "address": "Adresse",
       "saveProvider": "Enregistrer le fournisseur",
       "savingProvider": "Enregistrement...",
       "allFieldsRequired": "Tous les champs sont requis."
