@@ -682,7 +682,14 @@ const App: React.FC = () => {
     });
     setIsPasswordModalOpen(true);
   };
-  const handleOpenProviderUserModal = (provider: ServiceProvider | null) => { setEditingProvider(provider); setIsProviderUserModalOpen(true); };
+  const handleOpenProviderUserModal = (provider: ServiceProvider | null) => {
+    // Property Manager may only modify (edit) service providers they added
+    if (provider && currentUser?.role === UserRole.PropertyManager && provider.createdBy !== currentUser.id) {
+      return;
+    }
+    setEditingProvider(provider);
+    setIsProviderUserModalOpen(true);
+  };
   const handleCloseProviderUserModal = () => { setIsProviderUserModalOpen(false); setEditingProvider(null); };
   const handleOpenComponentModal = (component: Component | null, buildingId: string | null = null) => { 
     setEditingComponent(component); 

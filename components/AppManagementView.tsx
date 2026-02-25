@@ -123,7 +123,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                 <button onClick={() => setActiveTab('managers')} className={getTabClass('managers')}>
                     {t('appManagement.propertyManagers')}
                 </button>
-                {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
+                {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || currentUser.role === UserRole.PropertyManager) && (
                     <button onClick={() => setActiveTab('providers')} className={getTabClass('providers')}>
                         {t('appManagement.serviceProviders')}
                     </button>
@@ -217,7 +217,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
             </div>
         )}
 
-        {activeTab === 'providers' && (currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
+        {activeTab === 'providers' && (currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || currentUser.role === UserRole.PropertyManager) && (
              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -242,11 +242,13 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.contactPerson || ''}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.createdBy ? (users?.find(u => u.id === provider.createdBy)?.username ?? '—') : '—'}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <button onClick={() => onEditProvider(provider)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('appManagement.edit')}</button>
+                            {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || provider.createdBy === currentUser.id) && (
+                              <button onClick={() => onEditProvider(provider)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('appManagement.edit')}</button>
+                            )}
                             {provider.userId && (currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
                               <button onClick={() => onChangeProviderPassword(provider)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">{t('appManagement.changePassword')}</button>
                             )}
-                            {(currentUser.role === UserRole.SuperAdmin || provider.createdBy === currentUser.id) && (
+                            {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
                               <button onClick={() => setDeletingProvider(provider)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">{t('appManagement.delete')}</button>
                             )}
                             </td>
