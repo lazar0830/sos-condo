@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User, ServiceProvider } from '../types';
 import { UserRole } from '../types';
+import { SPECIALTY_TO_I18N_KEY } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 
 interface AppManagementViewProps {
@@ -236,7 +237,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                         {providers.length > 0 ? providers.map(provider => (
                         <tr key={provider.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{provider.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.specialty}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{SPECIALTY_TO_I18N_KEY[provider.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[provider.specialty]}`) : provider.specialty}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.email}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.contactPerson || ''}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.createdBy ? (users?.find(u => u.id === provider.createdBy)?.username ?? '—') : '—'}</td>

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { Unit, Building, Component, MaintenanceTask, ServiceRequest, ServiceProvider } from '../types';
 import CreateRequestModal from './CreateRequestModal';
 import { ServiceRequestStatus, TaskStatus } from '../types';
+import { SPECIALTY_TO_I18N_KEY, SERVICE_REQUEST_STATUS_TO_I18N_KEY } from '../constants';
 
 interface UnitDetailViewProps {
   unit: Unit;
@@ -183,7 +184,7 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
                                             {task.taskDate ? new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString() : t('unitDetail.recurring')}
                                         </p>
                                         <p className="text-xs">
-                                            <span className={`px-2 py-0.5 rounded-full ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
+                                            <span className={`px-2 py-0.5 rounded-full ${getSpecialtyColor(task.specialty)}`}>{SPECIALTY_TO_I18N_KEY[task.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[task.specialty]}`) : task.specialty}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -215,7 +216,7 @@ const UnitDetailView: React.FC<UnitDetailViewProps> = ({
                                             {sr.scheduledDate ? new Date(sr.scheduledDate + 'T12:00:00Z').toLocaleDateString() : new Date(sr.sentAt).toLocaleDateString()}
                                         </p>
                                         <p className="text-xs">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[sr.status]}`}>{sr.status}</span>
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[sr.status]}`}>{SERVICE_REQUEST_STATUS_TO_I18N_KEY[sr.status] ? t(`serviceRequests.${SERVICE_REQUEST_STATUS_TO_I18N_KEY[sr.status]}`) : sr.status}</span>
                                         </p>
                                     </div>
                                 </div>

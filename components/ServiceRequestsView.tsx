@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ServiceRequest, MaintenanceTask, Building, ServiceProvider } from '../types';
 import { ServiceRequestStatus } from '../types';
-import { SERVICE_REQUEST_STATUSES } from '../constants';
+import { SERVICE_REQUEST_STATUSES, SPECIALTY_TO_I18N_KEY } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 
 interface ServiceRequestsViewProps {
@@ -259,7 +259,7 @@ const ServiceRequestsView: React.FC<ServiceRequestsViewProps> = ({ requests, tas
                             )}
                         </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm"><span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(request.specialty)}`}>{request.specialty}</span></td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm"><span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(request.specialty)}`}>{SPECIALTY_TO_I18N_KEY[request.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[request.specialty]}`) : request.specialty}</span></td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider?.name || t('serviceRequests.unknown')}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(request.sentAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">

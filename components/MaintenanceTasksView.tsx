@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MaintenanceTask, Building, ServiceProvider, ServiceRequest } from '../types';
 import { TaskStatus, Recurrence } from '../types';
-import { TASK_STATUSES } from '../constants';
+import { TASK_STATUSES, SPECIALTY_TO_I18N_KEY } from '../constants';
 import useLocalStorage from '../hooks/useLocalStorage';
 import CreateRequestModal from './CreateRequestModal';
 import ConfirmationModal from './ConfirmationModal';
@@ -122,7 +122,7 @@ const TaskTable: React.FC<{
                   <div className={`text-sm text-gray-500 dark:text-gray-400 ${task.recurringTaskId ? 'pl-4' : ''}`}>{t(`maintenanceTasks.${recurrenceToKey[task.recurrence]}`)}</div>
                 </td>
                 <td onClick={() => onEditTask(task)} className="px-6 py-4 whitespace-nowrap text-sm cursor-pointer">
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{SPECIALTY_TO_I18N_KEY[task.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[task.specialty]}`) : task.specialty}</span>
                 </td>
                 <td onClick={() => onEditTask(task)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-medium cursor-pointer">
                   {task.taskDate && new Date(task.taskDate + 'T12:00:00Z').toLocaleDateString()}

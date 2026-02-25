@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest } from '../types';
 import { ServiceRequestStatus } from '../types';
+import { SPECIALTY_TO_I18N_KEY } from '../constants';
 import { generateServiceRequestEmail } from '../services/geminiService';
 import Modal from './Modal';
 
@@ -116,7 +117,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ building, task,
             >
               <option value="" disabled>{t('modals.common.selectProvider')}</option>
               {providers.filter(p => p.specialty === task.specialty).map(p => (
-                <option key={p.id} value={p.id}>{p.name} ({p.specialty})</option>
+                <option key={p.id} value={p.id}>{p.name} ({SPECIALTY_TO_I18N_KEY[p.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[p.specialty]}`) : p.specialty})</option>
               ))}
             </select>
         </div>

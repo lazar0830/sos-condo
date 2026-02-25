@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ServiceProvider, User } from '../types';
 import { UserRole } from '../types';
+import { SPECIALTY_TO_I18N_KEY } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 
 interface ServiceProvidersViewProps {
@@ -61,7 +62,7 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
                     </div>
                 )}
                 <div className="flex-grow">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300 mb-2">{provider.specialty}</span>
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300 mb-2">{SPECIALTY_TO_I18N_KEY[provider.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[provider.specialty]}`) : provider.specialty}</span>
                     <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{provider.name}</h3>
                     <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-300">
                       <p className="flex items-center">
@@ -70,7 +71,9 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
                       </p>
                       {provider.phone && (
                         <p className="flex items-center">
-                          <svg className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.067a1.5 1.5 0 01-1.17 1.734l-1.056.352a1.5 1.5 0 00-1.176 1.734l.716 3.067a1.5 1.5 0 01-1.17 1.734l-1.056.352a1.5 1.5 0 00-1.176 1.734l.716 3.067A1.5 1.5 0 013.5 18h1.148a1.5 1.5 0 011.465-1.175l.716-3.067a1.5 1.5 0 011.17-1.734l1.056-.352a1.5 1.5 0 001.176-1.734l-.716-3.067a1.5 1.5 0 011.17-1.734l1.056-.352a1.5 1.5 0 001.176-1.734l-.716-3.067A1.5 1.5 0 0115.352 2H16.5A1.5 1.5 0 0118 3.5v13a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 012 16.5v-13z" /></svg>
+                          <svg className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
                           {provider.phone}
                         </p>
                       )}

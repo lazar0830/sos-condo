@@ -4,6 +4,7 @@ import React, { useRef, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Component, Building, MaintenanceTask, ServiceProvider, ServiceRequest } from '../types';
 import { ServiceRequestStatus, Recurrence, TaskStatus } from '../types';
+import { SPECIALTY_TO_I18N_KEY, SERVICE_REQUEST_STATUS_TO_I18N_KEY } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 import CreateRequestModal from './CreateRequestModal';
 
@@ -257,7 +258,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                                                 <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{task.name}</h4>
                                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${taskStatusColorMap[task.status]}`}>{task.status}</span>
                                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${recurrenceColorMap[task.recurrence]}`}>{task.recurrence}</span>
-                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{SPECIALTY_TO_I18N_KEY[task.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[task.specialty]}`) : task.specialty}</span>
                                             </div>
                                             <p className="text-gray-600 dark:text-gray-300 text-sm whitespace-pre-wrap">{task.description}</p>
                                             <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-4 flex-wrap">
@@ -315,7 +316,7 @@ const ComponentDetailView: React.FC<ComponentDetailViewProps> = ({
                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{getProviderName(request.providerId)}</td>
                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : 'N/A'}</td>
                             <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${serviceRequestStatusColorMap[request.status]}`}>{request.status}</span>
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${serviceRequestStatusColorMap[request.status]}`}>{SERVICE_REQUEST_STATUS_TO_I18N_KEY[request.status] ? t(`serviceRequests.${SERVICE_REQUEST_STATUS_TO_I18N_KEY[request.status]}`) : request.status}</span>
                             </td>
                         </tr>
                         ))}

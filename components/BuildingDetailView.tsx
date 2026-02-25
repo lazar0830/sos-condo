@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, Component, Unit } from '../types';
 import { TaskStatus, Recurrence, ServiceRequestStatus } from '../types';
 import CreateRequestModal from './CreateRequestModal';
-import { TASK_STATUSES, TASK_STATUS_TO_I18N_KEY, RECURRENCE_TO_I18N_KEY } from '../constants';
+import { TASK_STATUSES, TASK_STATUS_TO_I18N_KEY, RECURRENCE_TO_I18N_KEY, SPECIALTY_TO_I18N_KEY, SERVICE_REQUEST_STATUS_TO_I18N_KEY } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 
 interface BuildingDetailViewProps {
@@ -281,7 +281,7 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
               <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{task.name}</h4>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`maintenanceTasks.${TASK_STATUS_TO_I18N_KEY[task.status] || 'statusNew'}`)}</span>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${recurrenceColorMap[task.recurrence]}`}>{t(`maintenanceTasks.${RECURRENCE_TO_I18N_KEY[task.recurrence] || 'recurrenceOneTime'}`)}</span>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{SPECIALTY_TO_I18N_KEY[task.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[task.specialty]}`) : task.specialty}</span>
             </div>
             <p className="text-gray-600 dark:text-gray-300 text-sm whitespace-pre-wrap">{task.description}</p>
             <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-4 flex-wrap">
@@ -605,13 +605,13 @@ const BuildingDetailView: React.FC<BuildingDetailViewProps> = ({ building, tasks
                             )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm"><span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(request.specialty)}`}>{request.specialty}</span></td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm"><span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(request.specialty)}`}>{SPECIALTY_TO_I18N_KEY[request.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[request.specialty]}`) : request.specialty}</span></td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider?.name || 'N/A'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(request.sentAt).toLocaleDateString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : t('buildingDetail.notSet')}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[request.status]}`}>
-                          {request.status}
+                          {SERVICE_REQUEST_STATUS_TO_I18N_KEY[request.status] ? t(`serviceRequests.${SERVICE_REQUEST_STATUS_TO_I18N_KEY[request.status]}`) : request.status}
                         </span>
                       </td>
                     </tr>

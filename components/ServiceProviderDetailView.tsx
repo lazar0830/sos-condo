@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ServiceProvider, ServiceRequest, MaintenanceTask, Building, User } from '../types';
 import { ServiceRequestStatus, UserRole } from '../types';
+import { SPECIALTY_TO_I18N_KEY, SERVICE_REQUEST_STATUS_TO_I18N_KEY } from '../constants';
 import { uploadProviderLogo } from '../services/storageService';
 
 interface ServiceProviderDetailViewProps {
@@ -114,7 +115,7 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                 <div className="flex-grow mt-4 sm:mt-0">
                     <div className="flex justify-between items-start">
                         <div>
-                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300 mb-2">{provider.specialty}</span>
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300 mb-2">{SPECIALTY_TO_I18N_KEY[provider.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[provider.specialty]}`) : provider.specialty}</span>
                             <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400">{provider.name}</h2>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -152,7 +153,9 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                         </div>
                         {provider.phone && (
                         <div className="flex items-center">
-                            <svg className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.067a1.5 1.5 0 01-1.17 1.734l-1.056.352a1.5 1.5 0 00-1.176 1.734l.716 3.067a1.5 1.5 0 01-1.17 1.734l-1.056.352a1.5 1.5 0 00-1.176 1.734l.716 3.067A1.5 1.5 0 013.5 18h1.148a1.5 1.5 0 011.465-1.175l.716-3.067a1.5 1.5 0 011.17-1.734l1.056-.352a1.5 1.5 0 001.176-1.734l-.716-3.067a1.5 1.5 0 011.17-1.734l1.056-.352a1.5 1.5 0 001.176-1.734l-.716-3.067A1.5 1.5 0 0115.352 2H16.5A1.5 1.5 0 0118 3.5v13a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 012 16.5v-13z" /></svg>
+                            <svg className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
                             <span>{provider.phone}</span>
                         </div>
                         )}
@@ -164,11 +167,36 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                         )}
                         {provider.website && (
                             <div className="flex items-center">
-                                <svg className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M12.572 2.098a.75.75 0 01.956-.317l4.5 1.5a.75.75 0 010 1.438l-4.5 1.5a.75.75 0 01-.956-.317L10.5 2.098l2.072-4.29zM3.5 12a.75.75 0 01.75-.75h.5a.75.75 0 010 1.5h-.5a.75.75 0 01-.75-.75zM4.75 14.25a.75.75 0 01.75-.75h.5a.75.75 0 010 1.5h-.5a.75.75 0 01-.75-.75zM6.25 11.25a.75.75 0 01.75-.75h.5a.75.75 0 010 1.5h-.5a.75.75 0 01-.75-.75zM7.5 15a.75.75 0 01.75-.75h.5a.75.75 0 010 1.5h-.5a.75.75 0 01-.75-.75zM9.25 10.5a.75.75 0 01.75-.75h.5a.75.75 0 010 1.5h-.5a.75.75 0 01-.75-.75zM12.5 10a.75.75 0 000-1.5H3.75a.75.75 0 000 1.5h8.75zM3.75 16.5a.75.75 0 000-1.5h5.5a.75.75 0 000 1.5h-5.5z" clipRule="evenodd" />
-                                <path d="M10 20a10 10 0 110-20 10 10 0 010 20zM9 4.75a.75.75 0 00-1.5 0v1.5a.75.75 0 001.5 0v-1.5z" />
+                                {/* Light mode: outline globe */}
+                                <svg
+                                  className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0 dark:hidden"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
                                 </svg>
-                                <a href={provider.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary-600 dark:hover:text-primary-400 truncate">{provider.website}</a>
+                                {/* Dark mode: filled globe */}
+                                <svg
+                                  className="h-5 w-5 mr-3 text-gray-400 flex-shrink-0 hidden dark:block"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                >
+                                  <path d="M21.721 12.752a9.711 9.711 0 0 0-.945-5.003 12.754 12.754 0 0 1-4.339 2.708 18.991 18.991 0 0 1-.214 4.772 17.165 17.165 0 0 0 5.498-2.477ZM14.634 15.55a17.324 17.324 0 0 0 .332-4.647c-.952.227-1.945.347-2.966.347-1.021 0-2.014-.12-2.966-.347a17.515 17.515 0 0 0 .332 4.647 17.385 17.385 0 0 0 5.268 0ZM9.772 17.119a18.963 18.963 0 0 0 4.456 0A17.182 17.182 0 0 1 12 21.724a17.18 17.18 0 0 1-2.228-4.605ZM7.777 15.23a18.87 18.87 0 0 1-.214-4.774 12.753 12.753 0 0 1-4.34-2.708 9.711 9.711 0 0 0-.944 5.004 17.165 17.165 0 0 0 5.498 2.477ZM21.356 14.752a9.765 9.765 0 0 1-7.478 6.817 18.64 18.64 0 0 0 1.988-4.718 18.627 18.627 0 0 0 5.49-2.098ZM2.644 14.752c1.682.971 3.53 1.688 5.49 2.099a18.64 18.64 0 0 0 1.988 4.718 9.765 9.765 0 0 1-7.478-6.816ZM13.878 2.43a9.755 9.755 0 0 1 6.116 3.986 11.267 11.267 0 0 1-3.746 2.504 18.63 18.63 0 0 0-2.37-6.49ZM12 2.276a17.152 17.152 0 0 1 2.805 7.121c-.897.23-1.837.353-2.805.353-.968 0-1.908-.122-2.805-.353A17.151 17.151 0 0 1 12 2.276ZM10.122 2.43a18.629 18.629 0 0 0-2.37 6.49 11.266 11.266 0 0 1-3.746-2.504 9.754 9.754 0 0 1 6.116-3.985Z" />
+                                </svg>
+                                <a
+                                  href={provider.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:text-primary-600 dark:hover:text-primary-400 truncate"
+                                >
+                                  {provider.website}
+                                </a>
                             </div>
                         )}
                     </div>
@@ -211,7 +239,7 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{request.scheduledDate ? new Date(request.scheduledDate + 'T12:00:00Z').toLocaleDateString() : t('serviceProviderDetail.notSet')}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColorMap[request.status]}`}>
-                                            {request.status}
+                                            {SERVICE_REQUEST_STATUS_TO_I18N_KEY[request.status] ? t(`serviceRequests.${SERVICE_REQUEST_STATUS_TO_I18N_KEY[request.status]}`) : request.status}
                                         </span>
                                     </td>
                                 </tr>

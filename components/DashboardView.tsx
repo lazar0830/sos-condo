@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, Unit, Component, Expense } from '../types';
 import { TaskStatus, ServiceRequestStatus } from '../types';
+import { SPECIALTY_TO_I18N_KEY } from '../constants';
 import ConfirmationModal from './ConfirmationModal';
 import CreateRequestModal from './CreateRequestModal';
 
@@ -536,7 +537,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ buildings, units, compone
                          {isOverdue && (
                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">{t('dashboard.overdue')}</span>
                          )}
-                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{task.specialty}</span>
+                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSpecialtyColor(task.specialty)}`}>{SPECIALTY_TO_I18N_KEY[task.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[task.specialty]}`) : task.specialty}</span>
                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[task.status]}`}>{t(`dashboard.${statusToKey[task.status] ?? 'statusNew'}`)}</span>
                       </div>
                     </div>
