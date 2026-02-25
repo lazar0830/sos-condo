@@ -87,21 +87,33 @@ export async function generateServiceRequestEmail(
   }
 }
 
-export async function generateTurnoverChecklist(unitNumber: string, propertyType: string, activityType: string): Promise<string> {
+export async function generateTurnoverChecklist(
+  unitNumber: string,
+  propertyType: string,
+  activityType: string,
+  language?: string,
+): Promise<string> {
   if (!gemini.instance) {
     const errorMessage = "Error: Gemini AI client is not initialized. Please configure your API_KEY.";
     console.error(errorMessage);
     return errorMessage;
   }
 
+  const isFrench = language?.toLowerCase().startsWith('fr');
+  const languageInstruction = isFrench
+    ? 'Generate the entire checklist in French (title, section headers, and all checklist items). Use French terminology appropriate for property management (e.g. "Liste de vérification", "À faire", etc.).'
+    : 'Generate the entire checklist in English.';
+
   const prompt = `
     You are an expert property manager. Your task is to generate a comprehensive unit checklist for a rental property. The checklist should be well-organized, detailed, and formatted in Markdown.
+
+    **Language:** ${languageInstruction}
 
     **Instructions:**
     - Use the provided details to customize the checklist.
     - The tone should be professional and thorough.
     - Structure the checklist into logical sections appropriate for the activity.
-    - For each item, provide a checkbox-like syntax (e.g., \`- [ ] Clean the oven inside and out.\`).
+    - For each item, provide a checkbox-like syntax (e.g., \`- [ ] Clean the oven inside and out.\` or in French \`- [ ] Nettoyer le four à l'intérieur et à l'extérieur.\`).
     - Be specific. For a "Luxury Apartment", you might add items like "Check wine fridge". For a "Painting" activity, focus only on painting-related prep and cleanup.
 
     **Details to use:**
@@ -109,7 +121,7 @@ export async function generateTurnoverChecklist(unitNumber: string, propertyType
     - Property Type: ${propertyType}
     - Type of Activity: ${activityType}
 
-    Generate only the Markdown checklist content. Do not add any extra explanations or text before or after the checklist. Start directly with a title like "# ${activityType} Checklist for Unit ${unitNumber}".
+    Generate only the Markdown checklist content. Do not add any extra explanations or text before or after the checklist. Start directly with a title (in the requested language), e.g. in English "# ${activityType} Checklist for Unit ${unitNumber}" or in French an equivalent like "# Liste de vérification - ${activityType} - Unité ${unitNumber}".
   `;
 
   try {

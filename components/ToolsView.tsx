@@ -23,7 +23,7 @@ interface ToolsViewProps {
 }
 
 const ToolsView: React.FC<ToolsViewProps> = ({ serviceRequests = [], tasks = [], providers = [], onDeleteOrphanedRequests, currentUser, onSendTaskReminderNow }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [unitNumber, setUnitNumber] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [activityType, setActivityType] = useState('New Tenant Move-in');
@@ -100,7 +100,8 @@ const ToolsView: React.FC<ToolsViewProps> = ({ serviceRequests = [], tasks = [],
     setIsLoading(true);
     setError('');
     setChecklist('');
-    const result = await generateTurnoverChecklist(unitNumber, propertyType, activityType);
+    const lang = i18n.language?.toLowerCase().substring(0, 2) || 'en';
+    const result = await generateTurnoverChecklist(unitNumber, propertyType, activityType, lang);
     if (result.startsWith('Error:')) {
         setError(result);
     } else {
