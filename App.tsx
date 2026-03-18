@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, User, Comment, Document, StatusChange, Component, ComponentImage, Unit, Expense, Notification as NotificationType } from './types';
+import type { Building, MaintenanceTask, ServiceProvider, ServiceRequest, User, Comment, Document, StatusChange, Component, ComponentImage, Unit, Expense, Notification as NotificationType, ComponentTemplate } from './types';
 import { UserRole, ServiceRequestStatus, Recurrence, TaskStatus } from './types';
 import { initGemini } from './services/geminiService';
 import { useAppData } from './hooks/useAppData';
@@ -38,12 +38,13 @@ import ComponentsView from './components/ComponentsView';
 import EditComponentModal from './components/EditComponentModal';
 import ComponentDetailView from './components/ComponentDetailView';
 import ToolsView from './components/ToolsView';
+import TemplatesView from './components/TemplatesView';
 import EditUnitModal from './components/EditUnitModal';
 import ContingencyFundView from './components/ContingencyFundView';
 import UnitDetailView from './components/UnitDetailView';
 import NotificationsView from './components/NotificationsView';
 
-export type View = 'dashboard' | 'financials' | 'properties' | 'tasks' | 'requests' | 'providers' | 'propertyManagers' | 'account' | 'management' | 'components' | 'tools' | 'contingencyFund' | 'notifications';
+export type View = 'dashboard' | 'financials' | 'properties' | 'templates' | 'components' | 'tasks' | 'requests' | 'providers' | 'propertyManagers' | 'account' | 'management' | 'tools' | 'contingencyFund' | 'notifications';
 export type Theme = 'light' | 'dark';
 
 const App: React.FC = () => {
@@ -86,6 +87,7 @@ const App: React.FC = () => {
     expenses,
     notifications,
     componentCategories,
+    componentTemplates,
   } = useAppData(!!currentUser);
 
   // UI State
@@ -351,6 +353,19 @@ const App: React.FC = () => {
     const updated = { ...component, images: component.images.filter(img => img.id !== imageId) };
     await fs.setComponent(updated);
     setNotification({ type: 'success', message: 'Image deleted.' });
+  };
+
+  const handleSaveComponentTemplate = async (templateData: Omit<ComponentTemplate, 'id'> | ComponentTemplate) => {
+    const template: ComponentTemplate = 'id' in templateData
+      ? templateData
+      : { ...templateData, id: crypto.randomUUID() };
+    await fs.setComponentTemplate(template);
+    setNotification({ type: 'success', message: 'Template saved successfully!' });
+  };
+
+  const handleDeleteComponentTemplate = async (templateId: string) => {
+    await fs.deleteComponentTemplate(templateId);
+    setNotification({ type: 'success', message: 'Template deleted successfully.' });
   };
 
   const handleAddServiceRequest = async (request: Omit<ServiceRequest, 'id' | 'comments' | 'documents' | 'statusHistory'>) => {
@@ -910,6 +925,15 @@ const App: React.FC = () => {
             onAddComponent={() => handleOpenComponentModal(null)}
             onSelectComponent={handleSelectComponent}
         />;
+      case 'templates':
+        return (
+          <TemplatesView
+            componentCategories={componentCategories}
+            templates={componentTemplates}
+            onSaveTemplate={handleSaveComponentTemplate}
+            onDeleteTemplate={handleDeleteComponentTemplate}
+          />
+        );
       case 'tasks':
         return <MaintenanceTasksView tasks={visibleTasks} buildings={visibleBuildings} providers={visibleProviders} onEditTask={handleOpenTaskModal} onAddTask={() => handleOpenTaskModal(null)} onDeleteTask={handleDeleteTask} onAddServiceRequest={handleAddServiceRequest} />;
       case 'requests':
@@ -1117,7 +1141,7 @@ const App: React.FC = () => {
         <EditBuildingModal building={editingBuilding} onClose={handleCloseBuildingModal} onSave={handleSaveBuilding} />
       )}
       {isTaskModalOpen && (
-        <EditTaskModal task={editingTask} buildings={visibleBuildings} providers={visibleProviders} components={visibleComponents} units={visibleUnits} onClose={handleCloseTaskModal} onSave={handleSaveTask} preselectedBuildingId={preselectedBuildingId} preselectedComponentId={preselectedComponentId} onDelete={handleDeleteTask} />
+        <EditTaskModal task={editingTask} buildings={visibleBuildings} providers={visibleProviders} components={visibleComponents} units={visibleUnits} componentTemplates={componentTemplates} onClose={handleCloseTaskModal} onSave={handleSaveTask} preselectedBuildingId={preselectedBuildingId} preselectedComponentId={preselectedComponentId} onDelete={handleDeleteTask} />
       )}
        {[UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role) && isUserModalOpen && (
         <EditUserModal 

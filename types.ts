@@ -108,6 +108,15 @@ export interface Component {
   unitNumber?: string;
 }
 
+export interface ComponentTemplate {
+  id: string;
+  type: ComponentType;
+  parentCategory: string;
+  subCategory: string;
+  componentName: string;
+  description: string;
+}
+
 export interface MaintenanceTask {
   id:string;
   buildingId: string;

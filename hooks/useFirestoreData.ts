@@ -13,6 +13,7 @@ import type {
   Expense,
   Document,
   Notification,
+  ComponentTemplate,
 } from '../types';
 
 export function useFirestoreData(
@@ -28,6 +29,7 @@ export function useFirestoreData(
     contingencyDocs: Document[];
     notifications: Notification[];
     componentCategories?: ComponentCategoriesData;
+    componentTemplates?: ComponentTemplate[];
   },
   enabled: boolean
 ) {
@@ -42,6 +44,7 @@ export function useFirestoreData(
   const [contingencyDocs, setContingencyDocs] = useState<Document[]>(initial.contingencyDocs);
   const [notifications, setNotifications] = useState<Notification[]>(initial.notifications);
   const [componentCategories, setComponentCategories] = useState<ComponentCategoriesData>(initial.componentCategories || {});
+  const [componentTemplates, setComponentTemplates] = useState<ComponentTemplate[]>(initial.componentTemplates || []);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,6 +65,7 @@ export function useFirestoreData(
     unsubs.push(fs.subscribeToContingencyDocs(setContingencyDocs) || (() => {}));
     unsubs.push(fs.subscribeToNotifications(setNotifications) || (() => {}));
     unsubs.push(fs.subscribeToComponentCategories(setComponentCategories) || (() => {}));
+    unsubs.push(fs.subscribeToComponentTemplates(setComponentTemplates) || (() => {}));
 
     setLoading(false);
     return () => unsubs.forEach((u) => u());
@@ -79,6 +83,7 @@ export function useFirestoreData(
     expenses,
     notifications,
     componentCategories,
+    componentTemplates,
     loading,
   };
 }

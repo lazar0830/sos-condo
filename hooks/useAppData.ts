@@ -1,4 +1,5 @@
 import { useFirestoreData } from './useFirestoreData';
+import type { ComponentCategoriesData } from '../services/firestoreService';
 import {
   initialBuildings,
   initialTasks,
@@ -22,6 +23,8 @@ export function useAppData(authenticated: boolean) {
     contingencyDocs: initialContingencyDocuments,
     expenses: initialExpenses,
     notifications: initialNotifications,
+    componentCategories: {} as ComponentCategoriesData,
+    componentTemplates: [],
   }, authenticated);
 
   return firestoreData;

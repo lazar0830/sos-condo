@@ -15,6 +15,7 @@ import type {
   Building,
   Unit,
   Component,
+  ComponentTemplate,
   MaintenanceTask,
   ServiceProvider,
   ServiceRequest,
@@ -35,6 +36,7 @@ const COLLECTIONS = {
   expenses: 'expenses',
   contingency_docs: 'contingency_docs',
   notifications: 'notifications',
+  component_templates: 'component_templates',
   component_categories: 'component_categories',
 } as const;
 
@@ -247,6 +249,32 @@ export function subscribeToComponentCategories(cb: (data: ComponentCategoriesDat
   if (!db) return null;
   return onSnapshot(doc(db, COLLECTIONS.component_categories, CATEGORIES_DOC_ID), (snap) => {
     cb(snap.exists() ? (snap.data() as ComponentCategoriesData) : {});
+  });
+}
+
+// --- Component Templates ---
+export async function getComponentTemplates(): Promise<ComponentTemplate[]> {
+  if (!db) return [];
+  const snap = await getDocs(collection(db, COLLECTIONS.component_templates));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as ComponentTemplate));
+}
+
+export async function setComponentTemplate(template: ComponentTemplate): Promise<void> {
+  if (!db) return;
+  const { id, ...data } = template;
+  await setDoc(doc(db, COLLECTIONS.component_templates, id), stripUndefined(data as Record<string, unknown>));
+}
+
+export async function deleteComponentTemplate(id: string): Promise<void> {
+  if (!db) return;
+  await deleteDoc(doc(db, COLLECTIONS.component_templates, id));
+}
+
+export function subscribeToComponentTemplates(cb: (templates: ComponentTemplate[]) => void): Unsubscribe | null {
+  if (!db) return null;
+  return onSnapshot(collection(db, COLLECTIONS.component_templates), (snap) => {
+    const templates = snap.docs.map((d) => ({ id: d.id, ...d.data() } as ComponentTemplate));
+    cb(templates);
   });
 }
 

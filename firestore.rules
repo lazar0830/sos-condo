@@ -16,5 +16,6 @@ service cloud.firestore {
     match /contingency_docs/{id} { allow read, write: if isAuthenticated(); }
     match /notifications/{id} { allow read, write: if isAuthenticated(); }
     match /component_categories/{id} { allow read, write: if isAuthenticated(); }
+    match /component_templates/{id} { allow read, write: if isAuthenticated(); }
   }
 }

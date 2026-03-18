@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { MaintenanceTask, Building, ServiceProvider, Component, Unit } from '../types';
+import type { MaintenanceTask, Building, ServiceProvider, Component, Unit, ComponentTemplate } from '../types';
 import { Recurrence, TaskStatus } from '../types';
 import { RECURRENCE_OPTIONS, TASK_STATUSES, TASK_STATUS_TO_I18N_KEY, RECURRENCE_TO_I18N_KEY, SERVICE_PROVIDER_SPECIALTIES, SPECIALTY_TO_I18N_KEY } from '../constants';
 import Modal from './Modal';
@@ -14,6 +14,7 @@ interface EditTaskModalProps {
   providers: ServiceProvider[];
   components: Component[];
   units: Unit[];
+  componentTemplates: ComponentTemplate[];
   preselectedBuildingId?: string | null;
   preselectedComponentId?: string | null;
   onClose: () => void;
@@ -21,7 +22,7 @@ interface EditTaskModalProps {
   onDelete: (taskId: string) => void;
 }
 
-const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, providers, components, units, preselectedBuildingId, preselectedComponentId, onClose, onSave, onDelete }) => {
+const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, providers, components, units, componentTemplates, preselectedBuildingId, preselectedComponentId, onClose, onSave, onDelete }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
@@ -40,6 +41,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
     unitId: '',
   });
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
   const allSpecialties = useMemo(() => {
     const providerSpecialties = providers.map(p => p.specialty);
@@ -55,6 +57,21 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
     if (!formData.buildingId) return [];
     return units.filter(u => u.buildingId === formData.buildingId);
   }, [formData.buildingId, units]);
+
+  const selectedComponent = useMemo(
+    () => buildingComponents.find(c => c.id === formData.componentId),
+    [buildingComponents, formData.componentId]
+  );
+
+  const availableTemplates = useMemo(() => {
+    if (!selectedComponent) return [];
+    return componentTemplates.filter((tpl) =>
+      tpl.type === selectedComponent.type &&
+      tpl.parentCategory === selectedComponent.parentCategory &&
+      tpl.subCategory === selectedComponent.subCategory &&
+      tpl.componentName === selectedComponent.name
+    );
+  }, [componentTemplates, selectedComponent]);
 
 
   useEffect(() => {
@@ -125,11 +142,24 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
   const handleComponentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const componentId = e.target.value;
     const component = buildingComponents.find(c => c.id === componentId);
+    setSelectedTemplateId('');
     setFormData(prev => ({
         ...prev,
         componentId: componentId,
         componentName: component ? component.name : ''
     }));
+  };
+
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const templateId = e.target.value;
+    setSelectedTemplateId(templateId);
+    const template = availableTemplates.find(t => t.id === templateId);
+    if (template) {
+      setFormData(prev => ({
+        ...prev,
+        description: template.description,
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -262,6 +292,28 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, buildings, provider
                       </option>
                       {buildingComponents.map(c => (
                           <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                  </select>
+              </div>
+              <div>
+                  <label htmlFor="templateId" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('modals.editTask.templateOptional')}</label>
+                  <select
+                      name="templateId"
+                      id="templateId"
+                      value={selectedTemplateId}
+                      onChange={handleTemplateChange}
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
+                      disabled={!formData.componentId || availableTemplates.length === 0}
+                  >
+                      <option value="">
+                          {!formData.componentId 
+                              ? t('modals.editTask.selectComponentFirstForTemplate')
+                              : availableTemplates.length > 0
+                                  ? t('modals.editTask.selectTemplate')
+                                  : t('modals.editTask.noTemplatesForComponent')}
+                      </option>
+                      {availableTemplates.map((tpl) => (
+                          <option key={tpl.id} value={tpl.id}>{tpl.componentName}</option>
                       ))}
                   </select>
               </div>
