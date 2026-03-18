@@ -541,6 +541,14 @@ const App: React.FC = () => {
   };
 
   const handleSaveProviderProfile = async (provider: ServiceProvider) => {
+    if (currentUser?.role === UserRole.Admin && provider.createdBy !== currentUser.id) {
+      setNotification({ type: 'error', message: 'You can only update service providers you created.' });
+      return;
+    }
+    if (currentUser?.role === UserRole.PropertyManager && provider.createdBy !== currentUser.id) {
+      setNotification({ type: 'error', message: 'You can only update service providers you added.' });
+      return;
+    }
     await fs.setProvider(provider);
     setNotification({ type: 'success', message: 'Provider profile updated.' });
   };
@@ -706,6 +714,10 @@ const App: React.FC = () => {
     if (provider && currentUser?.role === UserRole.PropertyManager && provider.createdBy !== currentUser.id) {
       return;
     }
+    // Admin may only modify (edit) service providers they created
+    if (provider && currentUser?.role === UserRole.Admin && provider.createdBy !== currentUser.id) {
+      return;
+    }
     setEditingProvider(provider);
     setIsProviderUserModalOpen(true);
   };
@@ -804,7 +816,8 @@ const App: React.FC = () => {
     const visibleUserIds = [...managedManagers.map(u => u.id), currentUser.id];
     const visibleUsernames = new Set([currentUser.username, ...managedManagers.map(u => u.username)]);
     visibleBuildings = buildings.filter(b => b.createdBy && visibleUserIds.includes(b.createdBy));
-    // Admin sees all providers (global + PM-created)
+    // Admin sees only service providers they created (not other admins')
+    visibleProviders = providers.filter(p => p.createdBy === currentUser.id);
     visibleContingencyDocuments = contingencyDocuments.filter(d => visibleUsernames.has(d.uploadedBy));
     applyBuildingScope(new Set(visibleBuildings.map(b => b.id)));
   } else if (currentUser.role === UserRole.PropertyManager) {

@@ -119,9 +119,9 @@ const ServiceProviderDetailView: React.FC<ServiceProviderDetailViewProps> = ({
                             <h2 className="text-3xl font-bold text-gray-900 dark:text-primary-400">{provider.name}</h2>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin || provider.createdBy === currentUser.id) && (
+                          {(currentUser.role === UserRole.SuperAdmin || (currentUser.role === UserRole.Admin && provider.createdBy === currentUser.id) || (currentUser.role === UserRole.PropertyManager && provider.createdBy === currentUser.id)) && (
                             <>
-                              {provider.userId && onChangePassword && (currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
+                              {provider.userId && onChangePassword && (currentUser.role === UserRole.SuperAdmin || (currentUser.role === UserRole.Admin && provider.createdBy === currentUser.id)) && (
                                 <button
                                     onClick={() => onChangePassword(provider)}
                                     className="flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-gray-600"
