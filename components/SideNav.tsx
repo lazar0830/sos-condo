@@ -82,11 +82,12 @@ const SideNav: React.FC<SideNavProps> = ({
   const unreadCount = notifications.filter(n => !n.isRead).length;
   const recentUnread = notifications.filter(n => !n.isRead).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
   
+  const isAdminOrSuperAdmin = [UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role);
   const baseManagerNavItems: { id: View, name: string }[] = [
     { id: 'dashboard', name: t('nav.dashboard') },
     { id: 'contingencyFund', name: t('nav.contingencyFund') },
     { id: 'properties', name: t('nav.allProperties') },
-    { id: 'templates', name: t('nav.templates') },
+    ...(isAdminOrSuperAdmin ? [{ id: 'templates' as View, name: t('nav.templates') }] : []),
     { id: 'components', name: t('nav.components') },
     { id: 'tasks', name: t('nav.maintenanceTasks') },
     { id: 'financials', name: t('nav.maintenanceCost') },
@@ -95,7 +96,7 @@ const SideNav: React.FC<SideNavProps> = ({
     { id: 'tools', name: t('nav.tools') },
   ];
   const propertyManagersItem: { id: View, name: string } = { id: 'propertyManagers', name: t('nav.propertyManagers') };
-  const managerNavItems = [UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role)
+  const managerNavItems = isAdminOrSuperAdmin
     ? [...baseManagerNavItems.slice(0, 7), propertyManagersItem, ...baseManagerNavItems.slice(7)]
     : baseManagerNavItems;
   

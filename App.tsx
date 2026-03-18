@@ -355,10 +355,14 @@ const App: React.FC = () => {
     setNotification({ type: 'success', message: 'Image deleted.' });
   };
 
-  const handleSaveComponentTemplate = async (templateData: Omit<ComponentTemplate, 'id'> | ComponentTemplate) => {
-    const template: ComponentTemplate = 'id' in templateData
-      ? templateData
-      : { ...templateData, id: crypto.randomUUID() };
+  const handleSaveComponentTemplate = async (
+    templateData: (Omit<ComponentTemplate, 'id'> & { createdBy?: string }) | ComponentTemplate
+  ) => {
+    if (!currentUser) return;
+    const template: ComponentTemplate =
+      'id' in templateData
+        ? { ...templateData, createdBy: (templateData as ComponentTemplate).createdBy ?? currentUser.id }
+        : { ...templateData, id: crypto.randomUUID(), createdBy: currentUser.id };
     await fs.setComponentTemplate(template);
     setNotification({ type: 'success', message: 'Template saved successfully!' });
   };
@@ -816,6 +820,11 @@ const App: React.FC = () => {
     applyBuildingScope(new Set(visibleBuildings.map(b => b.id)));
   }
 
+  // Templates: Super Admin sees all; Admin sees only their own (createdBy).
+  const visibleTemplates = !currentUser ? [] : currentUser.role === UserRole.SuperAdmin
+    ? componentTemplates
+    : componentTemplates.filter(t => t.createdBy === currentUser.id);
+
   const selectedBuilding = visibleBuildings.find(b => b.id === selectedBuildingId);
   const buildingTasks = visibleTasks.filter(t => t.buildingId === selectedBuildingId);
   const getTaskServiceRequests = (taskId: string) => visibleServiceRequests.filter(sr => sr.taskId === taskId);
@@ -926,10 +935,11 @@ const App: React.FC = () => {
             onSelectComponent={handleSelectComponent}
         />;
       case 'templates':
+        if (![UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role)) return <div>Access Denied</div>;
         return (
           <TemplatesView
             componentCategories={componentCategories}
-            templates={componentTemplates}
+            templates={visibleTemplates}
             onSaveTemplate={handleSaveComponentTemplate}
             onDeleteTemplate={handleDeleteComponentTemplate}
           />
@@ -1141,7 +1151,7 @@ const App: React.FC = () => {
         <EditBuildingModal building={editingBuilding} onClose={handleCloseBuildingModal} onSave={handleSaveBuilding} />
       )}
       {isTaskModalOpen && (
-        <EditTaskModal task={editingTask} buildings={visibleBuildings} providers={visibleProviders} components={visibleComponents} units={visibleUnits} componentTemplates={componentTemplates} onClose={handleCloseTaskModal} onSave={handleSaveTask} preselectedBuildingId={preselectedBuildingId} preselectedComponentId={preselectedComponentId} onDelete={handleDeleteTask} />
+        <EditTaskModal task={editingTask} buildings={visibleBuildings} providers={visibleProviders} components={visibleComponents} units={visibleUnits} componentTemplates={visibleTemplates} onClose={handleCloseTaskModal} onSave={handleSaveTask} preselectedBuildingId={preselectedBuildingId} preselectedComponentId={preselectedComponentId} onDelete={handleDeleteTask} />
       )}
        {[UserRole.SuperAdmin, UserRole.Admin].includes(currentUser.role) && isUserModalOpen && (
         <EditUserModal 

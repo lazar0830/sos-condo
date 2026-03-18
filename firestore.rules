@@ -16,6 +16,13 @@ service cloud.firestore {
     match /contingency_docs/{id} { allow read, write: if isAuthenticated(); }
     match /notifications/{id} { allow read, write: if isAuthenticated(); }
     match /component_categories/{id} { allow read, write: if isAuthenticated(); }
-    match /component_templates/{id} { allow read, write: if isAuthenticated(); }
+    // Admins see and modify only their own templates; Super Admin can see and modify all.
+    function isSuperAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
+    }
+    match /component_templates/{id} {
+      allow read, update, delete: if isAuthenticated() && (resource.data.createdBy == request.auth.uid || isSuperAdmin());
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+    }
   }
 }

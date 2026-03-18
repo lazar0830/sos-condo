@@ -3,7 +3,7 @@ import { ComponentType } from '../types';
 import type { ComponentCategoriesData } from '../services/firestoreService';
 
 export type ParsedTemplateRow = {
-  data: Omit<import('../types').ComponentTemplate, 'id'> | null;
+  data: Omit<import('../types').ComponentTemplate, 'id' | 'createdBy'> | null;
   error?: string;
   rowIndex: number;
   raw: Record<string, unknown>;

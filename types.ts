@@ -115,6 +115,8 @@ export interface ComponentTemplate {
   subCategory: string;
   componentName: string;
   description: string;
+  /** User ID of the Admin who created this template. Used for per-admin visibility. */
+  createdBy: string;
 }
 
 export interface MaintenanceTask {

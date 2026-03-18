@@ -10,7 +10,7 @@ import { parseTemplateExcel, type ParseResult, type ParsedTemplateRow } from '..
 interface TemplatesViewProps {
   componentCategories: ComponentCategoriesData;
   templates: ComponentTemplate[];
-  onSaveTemplate: (template: Omit<ComponentTemplate, 'id'> | ComponentTemplate) => void | Promise<void>;
+  onSaveTemplate: (template: (Omit<ComponentTemplate, 'id'> & { createdBy?: string }) | ComponentTemplate) => void | Promise<void>;
   onDeleteTemplate: (templateId: string) => void | Promise<void>;
 }
 
@@ -40,7 +40,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
   const [isImporting, setIsImporting] = useState(false);
   const [updateExistingOnImport, setUpdateExistingOnImport] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState<Omit<ComponentTemplate, 'id'>>({
+  const [formData, setFormData] = useState<Omit<ComponentTemplate, 'id' | 'createdBy'>>({
     type: ComponentType.Building,
     parentCategory: '',
     subCategory: '',
@@ -143,7 +143,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
       return;
     }
     setIsSaving(true);
-    const payload: Omit<ComponentTemplate, 'id'> = {
+    const payload: Omit<ComponentTemplate, 'id' | 'createdBy'> = {
       type: formData.type,
       parentCategory: formData.parentCategory,
       subCategory: formData.subCategory,
@@ -152,7 +152,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
     };
     try {
       if (editingTemplate) {
-        await onSaveTemplate({ ...payload, id: editingTemplate.id });
+        await onSaveTemplate({ ...payload, id: editingTemplate.id, createdBy: editingTemplate.createdBy });
       } else {
         await onSaveTemplate(payload);
       }
@@ -213,7 +213,7 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({
         const existing = findExistingTemplate(row.data);
         if (existing) {
           if (updateExistingOnImport) {
-            await onSaveTemplate({ ...row.data, id: existing.id });
+            await onSaveTemplate({ ...row.data, id: existing.id, createdBy: existing.createdBy });
             updated++;
           } else {
             skipped++;
