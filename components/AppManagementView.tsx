@@ -180,7 +180,9 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.displayName')}</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.loginEmail')}</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.role')}</th>
+                        {currentUser.role === UserRole.SuperAdmin && (
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.addedBy')}</th>
+                        )}
                         <th scope="col" className="relative px-6 py-3">
                             <span className="sr-only">{t('appManagement.actions')}</span>
                         </th>
@@ -192,7 +194,9 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{user.username}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.email}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{t(`appManagement.${roleToKey[user.role]}`)}</td>
+                            {currentUser.role === UserRole.SuperAdmin && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.createdBy ? (users?.find(u => u.id === user.createdBy)?.username ?? '—') : '—'}</td>
+                            )}
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                             <button onClick={() => onEditManager(user)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('appManagement.edit')}</button>
                             {(currentUser.role === UserRole.SuperAdmin || currentUser.role === UserRole.Admin) && (
@@ -205,7 +209,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                         </tr>
                         )) : (
                         <tr>
-                            <td colSpan={5} className="text-center py-10">
+                            <td colSpan={currentUser.role === UserRole.SuperAdmin ? 5 : 4} className="text-center py-10">
                             <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('appManagement.noPropertyManagersFound')}</h4>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">{t('appManagement.addManagerHint')}</p>
                             </td>
@@ -227,7 +231,9 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.specialty')}</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.contactEmail')}</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.contactPerson')}</th>
+                            {currentUser.role === UserRole.SuperAdmin && (
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('appManagement.addedBy')}</th>
+                            )}
                             <th scope="col" className="relative px-6 py-3">
                                 <span className="sr-only">{t('appManagement.actions')}</span>
                             </th>
@@ -240,7 +246,9 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{SPECIALTY_TO_I18N_KEY[provider.specialty] ? t(`modals.editTask.${SPECIALTY_TO_I18N_KEY[provider.specialty]}`) : provider.specialty}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.email}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.contactPerson || ''}</td>
+                            {currentUser.role === UserRole.SuperAdmin && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{provider.createdBy ? (users?.find(u => u.id === provider.createdBy)?.username ?? '—') : '—'}</td>
+                            )}
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                             {(currentUser.role === UserRole.SuperAdmin || (currentUser.role === UserRole.Admin && provider.createdBy === currentUser.id) || (currentUser.role === UserRole.PropertyManager && provider.createdBy === currentUser.id)) && (
                               <button onClick={() => onEditProvider(provider)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">{t('appManagement.edit')}</button>
@@ -255,7 +263,7 @@ const AppManagementView: React.FC<AppManagementViewProps> = ({
                         </tr>
                         )) : (
                         <tr>
-                            <td colSpan={6} className="text-center py-10">
+                            <td colSpan={currentUser.role === UserRole.SuperAdmin ? 6 : 5} className="text-center py-10">
                             <h4 className="text-lg font-medium text-gray-800 dark:text-gray-100">{t('appManagement.noServiceProvidersFound')}</h4>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">{t('appManagement.addProviderHint')}</p>
                             </td>

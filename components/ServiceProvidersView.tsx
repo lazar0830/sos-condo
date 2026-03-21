@@ -77,9 +77,11 @@ const ServiceProvidersView: React.FC<ServiceProvidersViewProps> = ({ providers, 
                           {provider.phone}
                         </p>
                       )}
+                      {currentUser.role === UserRole.SuperAdmin && (
                       <p className="flex items-center text-gray-500 dark:text-gray-400 mt-1">
                         <span className="text-xs">{t('serviceProviders.addedBy')}: {provider.createdBy ? (users?.find(u => u.id === provider.createdBy)?.username ?? '—') : '—'}</span>
                       </p>
+                      )}
                     </div>
                 </div>
               </div>
